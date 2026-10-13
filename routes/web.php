@@ -44,6 +44,25 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])->group(fun
     Route::get('collected/{collectedItem}/edit', [\App\Http\Controllers\Admin\CollectedItemController::class, 'edit'])->name('collected.edit');
     Route::put('collected/{collectedItem}', [\App\Http\Controllers\Admin\CollectedItemController::class, 'update'])->name('collected.update');
     Route::delete('collected/{collectedItem}', [\App\Http\Controllers\Admin\CollectedItemController::class, 'destroy'])->name('collected.destroy');
+
+    Route::get('now', [\App\Http\Controllers\Admin\NowController::class, 'edit'])->name('now.edit');
+    Route::put('now', [\App\Http\Controllers\Admin\NowController::class, 'update'])->name('now.update');
+
+    Route::get('about', [\App\Http\Controllers\Admin\AboutController::class, 'edit'])->name('about.edit');
+    Route::put('about', [\App\Http\Controllers\Admin\AboutController::class, 'update'])->name('about.update');
+
+    Route::get('social', [\App\Http\Controllers\Admin\SocialLinkController::class, 'index'])->name('social.index');
+    Route::post('social', [\App\Http\Controllers\Admin\SocialLinkController::class, 'store'])->name('social.store');
+    Route::put('social/{socialLink}', [\App\Http\Controllers\Admin\SocialLinkController::class, 'update'])->name('social.update');
+    Route::delete('social/{socialLink}', [\App\Http\Controllers\Admin\SocialLinkController::class, 'destroy'])->name('social.destroy');
+
+    Route::get('tags', [\App\Http\Controllers\Admin\TaxonomyController::class, 'index'])->name('tags.index');
+    Route::post('tags', [\App\Http\Controllers\Admin\TaxonomyController::class, 'store'])->name('tags.store');
+    Route::delete('tags/{kind}/{id}', [\App\Http\Controllers\Admin\TaxonomyController::class, 'destroy'])->name('tags.destroy');
+
+    Route::get('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'edit'])->name('settings.edit');
+    Route::put('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+    Route::delete('settings/demo-content', [\App\Http\Controllers\Admin\SettingsController::class, 'destroyDemo'])->name('settings.demo');
 });
 
 Route::get('/', function () {
