@@ -75,3 +75,5 @@ Route::get('/notes/{slug}', [\App\Http\Controllers\NoteController::class, 'show'
 
 Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
 Route::get('/projects/{slug}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
+
+Route::get('/collected', [\App\Http\Controllers\CollectedController::class, 'index'])->name('collected.index');
