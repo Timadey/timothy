@@ -93,3 +93,55 @@ it('opens auth-gated preview redirect', function () {
     $this->actingAs($this->owner)->get("/admin/posts/{$post->id}/preview")
         ->assertRedirect('/writing/preview-me?preview=1');
 });
+
+it('lets the owner preview an unpublished article draft', function () {
+    $author = User::factory()->create();
+    Post::factory()->create([
+        'author_id' => $author->id,
+        'slug' => 'hidden-draft',
+        'title' => 'Hidden Draft',
+        'status' => 'draft',
+    ]);
+
+    $this->get('/writing/hidden-draft')->assertNotFound();
+    $this->get('/writing/hidden-draft?preview=1')->assertNotFound();
+
+    $this->actingAs($this->owner)->get('/writing/hidden-draft?preview=1')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Writing/Show')
+            ->where('preview', true)
+            ->where('post.title', 'Hidden Draft'));
+});
+
+it('lets the owner preview an unpublished note draft', function () {
+    $author = User::factory()->create();
+    Post::factory()->create([
+        'author_id' => $author->id,
+        'slug' => 'hidden-note-draft',
+        'post_type' => 'note',
+        'status' => 'draft',
+    ]);
+
+    $this->get('/notes/hidden-note-draft')->assertNotFound();
+    $this->get('/notes/hidden-note-draft?preview=1')->assertNotFound();
+
+    $this->actingAs($this->owner)->get('/notes/hidden-note-draft?preview=1')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->component('Notes/Show')->where('preview', true));
+});
+
+it('does not flag preview on publicly visible posts', function () {
+    $author = User::factory()->create();
+    Post::factory()->create([
+        'author_id' => $author->id,
+        'slug' => 'public-preview-me',
+        'status' => 'published',
+        'visibility' => 'public',
+        'published_at' => now(),
+    ]);
+
+    $this->actingAs($this->owner)->get('/writing/public-preview-me?preview=1')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('preview', false));
+});

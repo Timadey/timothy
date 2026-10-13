@@ -22,7 +22,7 @@ type Post = {
 
 type Related = { slug: string; title: string; date: string | null };
 
-export default function ArticleShow({ post, related, canonical }: { post: Post; related: Related[]; canonical: string }) {
+export default function ArticleShow({ post, related, canonical, preview }: { post: Post; related: Related[]; canonical: string; preview?: boolean }) {
     return (
         <PublicLayout>
             <Head>
@@ -38,6 +38,11 @@ export default function ArticleShow({ post, related, canonical }: { post: Post; 
             </Head>
 
             <article className="mx-auto max-w-3xl px-6 pt-12 pb-16">
+                {preview && (
+                    <div className="mb-6 rounded-md border border-hairline bg-surface px-4 py-3 text-sm text-meta">
+                        Preview — this article isn&rsquo;t public yet. Only you can see it.
+                    </div>
+                )}
                 <MetaLine type="Article" date={post.date ?? undefined} readingTime={post.reading_time} />
                 <h1 className="mt-2 text-4xl font-semibold tracking-tight">{post.title}</h1>
                 {post.excerpt && <p className="mt-3 text-lg text-meta">{post.excerpt}</p>}

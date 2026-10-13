@@ -42,10 +42,18 @@ class WritingController extends Controller
         ]);
     }
 
-    public function show(string $slug, MarkdownService $markdown): Response
+    public function show(Request $request, string $slug, MarkdownService $markdown): Response
     {
-        $post = Post::publiclyVisible()->ofType('article')
-            ->where('slug', $slug)->with(['tags', 'topics'])->firstOrFail();
+        $query = Post::ofType('article')->where('slug', $slug)->with(['tags', 'topics']);
+
+        $canPreview = $request->boolean('preview') && $request->user()?->isOwner();
+        $post = ($canPreview ? $query : $query->publiclyVisible())->firstOrFail();
+
+        $isPublic = $post->status === 'published'
+            && $post->visibility === 'public'
+            && $post->published_at !== null
+            && $post->published_at->lte(now());
+        $preview = (bool) $canPreview && ! $isPublic;
 
         $related = Post::publiclyVisible()->ofType('article')
             ->where('id', '!=', $post->id)
@@ -55,6 +63,7 @@ class WritingController extends Controller
                 + ['date' => $p->published_at?->format('M j, Y')]);
 
         return Inertia::render('Writing/Show', [
+            'preview' => $preview,
             'post' => [
                 'slug' => $post->slug,
                 'title' => $post->title,

@@ -15,7 +15,7 @@ type Note = {
     tags: string[];
 };
 
-export default function NoteShow({ note, canonical }: { note: Note; canonical: string }) {
+export default function NoteShow({ note, canonical, preview }: { note: Note; canonical: string; preview?: boolean }) {
     return (
         <PublicLayout>
             <Head>
@@ -29,6 +29,11 @@ export default function NoteShow({ note, canonical }: { note: Note; canonical: s
             </Head>
 
             <article className="mx-auto max-w-3xl px-6 pt-12 pb-16">
+                {preview && (
+                    <div className="mb-6 rounded-md border border-hairline bg-surface px-4 py-3 text-sm text-meta">
+                        Preview — this note isn&rsquo;t public yet. Only you can see it.
+                    </div>
+                )}
                 <MetaLine type="Note" date={note.date ?? undefined} readingTime={note.reading_time} />
                 <h1 className="mt-2 text-3xl font-semibold tracking-tight">{note.title}</h1>
                 <hr className="my-8 border-hairline" />

@@ -38,11 +38,21 @@ class NoteController extends Controller
         ]);
     }
 
-    public function show(string $slug, MarkdownService $markdown): Response
+    public function show(Request $request, string $slug, MarkdownService $markdown): Response
     {
-        $note = Post::publiclyVisible()->ofType('note')->where('slug', $slug)->with('tags')->firstOrFail();
+        $query = Post::ofType('note')->where('slug', $slug)->with('tags');
+
+        $canPreview = $request->boolean('preview') && $request->user()?->isOwner();
+        $note = ($canPreview ? $query : $query->publiclyVisible())->firstOrFail();
+
+        $isPublic = $note->status === 'published'
+            && $note->visibility === 'public'
+            && $note->published_at !== null
+            && $note->published_at->lte(now());
+        $preview = (bool) $canPreview && ! $isPublic;
 
         return Inertia::render('Notes/Show', [
+            'preview' => $preview,
             'note' => [
                 'slug' => $note->slug,
                 'title' => $note->title,
