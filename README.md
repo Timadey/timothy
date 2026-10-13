@@ -1,59 +1,87 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Timadey
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A personal platform: writing archive, notes, projects, a collected library, about/now pages, full-text search, and a session-secure admin for managing it all — built with **Laravel + Inertia + React (TypeScript)** and **PostgreSQL**.
 
-## About Laravel
+## Phase overview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Phase | Scope | Status |
+|-------|-------|--------|
+| **1 — Functional Foundation** | Shell, design system, Home, Writing, Notes, Projects, Collected, About, Now, Search, public REST API, SEO/RSS/sitemap, admin auth + content management, demo seed content | **This repo** |
+| 2 | Activity feed, questions, comments, visitor auth, moderation | Planned |
+| 3 | Ask Timadey (AI guide over published content) | Planned (`/ask` is a labelled placeholder) |
+| 4 | Live layer + integrations | Planned |
+| 5 | Subscriptions, polish, production deployment (Docker scaffold lives in `docker/`) | Planned |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Deferred from Phase 1 by design: comments, visitor accounts, AI features, and integration tables (spec §18).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requirements
 
-## Learning Laravel
+- PHP ≥ 8.2 (8.4 recommended) with `pdo_pgsql`
+- Composer
+- Node 22 (20+ should work)
+- PostgreSQL (e.g. via [DBngin](https://dbngin.com/))
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Setup
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+# create a PostgreSQL database named 'timadey', then:
+php artisan migrate:fresh --seed
+npm install
+npm run build   # or: npm run dev
+php artisan serve
+```
 
-## Laravel Sponsors
+Then open http://localhost:8000.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Admin
 
-### Premium Partners
+- Visit `/admin/login`.
+- Sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `.env` (seeded by `OwnerSeeder`).
+- Manage posts (articles + notes), projects, collected items, now/about sections, social links, tags/topics, and site settings.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Demo content
 
-## Contributing
+`migrate:fresh --seed` creates clearly-labelled **Demo:** articles, notes, projects, collected items, default now/about sections, and settings so every page has something to show. Nothing here is real biography.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+To remove it: **Admin → Settings → Remove demo content** (deletes every row with `is_demo = true`; your own content is untouched).
 
-## Code of Conduct
+## Public API
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Read-only JSON endpoints for published content: `GET /api/posts`, `/api/notes`, `/api/projects`, `/api/collected`, `/api/search`. See [`docs/api.md`](docs/api.md). No auth required; drafts and private items always 404.
 
-## Security Vulnerabilities
+## Testing
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+./vendor/bin/pest      # backend feature suite
+npm test               # frontend unit tests
+npm run build          # production asset build
+npx tsc --noEmit       # type check
+```
+
+## Environment variables
+
+| Variable | Purpose | Default (`.env.example`) |
+|----------|---------|--------------------------|
+| `APP_NAME` | Application name | `Timadey` |
+| `APP_URL` | Base URL | `http://localhost:8000` |
+| `APP_DEBUG` | Debug pages | `true` (false in production) |
+| `DB_CONNECTION` | Database driver | `pgsql` |
+| `DB_HOST` / `DB_PORT` | Postgres host/port | `127.0.0.1` / `5432` |
+| `DB_DATABASE` | Database name | `timadey` |
+| `DB_USERNAME` / `DB_PASSWORD` | Database credentials | `postgres` / (empty) |
+| `ADMIN_EMAIL` | Owner login email | `owner@timadey.test` |
+| `ADMIN_PASSWORD` | Owner login password | `change-me-in-production` |
+| `SESSION_SECURE_COOKIE` | Secure cookies | `false` (set `true` in production) |
+
+Phase 3 vars are present but commented out: `# LLM_PROVIDER=`, `# LLM_API_KEY=`, `# LLM_MODEL=`.
+
+## Docker
+
+`docker/` + `docker-compose.yml` is a **Phase 5 target scaffold** (app + postgres:16 + nginx) — not required for local development. See [`docker/README.md`](docker/README.md).
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Private / all rights reserved unless stated otherwise.

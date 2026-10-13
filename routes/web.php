@@ -83,6 +83,8 @@ Route::get('/now', \App\Http\Controllers\NowPageController::class)->name('now');
 
 Route::get('/search', \App\Http\Controllers\SearchController::class)->name('search');
 
+Route::get('/ask', fn () => inertia('Ask'))->name('ask');
+
 Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
 Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
 Route::get('/rss.xml', [\App\Http\Controllers\SeoController::class, 'rss']);

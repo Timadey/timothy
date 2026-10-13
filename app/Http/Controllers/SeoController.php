@@ -9,7 +9,7 @@ class SeoController extends Controller
 {
     public function sitemap(): Response
     {
-        $static = ['/', '/writing', '/notes', '/projects', '/collected', '/now', '/about', '/search'];
+        $static = ['/', '/writing', '/notes', '/projects', '/collected', '/now', '/about', '/ask', '/search'];
 
         $urls = collect($static)->map(fn ($path) => ['loc' => url($path), 'lastmod' => now()->toW3cString()]);
 

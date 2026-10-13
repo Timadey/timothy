@@ -1,0 +1,60 @@
+# Phase 5 target scaffold — not required for local development.
+# See docker/README.md for usage.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY:-}
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: timadey
+      DB_USERNAME: timadey
+      DB_PASSWORD: timadey
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-owner@timadey.test}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-in-production}
+      SESSION_SECURE_COOKIE: "false"
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - public:/var/www/html/public
+      - storage:/var/www/html/storage
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: timadey
+      POSTGRES_USER: timadey
+      POSTGRES_PASSWORD: timadey
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U timadey -d timadey"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - public:/var/www/html/public:ro
+    depends_on:
+      - app
+
+volumes:
+  public:
+  storage:
+  dbdata:
