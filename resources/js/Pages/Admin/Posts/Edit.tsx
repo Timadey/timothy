@@ -1,5 +1,6 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { useForm, Link } from '@inertiajs/react';
+import type { FormDataValues } from '@inertiajs/core';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/Components/Button';
 import { PreviewPane } from '@/Components/PreviewPane';
@@ -86,7 +87,7 @@ export default function PostEdit({ post }: { post: PostData | null }) {
         return () => window.removeEventListener('beforeunload', handler);
     }, [dirty]);
 
-    const update = <K extends keyof PostData>(key: K, value: PostData[K]) => {
+    const update = <K extends keyof PostData>(key: K, value: FormDataValues<PostData, K>) => {
         setData(key, value);
         setDirty(true);
     };

@@ -30,6 +30,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])->group(fun
             'html' => app(\App\Services\MarkdownService::class)->render($data['markdown'] ?? ''),
         ]);
     })->name('preview-markdown');
+
+    Route::get('projects', [\App\Http\Controllers\Admin\ProjectController::class, 'index'])->name('projects.index');
+    Route::get('projects/create', [\App\Http\Controllers\Admin\ProjectController::class, 'create'])->name('projects.create');
+    Route::post('projects', [\App\Http\Controllers\Admin\ProjectController::class, 'store'])->name('projects.store');
+    Route::get('projects/{project}/edit', [\App\Http\Controllers\Admin\ProjectController::class, 'edit'])->name('projects.edit');
+    Route::put('projects/{project}', [\App\Http\Controllers\Admin\ProjectController::class, 'update'])->name('projects.update');
+    Route::delete('projects/{project}', [\App\Http\Controllers\Admin\ProjectController::class, 'destroy'])->name('projects.destroy');
+
+    Route::get('collected', [\App\Http\Controllers\Admin\CollectedItemController::class, 'index'])->name('collected.index');
+    Route::get('collected/create', [\App\Http\Controllers\Admin\CollectedItemController::class, 'create'])->name('collected.create');
+    Route::post('collected', [\App\Http\Controllers\Admin\CollectedItemController::class, 'store'])->name('collected.store');
+    Route::get('collected/{collectedItem}/edit', [\App\Http\Controllers\Admin\CollectedItemController::class, 'edit'])->name('collected.edit');
+    Route::put('collected/{collectedItem}', [\App\Http\Controllers\Admin\CollectedItemController::class, 'update'])->name('collected.update');
+    Route::delete('collected/{collectedItem}', [\App\Http\Controllers\Admin\CollectedItemController::class, 'destroy'])->name('collected.destroy');
 });
 
 Route::get('/', function () {
