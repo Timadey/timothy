@@ -44,7 +44,7 @@ class Project extends Model
     protected static function booted(): void
     {
         static::saving(function (Project $project) {
-            if ($project->isDirty('slug') || ! $project->slug) {
+            if (! $project->slug) {
                 $project->slug = static::makeSlug($project->name);
             }
         });

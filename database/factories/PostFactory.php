@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Post>
@@ -19,7 +18,6 @@ class PostFactory extends Factory
         return [
             'author_id' => User::factory(),
             'title' => $title,
-            'slug' => Str::slug($title),
             'excerpt' => fake()->paragraph(),
             'body' => "## Section\n\n" . fake()->paragraphs(3, true),
             'post_type' => 'article',

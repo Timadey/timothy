@@ -69,7 +69,7 @@ class Post extends Model
     protected static function booted(): void
     {
         static::saving(function (Post $post) {
-            if ($post->isDirty('slug') || ! $post->slug) {
+            if (! $post->slug) {
                 $post->slug = static::makeSlug($post->title);
             }
             $post->reading_time = static::readingTimeFromBody((string) $post->body);

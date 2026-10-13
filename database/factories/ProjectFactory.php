@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Project>
@@ -17,7 +16,6 @@ class ProjectFactory extends Factory
 
         return [
             'name' => ucfirst($name),
-            'slug' => Str::slug($name),
             'summary' => fake()->sentence(),
             'description' => "## Overview\n\n" . fake()->paragraph(),
             'status' => 'building',
