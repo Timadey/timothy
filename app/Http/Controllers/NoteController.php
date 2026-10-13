@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\{Post, Tag};
+use App\Services\MarkdownService;
+use Illuminate\Http\Request;
+use Inertia\{Inertia, Response};
+
+class NoteController extends Controller
+{
+    public function index(Request $request): Response
+    {
+        $query = Post::publiclyVisible()->ofType('note')->with('tags')->latest('published_at');
+
+        if ($q = $request->query('q')) {
+            $needle = '%'.mb_strtolower($q).'%';
+            $query->where(fn ($w) => $w
+                ->whereRaw('LOWER(title) LIKE ?', [$needle])
+                ->orWhereRaw('LOWER(body) LIKE ?', [$needle]));
+        }
+        if ($tag = $request->query('tag')) {
+            $query->whereHas('tags', fn ($t) => $t->where('slug', $tag));
+        }
+
+        return Inertia::render('Notes/Index', [
+            'notes' => $query->paginate(15)->withQueryString()->through(fn ($p) => [
+                'slug' => $p->slug,
+                'title' => $p->title,
+                'excerpt' => $p->excerpt,
+                'reading_time' => $p->reading_time,
+                'date' => $p->published_at?->format('M j, Y'),
+                'tags' => $p->tags->pluck('name'),
+            ]),
+            'tags' => Tag::whereHas('posts', fn ($q2) => $q2->where('post_type', 'note'))
+                ->orderBy('name')->get(['name', 'slug']),
+            'filters' => $request->only(['q', 'tag']),
+        ]);
+    }
+
+    public function show(string $slug, MarkdownService $markdown): Response
+    {
+        $note = Post::publiclyVisible()->ofType('note')->where('slug', $slug)->with('tags')->firstOrFail();
+
+        return Inertia::render('Notes/Show', [
+            'note' => [
+                'slug' => $note->slug,
+                'title' => $note->title,
+                'excerpt' => $note->excerpt,
+                'body_html' => $markdown->render((string) $note->body),
+                'date' => $note->published_at?->format('F j, Y'),
+                'published_iso' => $note->published_at?->toIso8601String(),
+                'reading_time' => $note->reading_time,
+                'tags' => $note->tags->pluck('name'),
+            ],
+            'canonical' => url('/notes/'.$note->slug),
+        ]);
+    }
+}

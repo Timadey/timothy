@@ -69,3 +69,6 @@ Route::get('/', \App\Http\Controllers\HomeController::class);
 
 Route::get('/writing', [\App\Http\Controllers\WritingController::class, 'index'])->name('writing.index');
 Route::get('/writing/{slug}', [\App\Http\Controllers\WritingController::class, 'show'])->name('writing.show');
+
+Route::get('/notes', [\App\Http\Controllers\NoteController::class, 'index'])->name('notes.index');
+Route::get('/notes/{slug}', [\App\Http\Controllers\NoteController::class, 'show'])->name('notes.show');
