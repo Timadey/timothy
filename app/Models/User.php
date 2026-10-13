@@ -19,10 +19,22 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'display_name',
         'email',
         'password',
+        'avatar',
+        'role',
     ];
+
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
+    }
+
+    public function posts(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Post::class, 'author_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
