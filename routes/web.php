@@ -66,3 +66,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])->group(fun
 });
 
 Route::get('/', \App\Http\Controllers\HomeController::class);
+
+Route::get('/writing', [\App\Http\Controllers\WritingController::class, 'index'])->name('writing.index');
+Route::get('/writing/{slug}', [\App\Http\Controllers\WritingController::class, 'show'])->name('writing.show');

@@ -19,8 +19,10 @@ class CollectedItemController extends Controller
             $query->where('item_type', $type);
         }
         if ($search = $request->query('q')) {
-            $query->where(fn ($q) => $q->where('title', 'like', "%{$search}%")
-                ->orWhere('creator', 'like', "%{$search}%"));
+            $needle = '%'.mb_strtolower($search).'%';
+            $query->where(fn ($q) => $q
+                ->whereRaw('LOWER(title) LIKE ?', [$needle])
+                ->orWhereRaw('LOWER(COALESCE(creator, \'\')) LIKE ?', [$needle]));
         }
 
         return Inertia::render('Admin/Collected/Index', [
