@@ -65,6 +65,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])->group(fun
     Route::delete('settings/demo-content', [\App\Http\Controllers\Admin\SettingsController::class, 'destroyDemo'])->name('settings.demo');
 });
 
-Route::get('/', function () {
-    return \Inertia\Inertia::render('Home');
-});
+Route::get('/', \App\Http\Controllers\HomeController::class);
