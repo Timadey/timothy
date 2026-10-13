@@ -77,3 +77,6 @@ Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'
 Route::get('/projects/{slug}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
 
 Route::get('/collected', [\App\Http\Controllers\CollectedController::class, 'index'])->name('collected.index');
+
+Route::get('/about', \App\Http\Controllers\AboutController::class)->name('about');
+Route::get('/now', \App\Http\Controllers\NowPageController::class)->name('now');
