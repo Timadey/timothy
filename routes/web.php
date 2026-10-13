@@ -72,3 +72,6 @@ Route::get('/writing/{slug}', [\App\Http\Controllers\WritingController::class, '
 
 Route::get('/notes', [\App\Http\Controllers\NoteController::class, 'index'])->name('notes.index');
 Route::get('/notes/{slug}', [\App\Http\Controllers\NoteController::class, 'show'])->name('notes.show');
+
+Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
+Route::get('/projects/{slug}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
