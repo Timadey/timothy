@@ -13,9 +13,7 @@ Route::post('/admin/logout', [AuthController::class, 'destroy'])
     ->name('logout');
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])->group(function () {
-    Route::get('/', function () {
-        return \Inertia\Inertia::render('Admin/Dashboard');
-    })->name('dashboard');
+    Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 });
 
 Route::get('/', function () {
