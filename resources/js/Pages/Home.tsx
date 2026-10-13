@@ -1,5 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ArrowRight, MessageCircle } from 'lucide-react';
 import { MetaLine } from '@/Components/MetaLine';
 import { Badge } from '@/Components/Badge';
@@ -43,6 +43,13 @@ export default function Home({
 }) {
     return (
         <PublicLayout>
+            <Head>
+                <title>Timadey — Writing, projects, and notes</title>
+                <meta
+                    name="description"
+                    content="Essays, short notes, projects, and things I'm collecting — written and maintained by Timadey."
+                />
+            </Head>
             <section className="mx-auto max-w-5xl px-6 pt-14 pb-10">
                 <h1 className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-5xl">Hey, I&rsquo;m Timadey.</h1>
                 <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink">{intro}</p>

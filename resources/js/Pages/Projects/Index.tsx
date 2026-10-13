@@ -1,5 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { FilterBar } from '@/Components/FilterBar';
 import { Badge } from '@/Components/Badge';
 import { Pagination } from '@/Components/Pagination';
@@ -34,6 +34,10 @@ export default function ProjectsIndex({ projects, statuses, filters }: { project
 
     return (
         <PublicLayout>
+            <Head>
+                <title>Projects — Timadey</title>
+                <meta name="description" content="Things I am building, exploring, or keeping alive." />
+            </Head>
             <div className="mx-auto max-w-5xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>
                 <p className="mt-2 max-w-2xl text-meta">Things I am building, exploring, or keeping alive.</p>

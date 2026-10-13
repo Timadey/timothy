@@ -1,5 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { SearchInput } from '@/Components/SearchInput';
 import { FilterBar } from '@/Components/FilterBar';
@@ -27,6 +27,10 @@ export default function NotesIndex({ notes, tags, filters }: { notes: Paginated;
 
     return (
         <PublicLayout>
+            <Head>
+                <title>Notes — Timadey</title>
+                <meta name="description" content="Shorter observations, links, and things worth remembering." />
+            </Head>
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Notes</h1>
                 <p className="mt-2 text-meta">Shorter observations, links, and things worth remembering.</p>

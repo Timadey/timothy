@@ -1,5 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Link, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { SearchInput } from '@/Components/SearchInput';
 import { FilterBar } from '@/Components/FilterBar';
@@ -29,6 +29,13 @@ export default function WritingIndex({ posts, topics, filters }: { posts: Pagina
 
     return (
         <PublicLayout>
+            <Head>
+                <title>Writing — Timadey</title>
+                <meta
+                    name="description"
+                    content="Long-form pieces about technology, product thinking, and ideas in progress."
+                />
+            </Head>
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Writing</h1>
                 <p className="mt-2 text-meta">Long-form pieces about technology, product thinking, and ideas in progress.</p>

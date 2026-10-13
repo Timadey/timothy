@@ -1,5 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
-import { router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { SearchInput } from '@/Components/SearchInput';
 import { FilterBar } from '@/Components/FilterBar';
@@ -28,6 +28,10 @@ export default function CollectedIndex({ items, types, filters }: { items: Pagin
 
     return (
         <PublicLayout>
+            <Head>
+                <title>Collected — Timadey</title>
+                <meta name="description" content="Books, articles, videos, and tools I keep coming back to." />
+            </Head>
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Collected</h1>
                 <p className="mt-2 text-meta">Books, articles, videos, and tools I keep coming back to.</p>

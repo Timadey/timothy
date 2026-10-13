@@ -82,3 +82,9 @@ Route::get('/about', \App\Http\Controllers\AboutController::class)->name('about'
 Route::get('/now', \App\Http\Controllers\NowPageController::class)->name('now');
 
 Route::get('/search', \App\Http\Controllers\SearchController::class)->name('search');
+
+Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
+Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
+Route::get('/rss.xml', [\App\Http\Controllers\SeoController::class, 'rss']);
+
+Route::fallback(fn () => abort(404));
