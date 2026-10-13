@@ -80,3 +80,5 @@ Route::get('/collected', [\App\Http\Controllers\CollectedController::class, 'ind
 
 Route::get('/about', \App\Http\Controllers\AboutController::class)->name('about');
 Route::get('/now', \App\Http\Controllers\NowPageController::class)->name('now');
+
+Route::get('/search', \App\Http\Controllers\SearchController::class)->name('search');
