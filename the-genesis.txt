@@ -1,0 +1,1301 @@
+# BUILD SPECIFICATION: TIMADEY — A PERSONAL CORNER OF THE INTERNET
+
+Act as a senior product designer, full-stack architect, AI engineer, and experienced software developer. Build a polished, production-minded web application called **Timadey**.
+
+Do not build a generic portfolio template, a clone of X, or a conventional blog. Build a distinctive personal internet platform that combines:
+
+1. A personal website and living portfolio.
+2. A social feed for ideas, updates, questions, and conversations.
+3. A digital garden that connects writing, notes, projects, interests, and evolving thoughts.
+4. A live layer that shows what the owner is currently exploring, listening to, reading, playing, or building.
+5. An AI assistant called **Ask Timadey** that helps visitors understand the owner's ideas and worldview using verified, published material.
+6. An administrative workspace where the owner can manage the entire experience without editing code.
+
+The experience should feel like visiting someone's thoughtfully designed corner of the internet, not browsing a corporate résumé.
+
+The application must be genuinely functional. Prioritize working features, a coherent architecture, real database persistence, responsive design, accessibility, security, and maintainable code over superficial visual effects.
+
+---
+
+## 1. PRODUCT VISION
+
+### Product name
+
+Timadey
+
+### Brand direction
+
+Use the owner's personal identity as the brand. Keep the visual identity understated, editorial, modern, warm, and intellectually curious.
+
+The site should communicate:
+
+- Curiosity and exploration.
+- A builder's mindset.
+- Ambitious ideas and consequential problems.
+- Technology, product thinking, and the future.
+- Personal interests and the things that make the owner human.
+- The evolution of ideas over time.
+
+The website should allow visitors to understand three things:
+
+- Who is this person?
+- What is this person thinking about and doing?
+- How can I explore their ideas or start a conversation?
+
+### Core product principle
+
+**One person, many interests, one connected world.**
+
+Writing, personal activities, professional work, social conversations, and AI-generated explanations should feel connected rather than like isolated website sections.
+
+### Initial audience
+
+Build for two audiences:
+
+- Visitors who want to understand the owner's work, ideas, personality, and interests.
+- Returning visitors who want to follow updates, explore new ideas, participate in discussions, or ask the AI questions.
+
+Do not build unnecessary social-network complexity at launch. This is initially a single-owner platform with public visitors and an optional visitor account system for community participation.
+
+---
+
+## 2. TECHNOLOGY STACK
+
+Use the following architecture unless a genuine Replit platform limitation requires a documented alternative.
+
+### Frontend
+
+- Laravel Inertia with React and TypeScript.
+- Tailwind CSS.
+- A consistent, reusable component system.
+- Lucide icons.
+- Accessible semantic HTML.
+- Responsive layouts for mobile, tablet, and desktop.
+- Markdown rendering with syntax highlighting for code.
+- A rich-text or Markdown-based editor for writing.
+
+Use server-rendered pages where appropriate for performance, SEO, and public content discoverability.
+
+### Backend
+
+- Laravel (PHP).
+- Laravel routes, controllers, and API resources for endpoints where APIs are needed.
+- PostgreSQL as the primary persistent database.
+- Laravel migrations for all schema changes.
+- Secure authentication and authorization.
+- Background jobs only where needed for integrations, notifications, or scheduled tasks.
+
+### Media and files
+
+Use local development storage for development and an S3-compatible object storage service for production uploads when configured.
+
+### AI
+
+Integrate an LLM through a server-side provider abstraction. Use environment variables for credentials and model configuration.
+
+Do not hardcode API keys in frontend code.
+
+### Project organization
+
+Keep frontend and backend code clearly separated, preferably in one repository with documented setup commands.
+
+Include:
+
+- Environment variable examples.
+- Database setup and migrations.
+- Seed data for development.
+- API documentation.
+- Error handling and logging.
+- Automated tests.
+- Deployment instructions suitable for Replit.
+
+Before implementing, briefly state the architecture and implementation plan. Then start building immediately. Do not stop after producing a plan or static mockup.
+
+If the preferred architecture cannot run reliably in the selected Replit environment, explain the limitation and implement the closest maintainable architecture that preserves the product requirements. Do not create a complex multi-service system unnecessarily.
+
+---
+
+## 3. VISUAL DESIGN SYSTEM
+
+Create a recognizable editorial design system.
+
+### Colors
+
+Use this palette as the starting point:
+
+- Warm ivory: `#F7F6F0`
+- Deep forest green: `#183C32`
+- Muted sage: `#A8B7A0`
+- Soft charcoal: `#252824`
+- Warm gray: `#777970`
+- White: `#FFFFFF`
+- Muted gold accent: `#C4A46B`
+
+Use forest green sparingly for important actions, selected navigation, links, and subtle emphasis.
+
+Use ivory as the main background. Avoid excessive pure-black backgrounds, saturated gradients, neon colors, glassmorphism, and generic startup landing-page aesthetics.
+
+Support a dark theme as an optional enhancement, but make the light editorial theme excellent first.
+
+### Typography
+
+Use a refined serif typeface for selected headings and editorial moments, paired with a clean sans-serif for body text, navigation, and interface controls.
+
+Typography should feel thoughtful and human, with comfortable line lengths and readable body text.
+
+### Layout
+
+- Generous whitespace.
+- Restrained borders and shadows.
+- A centered content column with a sensible maximum width.
+- Strong typographic hierarchy.
+- Small, intentional animations.
+- Clear hover and focus states.
+- Compact metadata for dates, tags, reading times, and content types.
+- Thoughtful empty states and loading skeletons.
+
+Use motion only when it improves understanding or gives the interface a sense of life.
+
+### Responsive behavior
+
+On desktop, use a refined editorial layout with a main content area and optional narrow contextual sidebar.
+
+On mobile, simplify the layout, prioritize reading, and use a compact navigation menu. All controls must remain usable on touch screens.
+
+Avoid oversized hero sections that force visitors to scroll before seeing actual content.
+
+### Avoid
+
+- Generic template layouts.
+- Fake analytics.
+- Excessive rounded cards.
+- Emoji as the primary icon system.
+- Decorative dashboards with meaningless statistics.
+- Placeholder links that appear functional but do nothing.
+- Random stock imagery that does not relate to the content.
+- Recreating another social platform's visual identity.
+
+---
+
+## 4. INFORMATION ARCHITECTURE
+
+Build the following public routes.
+
+### A. Home — `/`
+
+The homepage is a living introduction to the owner's world.
+
+Include:
+
+1. A minimal header with the Timadey wordmark.
+2. Primary navigation.
+3. A concise introduction written in a personal, conversational tone.
+4. A short statement describing what the owner is exploring or building.
+5. A prominent Ask Timadey entry point.
+6. A chronological feed of recent public activity.
+7. Featured writing and ideas.
+8. Selected projects.
+9. A compact current-state section.
+10. Links to social accounts.
+11. A restrained footer.
+
+The homepage should feel alive, but not cluttered.
+
+The main feed should support different content types:
+
+- Writing.
+- Short notes.
+- Questions.
+- Project updates.
+- Learning milestones.
+- Currently exploring.
+- Reading and listening updates.
+- Selected external posts.
+
+Each item should have a content-type label, date, title or message, relevant tags, and a link to its full detail when appropriate.
+
+Do not create fabricated personal history or present seeded content as genuine statements from the owner.
+
+### B. Writing — `/writing`
+
+A proper long-form publishing archive.
+
+Features:
+
+- List of published articles.
+- Featured article support.
+- Search.
+- Topic filtering.
+- Tag filtering.
+- Publication dates.
+- Estimated reading time.
+- Pagination or sensible incremental loading.
+- Clean article pages.
+- Related articles.
+- Social sharing metadata.
+- Canonical URLs.
+
+Article pages should support Markdown, headings, links, images, blockquotes, lists, and code blocks.
+
+Each article should have a permanent URL.
+
+### C. Notes — `/notes`
+
+A collection of shorter observations, questions, unfinished ideas, and reflections.
+
+Features:
+
+- Chronological feed.
+- Topic and tag filtering.
+- Search.
+- Links between related notes.
+- Optional public discussion.
+- Clearly distinguish published notes from private drafts.
+
+Notes should be easy to publish without the overhead of writing a full article.
+
+### D. Projects — `/projects`
+
+A living portfolio of things the owner has built, is building, or wants to explore.
+
+Each project should support:
+
+- Name.
+- Short description.
+- Detailed overview.
+- Project status.
+- Cover image.
+- Technologies or tools used.
+- Project category.
+- Links to a live product or repository.
+- Development updates.
+- Related writing and notes.
+- Start date and optional completion date.
+- Featured status.
+
+Project statuses may include idea, exploring, building, active, paused, and completed.
+
+Only show information the owner has chosen to publish.
+
+### E. Collected — `/collected`
+
+A personal library of things worth keeping.
+
+Support collections of:
+
+- Books.
+- Articles.
+- Videos.
+- Podcasts.
+- Music.
+- Tools.
+- Quotes.
+- Websites.
+- Other resources.
+
+Each saved item should support a title, URL, creator or author, category, personal annotation, tags, and date added.
+
+The owner should be able to explain why an item matters rather than merely bookmarking it.
+
+### F. Now — `/now`
+
+A living snapshot of what the owner is doing, learning, enjoying, and exploring.
+
+Possible sections:
+
+- Currently building.
+- Currently learning.
+- Reading.
+- Listening to.
+- Playing.
+- Exploring.
+- Current questions.
+- Recent milestones.
+
+Allow manual updates and optional external integrations.
+
+Show a last-updated timestamp. Never pretend manually entered or stale information is real-time activity.
+
+The owner must be able to hide any section or individual activity.
+
+### G. About — `/about`
+
+Create a personal biography rather than a conventional corporate résumé.
+
+Support:
+
+- Personal introduction.
+- Professional background.
+- Interests.
+- Principles and worldview.
+- Current ambitions.
+- Selected achievements.
+- Social links.
+- Contact information.
+- Links to relevant projects and writing.
+
+Every section should be editable through the admin dashboard.
+
+Do not invent biography details, qualifications, achievements, or opinions. Use owner-provided data and clearly marked editable starter content.
+
+### H. Ask Timadey — `/ask`
+
+Build a dedicated AI-powered conversational experience described in Section 8.
+
+It must also be accessible from the homepage and other relevant pages.
+
+### I. Search — `/search`
+
+Create global search across published writing, notes, projects, and collected resources.
+
+Support filtering by content type, topic, and date where practical.
+
+Search results should display relevant snippets and direct links to the original content.
+
+---
+
+## 5. THE UNIFIED ACTIVITY FEED
+
+The unified feed is one of the most important features.
+
+Build a consistent feed system that can display multiple types of activity without requiring a separate feed implementation for every section.
+
+Every activity item should have:
+
+- A unique identifier.
+- Activity type.
+- Title or message.
+- Timestamp.
+- Visibility status.
+- Optional source platform.
+- Optional external URL.
+- Optional tags.
+- Optional media.
+- Optional linked content.
+- Optional metadata appropriate to the activity type.
+
+Examples:
+
+- Published an article.
+- Added a note.
+- Started a project.
+- Updated a project milestone.
+- Added a book to the reading list.
+- Shared a music discovery.
+- Posted a thought.
+- Added a resource to the collection.
+
+The feed should be ordered chronologically by default.
+
+Provide filters such as All, Writing, Building, Ideas, and Personal Interests.
+
+Avoid an engagement-optimized algorithm. The default experience should be chronological and transparent.
+
+An external social post should retain attribution and link to its original platform. Do not copy protected content from other services without appropriate permission.
+
+The system should support both automatically imported activity and manually created activity, while clearly identifying the source.
+
+---
+
+## 6. SOCIAL FEATURES AND CONVERSATIONS
+
+The platform should allow people to respond to the owner's public ideas.
+
+### Comments
+
+Implement comments on supported public content.
+
+Features:
+
+- Comment creation.
+- Replies to comments.
+- Edit and delete permissions.
+- Author attribution.
+- Timestamps.
+- Moderation controls.
+- Pagination or incremental loading.
+- Clear loading, success, and error states.
+
+### Questions and discussions
+
+Allow the owner to publish a question that invites discussion.
+
+Visitors can submit answers or comments.
+
+Support a distinction between ordinary comments and question threads.
+
+### Visitor identity
+
+Design a simple visitor account system if required for community participation.
+
+Authenticated users should have a profile with a display name and optional avatar.
+
+Allow read-only visitors to browse public content without registering.
+
+Provide rate limiting, spam prevention, moderation, and account security.
+
+Do not add direct messaging, public follower counts, complex user profiles, algorithmic feeds, or gamification in the initial release.
+
+### Moderation
+
+The owner must be able to:
+
+- Hide or remove comments.
+- Report inappropriate content.
+- Block abusive accounts.
+- Restrict commenting on individual posts.
+- Disable comments globally.
+- Review pending content if moderation approval is enabled.
+
+Add a clear community guideline and a basic report workflow.
+
+---
+
+## 7. SOCIAL PLATFORM INTEGRATIONS
+
+The application should connect to the owner's wider digital presence.
+
+The website remains the canonical home for original writing and the connected personal archive. External platforms remain places where conversations and distribution happen.
+
+### Initial integrations to support
+
+Design the integration system for:
+
+- LinkedIn.
+- GitHub.
+- X.
+- Threads.
+- Spotify.
+- YouTube.
+- Other configurable social or content services.
+
+Do not assume all services offer the same API access.
+
+### Integration levels
+
+Support three different integration types:
+
+**Level 1: External links**
+
+Allow the owner to add profile URLs and choose where they appear.
+
+This must work without API credentials.
+
+**Level 2: Embeds and supported imports**
+
+Where officially supported, display embedded media or import selected public information.
+
+Use official APIs, embed tools, or documented methods consistent with each provider's terms.
+
+**Level 3: Authenticated synchronization**
+
+Where supported, allow the owner to connect an account using OAuth and explicitly approve the requested permissions.
+
+Examples include selected GitHub activity or supported Spotify listening information.
+
+### Integration architecture
+
+Create a reusable integration framework.
+
+Each integration should have:
+
+- Provider name.
+- Connection status.
+- Requested permissions.
+- Configuration.
+- Last successful synchronization.
+- Last error.
+- Disconnect action.
+- Sync status.
+- Clear handling of expired or revoked authorization.
+
+Store credentials and access tokens securely on the server. Encrypt sensitive tokens at rest where practical, and never return secrets to the browser.
+
+Use scheduled synchronization only when needed and permitted.
+
+### Important integration rules
+
+- Do not scrape websites to bypass API restrictions.
+- Do not fabricate imported posts or listening activity.
+- Do not claim an account is connected when it is not.
+- Do not display hardcoded sample data as live external data.
+- If an integration is not configured, show a clear disconnected or unavailable state.
+- Provide graceful fallback links to the original platform.
+- Allow the owner to select which imported items become public.
+- Never publish content to an external account without the owner's explicit authorization.
+- Clearly distinguish an external embed from content hosted on Timadey.
+
+Implement external profile links first, then the integrations that can be completed reliably with available credentials and official permissions.
+
+---
+
+## 8. ASK TIMADEY — THE AI GUIDE
+
+This is a core differentiator, not merely a generic chatbot.
+
+Ask Timadey helps visitors understand the owner's published ideas, interests, projects, and worldview.
+
+It should feel like an intelligent guide to a personal knowledge archive.
+
+### Example visitor questions
+
+- What kinds of problems is Timadey most interested in solving?
+- Why is Timadey interested in neurotechnology?
+- What does Timadey think about the future of brain-computer interfaces?
+- What is Timadey currently building?
+- How do Timadey's interests in technology and product building connect?
+- Which articles should I read to understand Timadey's worldview?
+- What has changed in Timadey's thinking about a particular topic?
+- What is Timadey learning right now?
+
+### Conversational interface
+
+Build a clean chat interface with:
+
+- A short introduction.
+- Suggested questions.
+- Message history during the session.
+- Streaming responses if supported reliably.
+- A stop-generation action if streaming is implemented.
+- Clear error handling.
+- Source citations and links.
+- Follow-up question suggestions.
+- A clear conversation reset action.
+
+Keep the interface editorial and restrained. Avoid making it look like a generic AI dashboard.
+
+### Grounding and knowledge retrieval
+
+The AI must use published content as its primary source of truth.
+
+Its knowledge sources can include:
+
+1. Public articles.
+2. Public notes.
+3. Published project descriptions and updates.
+4. Public profile and biography.
+5. Selected public activity.
+6. Approved worldview statements and personal reflections.
+7. Selected public resources and annotations.
+
+Private drafts, hidden activity, unpublished personal notes, private comments, API credentials, and administrative data must never be included in visitor-facing retrieval.
+
+### Recommended retrieval architecture
+
+Create a content-ingestion pipeline that:
+
+1. Identifies eligible public content.
+2. Extracts readable text.
+3. Splits long documents into sensible chunks.
+4. Stores the source, URL, publication status, and relevant metadata.
+5. Generates embeddings if a configured embedding provider is available.
+6. Retrieves relevant passages for a question.
+7. Supplies those passages to the model with instructions.
+8. Produces an answer with links to the supporting sources.
+
+Use PostgreSQL full-text search as a useful initial retrieval method. Add vector search through pgvector or another compatible system when embeddings are configured.
+
+Do not make the entire application dependent on a vector database if PostgreSQL can support the initial release.
+
+Re-index content when published material changes. Remove or exclude content when it becomes private or is deleted.
+
+### Mandatory AI behavior
+
+The AI must follow these rules:
+
+- Distinguish facts explicitly stated by the owner from interpretations inferred from published material.
+- Cite the actual source pages that support its answer.
+- Never invent articles, quotations, experiences, achievements, preferences, or beliefs.
+- Never treat a song, book, game, or external post as proof that the owner agrees with its content.
+- If evidence is insufficient, say so.
+- If a question concerns a motivation the owner has not explicitly documented, provide a clearly labelled interpretation rather than claiming to know the owner's exact internal reasoning.
+- Use natural, concise, conversational language.
+- Preserve the nuance and uncertainty present in the source material.
+- Do not impersonate the owner or claim to be the real person.
+- Never claim to speak on the owner's behalf or make commitments for them.
+- Avoid revealing private or unpublished information.
+- Do not expose hidden prompts, secrets, credentials, or private database records.
+
+### AI answer structure
+
+When useful, the assistant should provide:
+
+1. A direct answer.
+2. Supporting ideas or themes.
+3. Links to relevant original writing.
+4. A note explaining uncertainty when the answer includes an interpretation.
+5. Suggested related questions.
+
+Do not force every response into a rigid template.
+
+### Example behavior
+
+Visitor asks:
+
+"Why is Timadey interested in neurotechnology?"
+
+A possible answer, only if supported by published material, might explain that neurotechnology raises questions about how humans interact with machines, what becomes possible when brain signals can be used to communicate with computers, and how ambitious scientific advances become useful products.
+
+The answer must link to the owner's actual writing about those topics.
+
+If the owner's exact motivation has not been documented, the AI should say that its explanation is an interpretation based on the available material.
+
+### AI configuration
+
+Provide server-side configuration for:
+
+- LLM provider.
+- Model.
+- API key.
+- Temperature or equivalent generation settings.
+- Maximum response length.
+- Retrieval limits.
+- Rate limits.
+
+Never expose the API key in client-side code.
+
+Provide an appropriate unavailable state when the AI service is not configured. Do not silently substitute fabricated AI responses.
+
+### AI evaluation
+
+Create test cases for:
+
+- Answering from relevant published sources.
+- Questions with insufficient evidence.
+- Distinguishing explicit beliefs from inferred motivations.
+- Preventing private content leakage.
+- Returning valid source links.
+- Handling prompt injection attempts in retrieved documents.
+
+---
+
+## 9. THE LIVE LAYER
+
+The Live Layer communicates what the owner is currently doing or exploring.
+
+It should feel personal, optional, and low-pressure.
+
+### Activity types
+
+Support:
+
+- Listening to music.
+- Reading a book.
+- Playing a game.
+- Coding or building.
+- Learning a new subject.
+- Exploring an idea.
+- Attending or completing a milestone.
+- General status updates.
+
+### Manual updates
+
+The owner must be able to create an update quickly from the dashboard.
+
+Examples:
+
+- "Currently reading a book about brain-computer interfaces."
+- "Exploring how technology could change the way humans interact with computers."
+- "Building a new feature for a personal project."
+- "Currently learning about neuroengineering."
+
+Allow the owner to choose whether an update appears on the homepage, Now page, activity feed, or nowhere publicly.
+
+### Automated activity
+
+Add integration support for selected activities where APIs permit.
+
+For example:
+
+- Spotify: currently playing or recently played information when the account and permissions support it.
+- GitHub: selected public repositories or recent public contribution activity where available.
+- YouTube: selected public videos or playlists.
+
+Do not assume reading apps or games expose activity APIs. Use manual updates when automatic integration is not practical.
+
+### Freshness and stale data
+
+Show the last synchronization or update time.
+
+If a currently playing track is no longer current, do not continue showing it as playing.
+
+Support states such as:
+
+- Live.
+- Recently updated.
+- Manually updated.
+- Offline or unavailable.
+
+### Privacy
+
+Provide separate visibility controls for each activity type.
+
+Location, private activity, sensitive information, and activity the owner has not approved must never be published automatically.
+
+The owner must be able to pause all automatic activity sharing instantly.
+
+---
+
+## 10. FOLLOWING AND NOTIFICATIONS
+
+Design a future-compatible system for people who want to follow updates.
+
+For the initial release, prioritize a simple subscription to published updates rather than a complex social graph.
+
+Potential capabilities:
+
+- Email subscription.
+- Optional notifications for new writing.
+- Optional notifications for project updates.
+- Optional notifications for selected topics.
+- A periodic digest.
+- Unsubscribe and preference management.
+
+Make subscriptions opt-in.
+
+Do not send emails until a provider is configured and the recipient has consented.
+
+Avoid notification spam. A weekly or configurable digest is preferable to sending a message for every minor activity update.
+
+Build this after core publishing, conversations, and Ask Timadey work reliably.
+
+---
+
+## 11. ADMIN DASHBOARD
+
+Create a secure, owner-only administration area at `/admin` or another appropriate route.
+
+The dashboard is essential because the owner must be able to maintain the site without repeatedly asking a developer to make changes.
+
+### Dashboard overview
+
+Show useful operational information:
+
+- Published content count.
+- Draft count.
+- Recent comments.
+- Pending moderation items.
+- Recent activity.
+- Integration connection statuses.
+- AI service status.
+- Content indexing status.
+
+Do not fabricate visitor analytics or external integration statistics.
+
+### Content management
+
+Create management interfaces for:
+
+- Articles.
+- Notes.
+- Projects.
+- Collections.
+- Activity items.
+- About page sections.
+- Now page sections.
+- Tags and topics.
+- Social links.
+- Questions and discussions.
+
+Allow the owner to:
+
+- Create.
+- Edit.
+- Preview.
+- Publish.
+- Unpublish.
+- Schedule publication if implemented.
+- Archive.
+- Delete with confirmation.
+
+### Publishing editor
+
+Provide:
+
+- Title.
+- Slug.
+- Excerpt.
+- Main content.
+- Cover image.
+- Tags.
+- Topics.
+- Publication status.
+- SEO metadata.
+- Related content.
+- Featured status.
+
+Include autosave or reliable draft saving, validation, and a preview mode.
+
+Do not lose unsaved content silently.
+
+### Integration settings
+
+Display each provider's connection state, permissions, last sync, error state, and disconnect option.
+
+Make it obvious which functionality is unavailable because credentials have not been configured.
+
+### Ask Timadey settings
+
+Allow the owner to:
+
+- Enable or disable public AI access.
+- Manage approved knowledge sources.
+- Re-index published content.
+- Inspect source indexing status.
+- Configure suggested questions.
+- Edit the AI's public introduction.
+- Test retrieval against selected content.
+- Review basic usage and error logs without exposing private visitor information unnecessarily.
+
+### Moderation settings
+
+Allow the owner to manage comments, reports, spam controls, and account restrictions.
+
+### Authentication
+
+Use secure server-side authentication with proper authorization checks.
+
+Do not rely on hiding admin buttons in the frontend as the security mechanism. Protect every admin API endpoint and administrative operation on the server.
+
+---
+
+## 12. DATABASE DESIGN
+
+Create normalized Laravel Eloquent models with appropriate relationships, validation, indexes, timestamps, and migrations.
+
+Use these as the initial domain entities. Adapt names and fields to the actual implementation where appropriate.
+
+### Core content
+
+**Post**
+- id
+- title
+- slug
+- excerpt
+- body
+- post_type
+- status
+- visibility
+- featured
+- cover_image
+- author
+- published_at
+- created_at
+- updated_at
+- SEO fields
+
+The post type should support articles, notes, questions, and other suitable publication types where a shared model makes sense.
+
+**Topic**
+- id
+- name
+- slug
+- description
+
+**Tag**
+- id
+- name
+- slug
+
+Use many-to-many relationships where needed.
+
+**Project**
+- id
+- name
+- slug
+- summary
+- description
+- status
+- visibility
+- cover_image
+- repository_url
+- live_url
+- started_at
+- completed_at
+- featured
+
+**CollectedItem**
+- id
+- title
+- URL
+- creator
+- item_type
+- annotation
+- visibility
+- created_at
+
+### Activity
+
+**ActivityItem**
+- id
+- activity_type
+- title
+- description
+- source_provider
+- external_url
+- metadata
+- visibility
+- occurred_at
+- created_at
+- updated_at
+
+Validate provider-specific metadata rather than treating arbitrary client-supplied data as trusted.
+
+**ActivityPreference**
+- activity_type
+- automatic_sharing_enabled
+- public_visibility
+- homepage_visibility
+- feed_visibility
+
+### Community
+
+**User**
+- Use a secure authentication model appropriate for the project.
+- display_name
+- avatar
+- role
+- created_at
+
+**Comment**
+- id
+- author
+- post
+- parent_comment
+- body
+- status
+- created_at
+- updated_at
+
+**ContentReport**
+- id
+- reporter
+- comment or content reference
+- reason
+- status
+- created_at
+
+Add the required validation, rate limiting, and moderation rules.
+
+### Integrations
+
+**IntegrationConnection**
+- id
+- provider
+- connection_status
+- encrypted credential references
+- granted_scopes
+- last_synced_at
+- last_error
+- created_at
+- updated_at
+
+Never serialize secrets into public API responses.
+
+### AI
+
+**KnowledgeDocument**
+- id
+- source_type
+- source_id
+- source_url
+- title
+- visibility
+- indexed_at
+- content_hash
+
+**KnowledgeChunk**
+- id
+- document
+- chunk_index
+- text
+- metadata
+- optional embedding
+
+**AIConversation**
+- id
+- optional visitor or session reference
+- created_at
+
+**AIMessage**
+- id
+- conversation
+- role
+- content
+- citations
+- created_at
+
+Apply retention limits and privacy controls to conversations. Avoid collecting unnecessary personal information.
+
+Add supporting models for email subscriptions, notification preferences, and administrative settings if these features are implemented.
+
+---
+
+## 13. API DESIGN
+
+Use consistent REST endpoints with validation, permissions, pagination, and appropriate HTTP status codes.
+
+Example endpoint groups:
+
+- `/api/posts/`
+- `/api/posts/{slug}/`
+- `/api/notes/`
+- `/api/projects/`
+- `/api/collected/`
+- `/api/activity/`
+- `/api/topics/`
+- `/api/tags/`
+- `/api/comments/`
+- `/api/search/`
+- `/api/ask/`
+- `/api/integrations/`
+- `/api/subscriptions/`
+- `/api/admin/`
+
+Public endpoints must expose only published, public content.
+
+Administrative endpoints must require appropriate authentication and permissions.
+
+The AI endpoint must independently enforce retrieval permissions. Do not trust the frontend to filter out private content.
+
+Include request validation, pagination, sensible rate limits, and structured error responses.
+
+Generate API documentation.
+
+---
+
+## 14. SEO, SHARING, AND DISCOVERABILITY
+
+Make the site discoverable by search engines and useful when links are shared.
+
+Implement:
+
+- Page titles and descriptions.
+- Canonical URLs.
+- Open Graph metadata.
+- Social sharing images where available.
+- Sitemap.
+- Robots directives.
+- RSS feed for public writing and suitable public updates.
+- Semantic article markup.
+- Proper heading hierarchy.
+- Readable URLs.
+- Article publication and modification dates.
+
+Private content must not appear in public sitemaps, RSS feeds, search results, or metadata.
+
+Include a clean 404 page and useful empty states.
+
+---
+
+## 15. SECURITY, PRIVACY, AND RELIABILITY
+
+Treat these as core product requirements.
+
+- Keep all secrets on the server.
+- Validate and sanitize user input.
+- Prevent unauthorized access to private content.
+- Protect administrative endpoints.
+- Apply CSRF protection and appropriate secure cookie settings where applicable.
+- Use secure authentication and password handling.
+- Rate-limit authentication, comments, and AI endpoints.
+- Validate uploaded file types and sizes.
+- Prevent unauthorized file access.
+- Avoid exposing sensitive error details to visitors.
+- Use safe Markdown rendering.
+- Protect against prompt injection in retrieved documents.
+- Do not expose private drafts to AI retrieval.
+- Ensure disconnected integrations stop syncing.
+- Provide a way to delete stored account data and conversations according to the application's retention policy.
+- Do not expose secrets in logs.
+- Use HTTPS in deployment.
+- Configure appropriate security headers.
+- Back up the database using a documented procedure appropriate to the deployment.
+
+Provide sensible privacy defaults. External activity should be private until explicitly approved for sharing.
+
+---
+
+## 16. PERFORMANCE AND ACCESSIBILITY
+
+Target a fast, comfortable reading experience.
+
+Implement:
+
+- Optimized images.
+- Lazy loading where appropriate.
+- Pagination for large feeds.
+- Database indexes for frequent queries.
+- Efficient API queries.
+- Avoidance of unnecessary client-side JavaScript.
+- Loading, empty, and error states.
+- Keyboard navigation.
+- Visible focus indicators.
+- Accessible form labels.
+- Appropriate color contrast.
+- Reduced-motion support.
+- Screen-reader-friendly controls.
+
+Do not add expensive background processes or real-time infrastructure unless the feature genuinely requires it.
+
+---
+
+## 17. TESTING AND QUALITY ASSURANCE
+
+Create automated tests for critical functionality.
+
+At minimum, test:
+
+1. Public pages display published content correctly.
+2. Draft and private content cannot be accessed publicly.
+3. Content creation and editing work through the dashboard.
+4. Comment creation and moderation work.
+5. Search returns relevant published content.
+6. Admin permissions are enforced on the backend.
+7. AI retrieval includes only permitted sources.
+8. AI answers return real source links.
+9. Missing AI credentials produce a clear unavailable state.
+10. Disconnected integrations do not pretend to be live.
+11. Privacy settings are enforced.
+12. Invalid inputs and unauthorized API calls are handled correctly.
+
+Run migrations and tests.
+
+Fix build errors, broken routes, missing environment configuration, and major responsive layout issues before considering the application complete.
+
+Do not mark a feature as complete merely because a button is visible.
+
+---
+
+## 18. IMPLEMENTATION PLAN
+
+Build the application in the following order. Keep the project runnable after each phase.
+
+### Phase 1 — Functional foundation
+
+Build:
+
+- Application shell.
+- Design system.
+- Responsive navigation.
+- Home.
+- Writing archive and article detail.
+- Notes.
+- Projects.
+- Collected.
+- About.
+- Now.
+- Laravel Eloquent models and migrations.
+- Public content APIs.
+- Secure admin authentication.
+- Admin content management.
+- Search.
+- SEO and RSS.
+
+Seed the database with clearly labelled demonstration content so the interface is easy to evaluate. Make all demonstration content editable and removable. Do not represent it as authentic personal history.
+
+### Phase 2 — Unified feed and community
+
+Build:
+
+- Activity feed.
+- Activity filters.
+- Questions and discussions.
+- Comments and replies.
+- Visitor authentication if needed.
+- Moderation dashboard.
+- Content visibility controls.
+
+### Phase 3 — Ask Timadey
+
+Build:
+
+- AI chat interface.
+- Provider configuration.
+- Content ingestion.
+- Search-based retrieval.
+- Source citations.
+- Public/private content enforcement.
+- Conversation limits.
+- AI failure handling.
+- Suggested questions.
+- Tests for grounding and privacy.
+
+### Phase 4 — Live Layer and integrations
+
+Build:
+
+- Manual activity updates.
+- Now page management.
+- External profile links.
+- GitHub integration where configured.
+- Spotify integration where supported and authorized.
+- Embeds and other integrations as credentials and provider capabilities permit.
+- Integration health and synchronization controls.
+- Activity visibility and pause controls.
+
+### Phase 5 — Subscriptions and polish
+
+Build:
+
+- Email subscription.
+- Configurable digest if a provider is configured.
+- Performance improvements.
+- Accessibility improvements.
+- Final responsive testing.
+- Production configuration and deployment documentation.
+
+Do not delay a working Phase 1 application while attempting to integrate every external service.
+
+---
+
+## 19. DEFINITION OF DONE
+
+The application is not finished merely because the homepage looks attractive.
+
+The first complete release must satisfy these criteria:
+
+- A visitor can browse the website without logging in.
+- Public writing, notes, projects, and collections load from the database.
+- The owner can sign in and manage content.
+- Published content appears on the correct public pages.
+- Draft and private content remain protected.
+- The homepage feed combines relevant content types in chronological order.
+- Visitors can use search.
+- Comments and moderation work if community features are enabled.
+- Ask Timadey uses real retrieved content and provides working source links.
+- The AI never presents unsupported personal interpretations as confirmed facts.
+- The Now page can be updated manually.
+- Social profile links work without external credentials.
+- Integrations clearly communicate whether they are connected, unavailable, or stale.
+- The site is responsive, accessible, and reasonably fast.
+- Automated tests pass for the critical flows.
+- Environment variables, migrations, and deployment instructions are documented.
+- There are no major broken buttons, fabricated live states, or silently failing features.
+
+---
+
+## 20. HOW TO WORK ON THIS PROJECT
+
+Follow these instructions throughout development.
+
+1. Start by inspecting the available Replit environment and choosing a reliable project structure.
+2. Provide a short architecture and phased implementation plan.
+3. Build the functional foundation before polishing minor visual details.
+4. Use reusable components and a consistent design system.
+5. Connect every major screen to real backend functionality.
+6. Use migrations and persistent database storage rather than temporary in-memory state.
+7. Keep secrets in environment variables.
+8. Create a `.env.example` file with every required configuration variable.
+9. Document any feature that requires an external API key, OAuth application, email provider, storage provider, or other external service.
+10. Use clear disconnected and unavailable states when a dependency has not been configured.
+11. Never fabricate successful API responses or live integration data.
+12. Do not remove a required feature silently. If implementation must be deferred, document it and explain what remains.
+13. Test each phase before moving to the next.
+14. Keep the code readable and easy to maintain.
+15. Do not replace the chosen editorial visual direction with a generic dashboard template.
+16. Do not ask for every small design decision. Make sensible product decisions independently and record significant assumptions.
+17. Do not stop at a plan, a Figma-like mockup, or a static frontend. Build the working application.
+18. At the end, provide a concise report showing what works, what has been tested, which environment variables are needed, which integrations still require credentials, and how to run the project.
+
+**Start with Phase 1 now. Build the real application, not just a demonstration of what it might look like.**
