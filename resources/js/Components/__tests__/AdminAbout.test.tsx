@@ -15,7 +15,7 @@ vi.mock('@/Layouts/AdminLayout', () => ({
 }));
 vi.mock('@/Components/Flash', () => ({ Flash: () => null }));
 
-import About from '../About';
+import About from '@/Pages/Admin/About';
 
 test('renders the rich editor with the stored body and a save button', async () => {
     render(<About body="<p>Stored intro</p>" />);

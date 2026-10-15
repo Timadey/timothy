@@ -41,8 +41,16 @@ test(
         await boldButton.click();
         await expect(editor.locator('strong', { hasText: 'bold' })).toBeVisible();
 
-        await editor.focus();
-        await page.keyboard.press('End');
+        // Click the far end of the line (clear of the floating bubble menu). The
+        // bubble hides only once ProseMirror's state has the collapsed caret, so
+        // waiting for it to disappear guarantees the following Enter splits from
+        // fresh state instead of racing the async selectionchange sync (which
+        // used to delete the selected word under load).
+        const boldLine = editor.locator('p', { hasText: 'Say bold' });
+        const boldLineBox = await boldLine.boundingBox();
+        if (!boldLineBox) throw new Error('bold line not visible');
+        await boldLine.click({ position: { x: boldLineBox.width - 20, y: 10 } });
+        await expect(boldButton).toBeHidden();
         await page.keyboard.press('Enter');
         await expect(editor.locator('p strong', { hasText: 'bold' })).toBeVisible();
         await page.keyboard.type('A photo follows.');
