@@ -6,7 +6,8 @@ All endpoints live under `/api` and return JSON. Content rules:
 
 - Only posts/projects/collected items with `status = published` (posts) and `visibility = public` are exposed.
 - Drafts, private items, and unpublished content always return `404`.
-- List endpoints are paginated: **15 items per page** via `?page=`.
+- List endpoints are paginated: **15 items per page** via `?page=` (posts list also supports `?per_page=`).
+- Rate limited to **60 requests per minute** per user (or IP for guests); excess requests return `429`.
 - Admin functionality is **not** part of this API. Admin endpoints are session-authenticated Inertia routes served from the web stack (see the `routes/web.php` `/admin` group).
 
 ## Status codes
@@ -14,8 +15,9 @@ All endpoints live under `/api` and return JSON. Content rules:
 | Code | Meaning |
 |------|---------|
 | `200` | Success |
-| `400` | Missing/invalid query parameter (only `/api/search` without `q`) |
+| `400` | Missing/invalid query parameter (e.g. `/api/search` without `q`, unknown `status`, out-of-range `per_page`) |
 | `404` | Resource not found, or slug not publicly visible |
+| `429` | Rate limit exceeded (60 requests/minute) |
 
 Errors are returned in Laravel's standard shape: `{ "message": "..." }`.
 
@@ -29,7 +31,11 @@ List published articles (or notes with `?type=note`).
 |-------|------|-------------|
 | `type` | string | `article` (default) or `note` |
 | `q` | string | Filter by title substring |
-| `page` | int | Page number (15 per page) |
+| `tag` | string | Filter by tag slug |
+| `topic` | string | Filter by topic slug |
+| `status` | string | Only `published` is accepted (no-op confirm of the always-on public scope); any other value → `400`. Guests can never request drafts/private content. |
+| `per_page` | int | Page size, 5–50 (default 15); out of range → `400` |
+| `page` | int | Page number |
 
 ```json
 {

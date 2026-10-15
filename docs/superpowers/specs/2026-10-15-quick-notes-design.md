@@ -35,8 +35,9 @@ no data migration, no re-plumbing of tags/search/feeds.
   No row changes.
 - **Validation** (`StorePostRequest`): title `required` for `article`/`question`,
   `nullable` for `note` (conditional rule in `rules()`).
-- **Slug fallback:** `title` → else slugged first line of body → else `note`.
-  `HasSlug::makeSlug()` collision handling unchanged.
+- **Slug fallback:** `title` → else first line of body limited to ~8 words / 40
+  chars (short, readable permalinks; `2026_10_15_000002` backfills older long
+  title-less slugs) → else `note`. `HasSlug::makeSlug()` collision handling unchanged.
 - **Snippet helper:** `Post::titleOrSnippet(): string` — title if set, else ~60-char
   plain-text of body. Used at **every title consumer**: activity feed rows,
   RSS item titles, SEO `<title>`/description, admin lists, search result labels.
