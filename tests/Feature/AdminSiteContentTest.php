@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\{AboutSection, CollectedItem, NowSection, Post, Project, Setting, SocialLink, Tag, User};
+use App\Models\{CollectedItem, NowSection, Post, Project, Setting, SocialLink, Tag, User};
 
 beforeEach(fn () => $this->owner = User::factory()->create(['role' => 'owner']));
 
@@ -22,14 +22,18 @@ it('shows the now page editor', function () {
         ->assertInertia(fn ($p) => $p->component('Admin/Now')->has('sections'));
 });
 
-it('updates about sections', function () {
-    $s = AboutSection::create(['key' => 'intro', 'title' => 'Intro', 'body' => 'Hi', 'sort_order' => 0]);
-
+it('updates the about body', function () {
     $this->actingAs($this->owner)->put('/admin/about', [
-        'sections' => [['id' => $s->id, 'key' => 'intro', 'title' => 'Hello', 'body' => 'There', 'visible' => true, 'sort_order' => 0]],
+        'body' => '<p>New <strong>intro</strong></p>',
     ])->assertRedirect();
 
-    expect($s->fresh()->title)->toBe('Hello');
+    expect(Setting::get('about_body'))->toBe('<p>New <strong>intro</strong></p>');
+});
+
+it('rejects unsafe about markup', function () {
+    $this->actingAs($this->owner)->put('/admin/about', [
+        'body' => '<p>ok</p><script>alert(1)</script><img src="https://evil.test/x.png">',
+    ])->assertSessionHasErrors('body');
 });
 
 it('creates and deletes social links', function () {
