@@ -20,8 +20,9 @@ no data migration, no re-plumbing of tags/search/feeds.
    Save draft / Publish with `Cmd+Enter`. **No autosave.**
 5. **Stream density:** truncate at ~280 chars with **"Read on"** that expands the full
    text **inline** (does not navigate).
-6. **Permalink access:** a subtle **copy-link** button per note (copies
-   `/notes/{slug}`; "Copied!" flash). Date is plain text, not a link.
+6. **Permalink access:** a subtle **copy-link** button per note (copies the
+   **absolute** URL `{APP_URL}/notes/{slug}`; "Copied!" flash). Date is plain text,
+   not a link.
 7. **Admin location:** new **"Notes"** admin section (sidebar item → list → composer
    at `/admin/notes/new`).
 8. **FAB:** a bottom-right floating `+` button on **every admin screen** opens a
