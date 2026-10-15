@@ -1,6 +1,6 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SearchInput } from '@/Components/SearchInput';
 import { FilterBar } from '@/Components/FilterBar';
 import { Pagination } from '@/Components/Pagination';
@@ -22,15 +22,38 @@ type TypeOption = { value: string; label: string };
 
 export default function CollectedIndex({ items, types, filters }: { items: Paginated; types: TypeOption[]; filters: Filters }) {
     const [q, setQ] = useState(filters.q ?? '');
+    const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        setQ(filters.q ?? '');
+    }, [filters.q]);
+
+    useEffect(() => () => {
+        if (timer.current) clearTimeout(timer.current);
+    }, []);
 
     const apply = (patch: Record<string, string | undefined>) =>
         router.get('/collected', { ...filters, q: q || undefined, ...patch }, { preserveState: true, preserveScroll: true });
+
+    const onSearch = (next: string) => {
+        setQ(next);
+        if (timer.current) clearTimeout(timer.current);
+        timer.current = setTimeout(() => {
+            router.get('/collected', { ...filters, q: next || undefined }, { preserveState: true, preserveScroll: true });
+        }, 300);
+    };
 
     return (
         <PublicLayout>
             <Head>
                 <title>Collected — Timadey</title>
                 <meta name="description" content="Books, articles, videos, and tools I keep coming back to." />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Collected — Timadey" />
+                <meta property="og:description" content="Books, articles, videos, and tools I keep coming back to." />
+                <meta property="og:url" content="/collected" />
+                <link rel="canonical" href="/collected" />
+                <meta name="twitter:card" content="summary" />
             </Head>
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Collected</h1>
@@ -38,7 +61,7 @@ export default function CollectedIndex({ items, types, filters }: { items: Pagin
 
                 <div className="mt-8 flex flex-col gap-4">
                     <div className="max-w-sm">
-                        <SearchInput value={q} onChange={setQ} placeholder="Search collection" />
+                        <SearchInput value={q} onChange={onSearch} placeholder="Search collection" />
                     </div>
                     <FilterBar
                         options={types}

@@ -5,7 +5,7 @@
     --color-ink: #1d1d1f;
     --color-primary: #000000;
     --color-surface: #f5f5f7;
-    --color-meta: #86868b;
+    --color-meta: #6e6e73;
     --color-hairline: #d2d2d7;
     --color-link: #0066cc;
     --font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -52,6 +52,9 @@
     .prose-custom pre { @apply bg-ink text-white rounded-md p-4 overflow-x-auto text-sm mb-4; }
     .prose-custom code { @apply bg-surface rounded-sm px-1 py-0.5 text-sm; }
     .prose-custom pre code { @apply bg-transparent p-0; }
-    .prose-custom img { @apply rounded-md mb-4; }
+    .prose-custom img { @apply rounded-md mb-4 block; max-width: 100%; height: auto; }
+    .prose-custom figure { @apply mb-4; }
+    .prose-custom figcaption { @apply text-sm text-meta mt-2; }
+    .prose-custom > :first-child { @apply mt-0; }
     .prose-custom hr { @apply border-hairline my-8; }
 }

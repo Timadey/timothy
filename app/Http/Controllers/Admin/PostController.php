@@ -95,7 +95,7 @@ class PostController extends Controller
         $topics = $data['topics'] ?? [];
         unset($data['tags'], $data['topics']);
         if (empty($data['slug'])) {
-            $data['slug'] = Post::makeSlug($data['title']);
+            $data['slug'] = Post::resolveSlug($data['title'] ?? null, $data['body'] ?? null);
         }
 
         $post->update($data);

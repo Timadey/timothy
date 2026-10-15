@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\SocialLink;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -14,6 +15,8 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'status' => fn () => $request->session()->get('status'),
+            'social_links' => fn () => SocialLink::where('visible', true)->orderBy('sort_order')
+                ->get(['platform', 'url', 'label']),
         ];
     }
 }

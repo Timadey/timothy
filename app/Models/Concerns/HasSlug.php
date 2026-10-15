@@ -8,7 +8,7 @@ trait HasSlug
 {
     public static function makeSlug(string $title): string
     {
-        $base = Str::slug($title) ?: 'item';
+        $base = trim(Str::limit(Str::slug($title), 240, ''), '-') ?: 'item';
         $slug = $base;
         $i = 2;
         $exists = fn (string $candidate) => (method_exists(static::class, 'withTrashed')

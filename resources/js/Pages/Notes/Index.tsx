@@ -1,43 +1,59 @@
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, router } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 import { SearchInput } from '@/Components/SearchInput';
 import { FilterBar } from '@/Components/FilterBar';
-import { MetaLine } from '@/Components/MetaLine';
 import { Pagination } from '@/Components/Pagination';
 import { EmptyState } from '@/Components/EmptyState';
+import { MetaLine } from '@/Components/MetaLine';
+import { PostRow } from '@/Components/PostRow';
 
-type NoteRow = {
-    slug: string;
-    title: string;
-    excerpt: string | null;
-    reading_time: number;
-    date: string | null;
-    tags: string[];
-};
-
+type NoteRow = { slug: string; headline: string; teaser: string; date: string | null; tags: string[] };
 type Paginated = { data: NoteRow[]; links: { url: string | null; label: string; active: boolean }[] };
 type Filters = { q?: string; tag?: string };
 
 export default function NotesIndex({ notes, tags, filters }: { notes: Paginated; tags: { name: string; slug: string }[]; filters: Filters }) {
     const [q, setQ] = useState(filters.q ?? '');
+    const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        setQ(filters.q ?? '');
+    }, [filters.q]);
+
+    useEffect(() => () => {
+        if (timer.current) clearTimeout(timer.current);
+    }, []);
 
     const apply = (patch: Record<string, string | undefined>) =>
         router.get('/notes', { ...filters, q: q || undefined, ...patch }, { preserveState: true, preserveScroll: true });
+
+    const onSearch = (next: string) => {
+        setQ(next);
+        if (timer.current) clearTimeout(timer.current);
+        timer.current = setTimeout(() => {
+            router.get('/notes', { ...filters, q: next || undefined }, { preserveState: true, preserveScroll: true });
+        }, 300);
+    };
 
     return (
         <PublicLayout>
             <Head>
                 <title>Notes — Timadey</title>
-                <meta name="description" content="Shorter observations, links, and things worth remembering." />
+                <meta name="description" content="Half-formed thoughts, small observations, and things I want to remember." />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Notes — Timadey" />
+                <meta property="og:description" content="Half-formed thoughts, small observations, and things I want to remember." />
+                <meta property="og:url" content="/notes" />
+                <link rel="canonical" href="/notes" />
+                <meta name="twitter:card" content="summary" />
             </Head>
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Notes</h1>
-                <p className="mt-2 text-meta">Shorter observations, links, and things worth remembering.</p>
+                <p className="mt-2 text-meta">Half-formed thoughts, small observations, and things I want to remember.</p>
 
                 <div className="mt-8 flex flex-col gap-4">
                     <div className="max-w-sm">
-                        <SearchInput value={q} onChange={setQ} placeholder="Search notes" />
+                        <SearchInput value={q} onChange={onSearch} placeholder="Search my notes" />
                     </div>
                     <FilterBar
                         options={tags.map((t) => ({ label: t.name, value: t.slug }))}
@@ -49,18 +65,20 @@ export default function NotesIndex({ notes, tags, filters }: { notes: Paginated;
 
                 <div className="mt-10 divide-y divide-hairline">
                     {notes.data.map((note) => (
-                        <article key={note.slug} className="py-5">
-                            <MetaLine date={note.date ?? undefined} readingTime={note.reading_time} />
-                            <Link href={`/notes/${note.slug}`} className="mt-1 block text-lg font-semibold tracking-tight hover:text-link">
-                                {note.title}
-                            </Link>
-                            {note.excerpt && <p className="mt-1 text-sm text-meta line-clamp-2">{note.excerpt}</p>}
-                            {note.tags.length > 0 && <p className="mt-2 text-xs text-meta">{note.tags.join(' · ')}</p>}
-                        </article>
+                        <PostRow
+                            key={note.slug}
+                            href={`/notes/${note.slug}`}
+                            headline={note.headline}
+                            meta={<MetaLine date={note.date ?? undefined} items={note.tags} />}
+                            excerpt={note.teaser}
+                        />
                     ))}
                     {notes.data.length === 0 && (
                         <div className="py-8">
-                            <EmptyState title="No notes found" hint="Try a different search or tag." />
+                            <EmptyState
+                                title="Couldn’t find anything"
+                                hint="I haven’t written a note matching that — try a different word or tag."
+                            />
                         </div>
                     )}
                 </div>

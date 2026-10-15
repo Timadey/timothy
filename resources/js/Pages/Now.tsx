@@ -14,6 +14,12 @@ export default function Now({ sections, last_updated_at }: { sections: Section[]
             <Head>
                 <title>Now — Timadey</title>
                 <meta name="description" content="What I am focused on right now." />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Now — Timadey" />
+                <meta property="og:description" content="What I am focused on right now." />
+                <meta property="og:url" content="/now" />
+                <link rel="canonical" href="/now" />
+                <meta name="twitter:card" content="summary" />
             </Head>
 
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">

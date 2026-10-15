@@ -19,7 +19,7 @@ class PostFactory extends Factory
             'author_id' => User::factory(),
             'title' => $title,
             'excerpt' => fake()->paragraph(),
-            'body' => "## Section\n\n" . fake()->paragraphs(3, true),
+            'body' => '<h2>Section</h2><p>'.fake()->paragraph().'</p><p>'.fake()->paragraph().'</p>',
             'post_type' => 'article',
             'status' => 'published',
             'visibility' => 'public',

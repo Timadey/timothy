@@ -37,6 +37,7 @@ export default function Social({ social_links }: { social_links: SocialLink[] })
                             className={`${fieldClass} mt-1 block`}
                             required
                         />
+                        {create.errors.platform && <p className="mt-1 text-sm text-red-700">{create.errors.platform}</p>}
                     </label>
                     <label className="text-sm">
                         URL

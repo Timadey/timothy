@@ -11,6 +11,12 @@ export default function About({ sections, social_links, contact_email }: { secti
             <Head>
                 <title>About — Timadey</title>
                 <meta name="description" content="Who I am, what I do, and how to reach me." />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="About — Timadey" />
+                <meta property="og:description" content="Who I am, what I do, and how to reach me." />
+                <meta property="og:url" content="/about" />
+                <link rel="canonical" href="/about" />
+                <meta name="twitter:card" content="summary" />
             </Head>
 
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">

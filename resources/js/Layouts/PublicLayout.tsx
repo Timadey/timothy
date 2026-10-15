@@ -3,9 +3,12 @@ import type { ReactNode } from 'react';
 import { MobileNav } from '@/Components/MobileNav';
 import { navItems } from '@/nav';
 
+type SocialLink = { platform: string; url: string; label: string | null };
+
 export default function PublicLayout({ children }: { children: ReactNode }) {
-    const { url } = usePage();
+    const { url, props } = usePage();
     const current = url.split('?')[0];
+    const socialLinks = ((props as { social_links?: SocialLink[] }).social_links ?? []);
 
     return (
         <div className="flex min-h-screen flex-col">
@@ -40,18 +43,32 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                 {children}
             </main>
             <footer className="border-t border-hairline">
-                <div className="mx-auto flex max-w-5xl flex-col gap-2 px-6 py-8 text-xs text-meta sm:flex-row sm:justify-between">
+                <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-8 text-xs text-meta sm:flex-row sm:justify-between">
                     <span>© {new Date().getFullYear()} Timadey</span>
-                    <div className="flex gap-4">
-                        <Link href="/rss.xml" className="hover:text-ink">
-                            RSS
+                    <div className="flex flex-wrap gap-4">
+                        <Link href="/activity" className="hover:text-ink">
+                            Activity
                         </Link>
                         <Link href="/writing" className="hover:text-ink">
                             Writing
                         </Link>
                         <Link href="/ask" className="hover:text-ink">
-                            Ask Timadey
+                            Ask me anything
                         </Link>
+                        <Link href="/rss.xml" className="hover:text-ink">
+                            RSS
+                        </Link>
+                        {socialLinks.map((l) => (
+                            <a
+                                key={l.url}
+                                href={l.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-ink"
+                            >
+                                {l.label || l.platform}
+                            </a>
+                        ))}
                     </div>
                 </div>
             </footer>

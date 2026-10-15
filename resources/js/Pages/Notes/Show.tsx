@@ -3,10 +3,12 @@ import { Head } from '@inertiajs/react';
 import { Prose } from '@/Components/Prose';
 import { MetaLine } from '@/Components/MetaLine';
 import { Badge } from '@/Components/Badge';
+import { CopyLinkButton } from '@/Components/CopyLinkButton';
 
 type Note = {
     slug: string;
-    title: string;
+    title: string | null;
+    headline: string;
     excerpt: string | null;
     body_html: string;
     date: string | null;
@@ -16,15 +18,17 @@ type Note = {
 };
 
 export default function NoteShow({ note, canonical, preview }: { note: Note; canonical: string; preview?: boolean }) {
+    const headline = note.title || note.headline;
+
     return (
         <PublicLayout>
             <Head>
-                <title>{note.title} — Timadey</title>
-                {note.excerpt && <meta name="description" content={note.excerpt} />}
+                <title>{`${headline} — Timadey`}</title>
+                <meta name="description" content={note.excerpt || note.headline} />
                 <link rel="canonical" href={canonical} />
                 <meta property="og:type" content="article" />
-                <meta property="og:title" content={note.title} />
-                {note.excerpt && <meta property="og:description" content={note.excerpt} />}
+                <meta property="og:title" content={headline} />
+                <meta property="og:description" content={note.excerpt || note.headline} />
                 <meta name="twitter:card" content="summary" />
             </Head>
 
@@ -35,7 +39,10 @@ export default function NoteShow({ note, canonical, preview }: { note: Note; can
                     </div>
                 )}
                 <MetaLine type="Note" date={note.date ?? undefined} readingTime={note.reading_time} />
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight">{note.title}</h1>
+                <h1 className="mt-2 text-3xl font-semibold tracking-tight">{headline}</h1>
+                <div className="mt-4">
+                    <CopyLinkButton slug={note.slug} />
+                </div>
                 <hr className="my-8 border-hairline" />
                 <Prose html={note.body_html} />
                 {note.tags.length > 0 && (

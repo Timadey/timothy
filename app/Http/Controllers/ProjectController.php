@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Post, Project};
-use App\Services\MarkdownService;
 use Illuminate\Http\Request;
 use Inertia\{Inertia, Response};
 
@@ -35,7 +34,7 @@ class ProjectController extends Controller
         ]);
     }
 
-    public function show(string $slug, MarkdownService $markdown): Response
+    public function show(string $slug): Response
     {
         $project = Project::publiclyVisible()->where('slug', $slug)->with('tags')->firstOrFail();
 
@@ -53,7 +52,7 @@ class ProjectController extends Controller
                 'slug' => $project->slug,
                 'name' => $project->name,
                 'summary' => $project->summary,
-                'description_html' => $markdown->render((string) $project->description),
+                'description_html' => (string) $project->description,
                 'status' => $project->status,
                 'repository_url' => $project->repository_url,
                 'live_url' => $project->live_url,

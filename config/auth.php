@@ -22,6 +22,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Login Throttle
+    |--------------------------------------------------------------------------
+    |
+    | Maximum login attempts per IP within the decay window. Named limiter
+    | "login" is registered in AppServiceProvider and referenced from the
+    | /admin/login route. Raise via LOGIN_THROTTLE for QA/e2e runs.
+    |
+    */
+
+    'login_throttle' => [
+        'max_attempts' => (int) env('LOGIN_THROTTLE', 5),
+        'decay_seconds' => 60,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Authentication Guards
     |--------------------------------------------------------------------------
     |

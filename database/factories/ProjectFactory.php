@@ -17,7 +17,7 @@ class ProjectFactory extends Factory
         return [
             'name' => ucfirst($name),
             'summary' => fake()->sentence(),
-            'description' => "## Overview\n\n" . fake()->paragraph(),
+            'description' => '<h2>Overview</h2><p>'.fake()->paragraph().'</p>',
             'status' => 'building',
             'visibility' => 'public',
             'featured' => false,

@@ -22,7 +22,9 @@ class PostResource extends JsonResource
             'tags' => $this->whenLoaded('tags', fn () => $this->tags->pluck('name')),
             'topics' => $this->whenLoaded('topics', fn () => $this->topics->pluck('name')),
             'url' => '/'.($this->post_type === 'article' ? 'writing' : 'notes').'/'.$this->slug,
-            'body_html' => app(MarkdownService::class)->render((string) $this->body),
+            'body_html' => $this->post_type === 'note'
+                ? app(MarkdownService::class)->render((string) $this->body)
+                : (string) $this->body,
         ];
     }
 }

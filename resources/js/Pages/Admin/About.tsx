@@ -8,7 +8,7 @@ type Section = { id: number; key: string; title: string; body: string | null; vi
 const fieldClass = 'mt-1 w-full rounded-md border border-hairline px-3 py-2 text-sm focus:border-primary';
 
 export default function About({ sections }: { sections: Section[] }) {
-    const { data, setData, put, processing } = useForm<{ sections: Section[] }>({ sections });
+    const { data, setData, put, processing, errors } = useForm<{ sections: Section[] }>({ sections });
 
     const setSection = (i: number, patch: Partial<Section>) =>
         setData('sections', data.sections.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
@@ -33,6 +33,9 @@ export default function About({ sections }: { sections: Section[] }) {
                                     aria-label="Section title"
                                 />
                                 <span className="text-xs uppercase text-meta">{s.key}</span>
+                                {errors[`sections.${i}.title`] && (
+                                    <span className="text-sm text-red-700">{errors[`sections.${i}.title`]}</span>
+                                )}
                             </div>
                             <label className="flex items-center gap-2 text-sm">
                                 <input
@@ -50,6 +53,9 @@ export default function About({ sections }: { sections: Section[] }) {
                             className={`${fieldClass} mt-3`}
                             placeholder="Markdown welcome…"
                         />
+                        {errors[`sections.${i}.body`] && (
+                            <p className="mt-1 text-sm text-red-700">{errors[`sections.${i}.body`]}</p>
+                        )}
                     </div>
                 ))}
 

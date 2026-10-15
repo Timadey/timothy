@@ -9,7 +9,7 @@ type Update = { id?: number; now_section_id: number; text: string; occurred_at: 
 const fieldClass = 'mt-1 w-full rounded-md border border-hairline px-3 py-2 text-sm focus:border-primary';
 
 export default function Now({ sections, updates }: { sections: Section[]; updates: Update[]; lastUpdatedAt: string | null }) {
-    const { data, setData, put, processing } = useForm<{ sections: Section[]; updates: Update[] }>({
+    const { data, setData, put, processing, errors } = useForm<{ sections: Section[]; updates: Update[] }>({
         sections,
         updates,
     });
@@ -54,6 +54,9 @@ export default function Now({ sections, updates }: { sections: Section[]; update
                             className={`${fieldClass} mt-3`}
                             placeholder={`What are you ${s.label.toLowerCase()}?`}
                         />
+                        {errors[`sections.${i}.body`] && (
+                            <p className="mt-1 text-sm text-red-700">{errors[`sections.${i}.body`]}</p>
+                        )}
 
                         <div className="mt-4 space-y-2 border-t border-hairline pt-3">
                             <div className="flex items-center justify-between">
@@ -92,6 +95,9 @@ export default function Now({ sections, updates }: { sections: Section[]; update
                                                 className="flex-1 rounded-md border border-hairline px-3 py-2 text-sm"
                                                 placeholder="Update…"
                                             />
+                                            {errors[`updates.${idx}.text`] && (
+                                                <p className="w-full text-sm text-red-700">{errors[`updates.${idx}.text`]}</p>
+                                            )}
                                             <Button
                                                 variant="ghost"
                                                 type="button"

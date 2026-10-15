@@ -31,12 +31,13 @@ export default function ProjectShow({
     return (
         <PublicLayout>
             <Head>
-                <title>{project.name} — Timadey</title>
+                <title>{`${project.name} — Timadey`}</title>
                 {project.summary && <meta name="description" content={project.summary} />}
                 <link rel="canonical" href={canonical} />
                 <meta property="og:type" content="website" />
                 <meta property="og:title" content={project.name} />
                 {project.summary && <meta property="og:description" content={project.summary} />}
+                <meta name="twitter:card" content="summary" />
             </Head>
 
             <article className="mx-auto max-w-3xl px-6 pt-12 pb-16">

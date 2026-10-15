@@ -1,11 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Prose } from './Prose';
 
-export function PreviewPane({ markdown, title, excerpt }: { markdown: string; title: string; excerpt: string }) {
+export function PreviewPane({
+    body,
+    format = 'markdown',
+    title,
+    excerpt,
+}: {
+    body: string;
+    format?: 'markdown' | 'html';
+    title: string;
+    excerpt: string;
+}) {
     const [html, setHtml] = useState('');
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (format === 'html') {
+            setHtml(body);
+            setError(null);
+            return;
+        }
+
         const id = setTimeout(async () => {
             try {
                 const xsrf = document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '';
@@ -16,7 +32,7 @@ export function PreviewPane({ markdown, title, excerpt }: { markdown: string; ti
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-XSRF-TOKEN': decodeURIComponent(xsrf),
                     },
-                    body: JSON.stringify({ markdown }),
+                    body: JSON.stringify({ markdown: body }),
                 });
                 if (!res.ok) throw new Error('Preview failed');
                 const data = await res.json();
@@ -27,7 +43,7 @@ export function PreviewPane({ markdown, title, excerpt }: { markdown: string; ti
             }
         }, 400);
         return () => clearTimeout(id);
-    }, [markdown]);
+    }, [body, format]);
 
     return (
         <article className="rounded-md border border-hairline bg-white p-8">

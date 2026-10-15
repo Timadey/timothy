@@ -9,14 +9,17 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | Public read-only endpoints. Only published, public content is exposed.
+| Rate limited to 60 requests per minute per user/IP (see AppServiceProvider).
 |
 */
 
-Route::get('/posts', [Api\PostController::class, 'index']);
-Route::get('/posts/{slug}', [Api\PostController::class, 'show'])->where('slug', '[A-Za-z0-9\-]+');
-Route::get('/notes', [Api\PostController::class, 'notes']);
-Route::get('/notes/{slug}', [Api\PostController::class, 'showNote'])->where('slug', '[A-Za-z0-9\-]+');
-Route::get('/projects', [Api\ProjectController::class, 'index']);
-Route::get('/projects/{slug}', [Api\ProjectController::class, 'show'])->where('slug', '[A-Za-z0-9\-]+');
-Route::get('/collected', [Api\CollectedItemController::class, 'index']);
-Route::get('/search', [Api\SearchController::class, '__invoke']);
+Route::middleware('throttle:api')->group(function () {
+    Route::get('/posts', [Api\PostController::class, 'index']);
+    Route::get('/posts/{slug}', [Api\PostController::class, 'show'])->where('slug', '[A-Za-z0-9\-]+');
+    Route::get('/notes', [Api\PostController::class, 'notes']);
+    Route::get('/notes/{slug}', [Api\PostController::class, 'showNote'])->where('slug', '[A-Za-z0-9\-]+');
+    Route::get('/projects', [Api\ProjectController::class, 'index']);
+    Route::get('/projects/{slug}', [Api\ProjectController::class, 'show'])->where('slug', '[A-Za-z0-9\-]+');
+    Route::get('/collected', [Api\CollectedItemController::class, 'index']);
+    Route::get('/search', [Api\SearchController::class, '__invoke']);
+});

@@ -17,13 +17,13 @@ it('filters projects by status', function () {
     $this->get('/projects?status=building')->assertInertia(fn ($p) => $p->where('projects.data.0.name', 'Building One'));
 });
 
-it('shows project detail with markdown description', function () {
-    Project::factory()->create(['name' => 'Deep Project', 'slug' => 'deep-project', 'visibility' => 'public', 'description' => "### Goals\n\nShip it"]);
+it('shows project detail with stored html description', function () {
+    Project::factory()->create(['name' => 'Deep Project', 'slug' => 'deep-project', 'visibility' => 'public', 'description' => '<h3>Goals</h3><p>Ship it</p>']);
 
     $this->get('/projects/deep-project')->assertOk()
         ->assertInertia(fn ($p) => $p->component('Projects/Show')
             ->where('project.name', 'Deep Project')
-            ->where('project.description_html', fn ($h) => str_contains($h, '<h3>')));
+            ->where('project.description_html', fn ($h) => str_contains($h, '<h3>Goals</h3>')));
 });
 
 it('404s on private project', function () {

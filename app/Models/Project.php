@@ -41,6 +41,20 @@ class Project extends Model
         return $query->where('visibility', 'public');
     }
 
+    public static function convertDescriptionsToHtml(): void
+    {
+        $markdown = app(\App\Services\MarkdownService::class);
+
+        static::query()
+            ->orderBy('id')
+            ->chunkById(100, function ($projects) use ($markdown) {
+                foreach ($projects as $project) {
+                    $project->description = $markdown->render((string) $project->description);
+                    $project->save();
+                }
+            });
+    }
+
     protected static function booted(): void
     {
         static::saving(function (Project $project) {

@@ -37,6 +37,12 @@ export default function ProjectsIndex({ projects, statuses, filters }: { project
             <Head>
                 <title>Projects — Timadey</title>
                 <meta name="description" content="Things I am building, exploring, or keeping alive." />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Projects — Timadey" />
+                <meta property="og:description" content="Things I am building, exploring, or keeping alive." />
+                <meta property="og:url" content="/projects" />
+                <link rel="canonical" href="/projects" />
+                <meta name="twitter:card" content="summary" />
             </Head>
             <div className="mx-auto max-w-5xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>

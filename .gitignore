@@ -22,3 +22,8 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+/qa/evidence
+/test-results
+/playwright-report
+.superpowers/

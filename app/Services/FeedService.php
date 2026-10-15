@@ -20,7 +20,7 @@ class FeedService
                     'question' => 'Asked',
                     default => 'Posted',
                 },
-                'title' => $post->title,
+                'title' => $post->titleOrSnippet(),
                 'message' => $post->excerpt,
                 'url' => '/'.($post->post_type === 'article' ? 'writing' : 'notes').'/'.$post->slug,
                 'date' => $post->published_at?->toIso8601String(),

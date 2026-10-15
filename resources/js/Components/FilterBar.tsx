@@ -13,6 +13,10 @@ export function FilterBar({
     onSelect: (value: string) => void;
     allLabel?: string;
 }) {
+    if (options.length <= 1) {
+        return null;
+    }
+
     return (
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filters">
             <button type="button" onClick={() => onSelect('')} className="cursor-pointer">

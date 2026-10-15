@@ -12,6 +12,15 @@ class StoreProjectRequest extends FormRequest
         return $this->user()?->isOwner() ?? false;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('description'))) {
+            $this->merge([
+                'description' => \App\Support\HtmlSanitizer::sanitize($this->input('description'), 'description'),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [

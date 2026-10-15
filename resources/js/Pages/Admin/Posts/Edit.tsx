@@ -4,6 +4,7 @@ import type { FormDataValues } from '@inertiajs/core';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/Components/Button';
 import { PreviewPane } from '@/Components/PreviewPane';
+import { RichEditor } from '@/Components/RichEditor';
 import { Flash } from '@/Components/Flash';
 
 type PostData = {
@@ -55,12 +56,19 @@ export default function PostEdit({ post }: { post: PostData | null }) {
     const [preview, setPreview] = useState(false);
     const [savedAt, setSavedAt] = useState<string | null>(null);
     const [dirty, setDirty] = useState(false);
-    const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const interval = useRef<ReturnType<typeof setInterval> | null>(null);
+    const inFlight = useRef(false);
     const isNew = !post?.id;
 
     const save = () => {
         const opts = {
             preserveScroll: true,
+            onStart: () => {
+                inFlight.current = true;
+            },
+            onFinish: () => {
+                inFlight.current = false;
+            },
             onSuccess: () => {
                 setDirty(false);
                 setSavedAt(new Date().toLocaleTimeString());
@@ -70,14 +78,18 @@ export default function PostEdit({ post }: { post: PostData | null }) {
         else submitCreate('/admin/posts', opts);
     };
 
+    const autosave = () => {
+        if (isNew || inFlight.current || processing || !dirty) return;
+        save();
+    };
+
     useEffect(() => {
         if (!dirty) return;
-        if (timer.current) clearTimeout(timer.current);
-        timer.current = setTimeout(save, 30000);
+        interval.current = setInterval(autosave, 30000);
         return () => {
-            if (timer.current) clearTimeout(timer.current);
+            if (interval.current) clearInterval(interval.current);
         };
-    }, [data, dirty]);
+    }, [dirty]);
 
     useEffect(() => {
         const handler = (e: BeforeUnloadEvent) => {
@@ -90,6 +102,10 @@ export default function PostEdit({ post }: { post: PostData | null }) {
     const update = <K extends keyof PostData>(key: K, value: FormDataValues<PostData, K>) => {
         setData(key, value);
         setDirty(true);
+    };
+
+    const saveOnBlur = () => {
+        if (!isNew && dirty && !inFlight.current && !processing) save();
     };
 
     return (
@@ -120,7 +136,7 @@ export default function PostEdit({ post }: { post: PostData | null }) {
             </div>
 
             {preview ? (
-                <PreviewPane markdown={data.body} title={data.title} excerpt={data.excerpt} />
+                <PreviewPane body={data.body} format="html" title={data.title} excerpt={data.excerpt} />
             ) : (
                 <div className="grid gap-6 lg:grid-cols-3">
                     <div className="space-y-4 lg:col-span-2">
@@ -132,6 +148,7 @@ export default function PostEdit({ post }: { post: PostData | null }) {
                                 id="post-title"
                                 value={data.title}
                                 onChange={(e) => update('title', e.target.value)}
+                                onBlur={saveOnBlur}
                                 className={fieldClass}
                             />
                             {errors.title && <p className="mt-1 text-sm text-red-700">{errors.title}</p>}
@@ -162,16 +179,12 @@ export default function PostEdit({ post }: { post: PostData | null }) {
                             />
                         </div>
                         <div>
-                            <label className="text-sm font-medium" htmlFor="post-body">
-                                Body (Markdown)
-                            </label>
-                            <textarea
-                                id="post-body"
-                                value={data.body}
-                                onChange={(e) => update('body', e.target.value)}
-                                rows={20}
-                                className={`${fieldClass} font-mono text-sm`}
-                            />
+                            <span className="text-sm font-medium" id="post-body-label">
+                                Body
+                            </span>
+                            <div className="mt-1">
+                                <RichEditor value={data.body} onChange={(html) => update('body', html)} />
+                            </div>
                             {errors.body && <p className="mt-1 text-sm text-red-700">{errors.body}</p>}
                         </div>
                     </div>

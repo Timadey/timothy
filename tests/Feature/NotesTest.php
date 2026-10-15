@@ -8,7 +8,7 @@ it('lists published notes only', function () {
     Post::factory()->create(['post_type' => 'note', 'status' => 'draft', 'author_id' => $author->id, 'title' => 'Hidden']);
 
     $this->get('/notes')->assertOk()
-        ->assertInertia(fn ($p) => $p->component('Notes/Index')->where('notes.data.0.title', 'A Note'));
+        ->assertInertia(fn ($p) => $p->component('Notes/Index')->where('notes.data.0.headline', 'A Note'));
 });
 
 it('shows single note with markdown', function () {
@@ -40,5 +40,5 @@ it('filters notes by tag', function () {
     $tag = \App\Models\Tag::create(['name' => 'Systems', 'slug' => 'systems']);
     $note->tags()->attach($tag);
 
-    $this->get('/notes?tag=systems')->assertInertia(fn ($p) => $p->where('notes.data.0.title', 'Tagged Note'));
+    $this->get('/notes?tag=systems')->assertInertia(fn ($p) => $p->where('notes.data.0.headline', 'Tagged Note'));
 });

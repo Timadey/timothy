@@ -21,13 +21,23 @@ it('lists published articles', function () {
         ->assertInertia(fn ($p) => $p->component('Writing/Index')->has('posts')->where('posts.data.0.title', 'Public One'));
 });
 
-it('shows article with rendered markdown', function () {
-    $post = makeArticle(['title' => 'Deep Dive']);
+it('lists newest articles first regardless of the featured flag', function () {
+    makeArticle(['title' => 'Older Featured', 'featured' => true, 'published_at' => now()->subDays(10)]);
+    makeArticle(['title' => 'Newer Regular', 'featured' => false, 'published_at' => now()->subDay()]);
+
+    $this->get('/writing')->assertOk()
+        ->assertInertia(fn ($p) => $p->component('Writing/Index')
+            ->where('posts.data.0.title', 'Newer Regular')
+            ->where('posts.data.1.title', 'Older Featured'));
+});
+
+it('shows article with stored html body', function () {
+    $post = makeArticle(['title' => 'Deep Dive', 'body' => '<h2>Deep section</h2><p>Hello there.</p>']);
 
     $this->get('/writing/deep-dive')->assertOk()
         ->assertInertia(fn ($p) => $p->component('Writing/Show')
             ->where('post.title', 'Deep Dive')
-            ->where('post.body_html', fn ($html) => str_contains($html, '<h2>')));
+            ->where('post.body_html', fn ($html) => str_contains($html, '<h2>Deep section</h2>')));
 });
 
 it('404s on draft article for guests', function () {

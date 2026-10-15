@@ -26,9 +26,8 @@ class NoteController extends Controller
         return Inertia::render('Notes/Index', [
             'notes' => $query->paginate(15)->withQueryString()->through(fn ($p) => [
                 'slug' => $p->slug,
-                'title' => $p->title,
-                'excerpt' => $p->excerpt,
-                'reading_time' => $p->reading_time,
+                'headline' => $p->streamHeadline(),
+                'teaser' => $p->streamTeaser(),
                 'date' => $p->published_at?->format('M j, Y'),
                 'tags' => $p->tags->pluck('name'),
             ]),
@@ -56,6 +55,7 @@ class NoteController extends Controller
             'note' => [
                 'slug' => $note->slug,
                 'title' => $note->title,
+                'headline' => $note->streamHeadline(),
                 'excerpt' => $note->excerpt,
                 'body_html' => $markdown->render((string) $note->body),
                 'date' => $note->published_at?->format('F j, Y'),

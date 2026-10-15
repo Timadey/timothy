@@ -1,10 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import { Menu, X, ExternalLink } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Menu, X, ExternalLink, Plus } from 'lucide-react';
+import { QuickComposer } from '@/Components/QuickComposer';
 
 const items = [
     { label: 'Dashboard', href: '/admin' },
     { label: 'Posts', href: '/admin/posts' },
+    { label: 'Notes', href: '/admin/notes' },
     { label: 'Projects', href: '/admin/projects' },
     { label: 'Collected', href: '/admin/collected' },
     { label: 'Now', href: '/admin/now' },
@@ -18,6 +20,16 @@ export default function AdminLayout({ children, title }: { children: React.React
     const { url } = usePage();
     const current = url.split('?')[0];
     const [open, setOpen] = useState(false);
+    const [composerOpen, setComposerOpen] = useState(false);
+
+    useEffect(() => {
+        if (!composerOpen) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setComposerOpen(false);
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [composerOpen]);
 
     const nav = (
         <nav className="flex flex-col gap-1" aria-label="Admin">
@@ -64,7 +76,7 @@ export default function AdminLayout({ children, title }: { children: React.React
                     onClick={() => setOpen(!open)}
                     aria-label="Toggle menu"
                     aria-expanded={open}
-                    className="p-2"
+                    className="min-h-11 min-w-11 p-3"
                 >
                     {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </button>
@@ -84,6 +96,41 @@ export default function AdminLayout({ children, title }: { children: React.React
                     <div className="mt-6">{children}</div>
                 </main>
             </div>
+
+            <button
+                type="button"
+                aria-label="Quick post"
+                onClick={() => setComposerOpen(true)}
+                className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 hover:bg-ink"
+            >
+                <Plus className="h-6 w-6" aria-hidden="true" />
+            </button>
+
+            {composerOpen && (
+                <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Quick post">
+                    <div
+                        className="absolute inset-0 bg-black/30"
+                        onClick={() => setComposerOpen(false)}
+                        aria-hidden="true"
+                    />
+                    <div className="absolute right-0 top-0 flex h-full w-full max-w-xl flex-col border-l border-hairline bg-white shadow-xl">
+                        <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
+                            <p className="font-semibold tracking-tight">New note</p>
+                            <button
+                                type="button"
+                                aria-label="Close composer"
+                                onClick={() => setComposerOpen(false)}
+                                className="flex h-9 w-9 items-center justify-center rounded-full text-meta hover:bg-surface hover:text-ink"
+                            >
+                                <X className="h-5 w-5" aria-hidden="true" />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                            <QuickComposer note={null} showPreview={false} onSaved={() => setComposerOpen(false)} />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

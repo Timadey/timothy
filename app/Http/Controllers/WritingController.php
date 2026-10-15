@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Post, Topic};
-use App\Services\MarkdownService;
 use Illuminate\Http\Request;
 use Inertia\{Inertia, Response};
 
@@ -42,7 +41,7 @@ class WritingController extends Controller
         ]);
     }
 
-    public function show(Request $request, string $slug, MarkdownService $markdown): Response
+    public function show(Request $request, string $slug): Response
     {
         $query = Post::ofType('article')->where('slug', $slug)->with(['tags', 'topics']);
 
@@ -68,7 +67,7 @@ class WritingController extends Controller
                 'slug' => $post->slug,
                 'title' => $post->title,
                 'excerpt' => $post->excerpt,
-                'body_html' => $markdown->render((string) $post->body),
+                'body_html' => (string) $post->body,
                 'reading_time' => $post->reading_time,
                 'date' => $post->published_at?->format('F j, Y'),
                 'published_iso' => $post->published_at?->toIso8601String(),

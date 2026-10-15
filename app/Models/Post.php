@@ -70,12 +70,156 @@ class Post extends Model
     {
         static::saving(function (Post $post) {
             if (! $post->slug) {
-                $post->slug = static::makeSlug($post->title);
+                $post->slug = static::resolveSlug($post->title, $post->body);
             }
             $post->reading_time = static::readingTimeFromBody((string) $post->body);
             if ($post->status === 'published' && ! $post->published_at) {
                 $post->published_at = now();
             }
         });
+    }
+
+    public static function resolveSlug(?string $title, ?string $body = null): string
+    {
+        if ($title !== null && $title !== '') {
+            return static::makeSlug($title);
+        }
+
+        $firstLine = trim(\Illuminate\Support\Str::before((string) $body, "\n"));
+        if ($firstLine === '') {
+            return static::makeSlug('note');
+        }
+
+        $kept = [];
+        $length = 0;
+        foreach (preg_split('/\s+/', $firstLine) ?: [] as $word) {
+            $add = mb_strlen($word) + ($kept !== [] ? 1 : 0);
+            if (count($kept) >= 8 || ($kept !== [] && $length + $add > 40)) {
+                break;
+            }
+            $kept[] = $word;
+            $length += $add;
+        }
+
+        $source = implode(' ', $kept);
+        if (mb_strlen($source) > 40) {
+            $source = rtrim(mb_substr($source, 0, 40));
+        }
+
+        return static::makeSlug($source !== '' ? $source : 'note');
+    }
+
+    public static function convertMarkdownBodiesToHtml(): void
+    {
+        $markdown = app(\App\Services\MarkdownService::class);
+
+        static::query()
+            ->where('post_type', '!=', 'note')
+            ->orderBy('id')
+            ->chunkById(100, function ($posts) use ($markdown) {
+                foreach ($posts as $post) {
+                    $post->body = $markdown->render((string) $post->body);
+                    $post->save();
+                }
+            });
+    }
+
+    public static function shortenTitlelessSlugs(int $max = 45): void
+    {
+        static::query()
+            ->where('post_type', 'note')
+            ->whereNull('title')
+            ->whereRaw('LENGTH(slug) > ?', [$max])
+            ->orderBy('id')
+            ->get()
+            ->each(function (Post $post) {
+                $fresh = static::resolveSlug($post->title, $post->body);
+                if ($fresh !== $post->slug) {
+                    $post->slug = $fresh;
+                    $post->save();
+                }
+            });
+    }
+
+    public function plainBody(): string
+    {
+        $text = (string) $this->body;
+
+        if ($this->post_type !== 'note') {
+            $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5);
+            $text = preg_replace('/\s+/', ' ', $text) ?? $text;
+
+            return trim($text);
+        }
+
+        $text = preg_replace('/^#{1,6}\s*/m', '', $text) ?? $text;
+        $text = preg_replace('/^\s*(?:[->*+]|\d+\.)\s+/m', '', $text) ?? $text;
+        $text = str_replace(['**', '__', '~~', '`'], '', $text);
+        $text = preg_replace('/\[([^\]]+)\]\([^)]*\)/', '$1', $text) ?? $text;
+        $text = preg_replace('/\s+/', ' ', $text) ?? $text;
+
+        return trim($text);
+    }
+
+    public function titleOrSnippet(int $limit = 60): string
+    {
+        if ($this->title !== null && $this->title !== '') {
+            return $this->title;
+        }
+
+        $plain = $this->plainBody();
+
+        return $plain !== '' ? self::cut($plain, $limit) : 'Untitled';
+    }
+
+    public function streamHeadline(int $limit = 90): string
+    {
+        if ($this->title !== null && $this->title !== '') {
+            return $this->title;
+        }
+
+        $plain = $this->plainBody();
+
+        if ($plain === '') {
+            return 'Untitled';
+        }
+
+        return $this->plainExcerpt($limit);
+    }
+
+    public function streamTeaser(int $limit = 280): string
+    {
+        $teaser = $this->plainExcerpt($limit);
+
+        if ($this->title === null || $this->title === '') {
+            $base = rtrim($this->streamHeadline(), '…');
+            if ($base !== '' && str_starts_with($teaser, $base)) {
+                $teaser = ltrim(mb_substr($teaser, mb_strlen($base)));
+            }
+        }
+
+        return $teaser;
+    }
+
+    public function plainExcerpt(int $limit = 280): string
+    {
+        $plain = $this->plainBody();
+
+        if (mb_strlen($plain) <= $limit) {
+            return $plain;
+        }
+
+        $cut = mb_substr($plain, 0, $limit);
+        $space = mb_strrpos($cut, ' ');
+        if ($space !== false && $space > (int) ($limit * 0.6)) {
+            $cut = mb_substr($cut, 0, $space);
+        }
+
+        return rtrim($cut).'…';
+    }
+
+    private static function cut(string $text, int $limit): string
+    {
+        return mb_strlen($text) <= $limit ? $text : mb_substr($text, 0, $limit).'…';
     }
 }

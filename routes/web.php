@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('/admin/login', [AuthController::class, 'create'])->name('login');
-    Route::post('/admin/login', [AuthController::class, 'store'])->middleware('throttle:5,1');
+    Route::post('/admin/login', [AuthController::class, 'store'])->middleware('throttle:login');
 });
 
 Route::post('/admin/logout', [AuthController::class, 'destroy'])
@@ -15,6 +15,7 @@ Route::post('/admin/logout', [AuthController::class, 'destroy'])
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])->group(function () {
     Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
+    Route::post('uploads', [\App\Http\Controllers\Admin\UploadController::class, 'store'])->name('uploads.store');
     Route::get('posts', [\App\Http\Controllers\Admin\PostController::class, 'index'])->name('posts.index');
     Route::get('posts/create', [\App\Http\Controllers\Admin\PostController::class, 'create'])->name('posts.create');
     Route::post('posts', [\App\Http\Controllers\Admin\PostController::class, 'store'])->name('posts.store');
@@ -22,6 +23,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])->group(fun
     Route::put('posts/{post}', [\App\Http\Controllers\Admin\PostController::class, 'update'])->name('posts.update');
     Route::delete('posts/{post}', [\App\Http\Controllers\Admin\PostController::class, 'destroy'])->name('posts.destroy');
     Route::get('posts/{post}/preview', [\App\Http\Controllers\Admin\PostController::class, 'preview'])->name('posts.preview');
+
+    Route::get('notes', [\App\Http\Controllers\Admin\NoteController::class, 'index'])->name('notes.index');
+    Route::get('notes/new', [\App\Http\Controllers\Admin\NoteController::class, 'create'])->name('notes.create');
+    Route::post('notes', [\App\Http\Controllers\Admin\NoteController::class, 'store'])->name('notes.store');
+    Route::get('notes/{post}/edit', [\App\Http\Controllers\Admin\NoteController::class, 'edit'])->name('notes.edit');
+    Route::put('notes/{post}', [\App\Http\Controllers\Admin\NoteController::class, 'update'])->name('notes.update');
 
     Route::post('preview-markdown', function (\Illuminate\Http\Request $request) {
         $data = $request->validate(['markdown' => ['nullable', 'string', 'max:200000']]);
@@ -77,6 +84,8 @@ Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'
 Route::get('/projects/{slug}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
 
 Route::get('/collected', [\App\Http\Controllers\CollectedController::class, 'index'])->name('collected.index');
+
+Route::get('/activity', \App\Http\Controllers\ActivityController::class)->name('activity.index');
 
 Route::get('/about', \App\Http\Controllers\AboutController::class)->name('about');
 Route::get('/now', \App\Http\Controllers\NowPageController::class)->name('now');

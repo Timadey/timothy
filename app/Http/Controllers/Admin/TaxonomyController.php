@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\{Tag, Topic};
 use Illuminate\Http\{RedirectResponse, Request};
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\{Inertia, Response};
+use Closure;
 
 class TaxonomyController extends Controller
 {
@@ -23,7 +25,17 @@ class TaxonomyController extends Controller
     {
         $data = $request->validate([
             'kind' => ['required', Rule::in(['tag', 'topic'])],
-            'name' => ['required', 'string', 'max:50'],
+            'name' => [
+                'required', 'string', 'max:50',
+                function (string $attribute, mixed $value, Closure $fail) use ($request) {
+                    $table = $request->input('kind') === 'topic' ? 'topics' : 'tags';
+                    $slug = Str::slug((string) $value);
+
+                    if ($slug !== '' && DB::table($table)->where('slug', $slug)->exists()) {
+                        $fail('The name has already been taken.');
+                    }
+                },
+            ],
         ]);
 
         $model = $data['kind'] === 'tag' ? new Tag() : new Topic();

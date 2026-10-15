@@ -1,31 +1,48 @@
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, router } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
 import { SearchInput } from '@/Components/SearchInput';
 import { FilterBar } from '@/Components/FilterBar';
 import { MetaLine } from '@/Components/MetaLine';
 import { Pagination } from '@/Components/Pagination';
 import { EmptyState } from '@/Components/EmptyState';
+import { PostRow } from '@/Components/PostRow';
 
-type PostRow = {
+type PostRowData = {
     slug: string;
     title: string;
     excerpt: string | null;
     reading_time: number;
-    featured: boolean;
     date: string | null;
     topics: string[];
     tags: string[];
 };
 
-type Paginated = { data: PostRow[]; links: { url: string | null; label: string; active: boolean }[] };
+type Paginated = { data: PostRowData[]; links: { url: string | null; label: string; active: boolean }[] };
 type Filters = { q?: string; topic?: string; tag?: string };
 
 export default function WritingIndex({ posts, topics, filters }: { posts: Paginated; topics: { name: string; slug: string }[]; filters: Filters }) {
     const [q, setQ] = useState(filters.q ?? '');
+    const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        setQ(filters.q ?? '');
+    }, [filters.q]);
+
+    useEffect(() => () => {
+        if (timer.current) clearTimeout(timer.current);
+    }, []);
 
     const apply = (patch: Record<string, string | undefined>) =>
         router.get('/writing', { ...filters, q: q || undefined, ...patch }, { preserveState: true, preserveScroll: true });
+
+    const onSearch = (next: string) => {
+        setQ(next);
+        if (timer.current) clearTimeout(timer.current);
+        timer.current = setTimeout(() => {
+            router.get('/writing', { ...filters, q: next || undefined }, { preserveState: true, preserveScroll: true });
+        }, 300);
+    };
 
     return (
         <PublicLayout>
@@ -35,6 +52,15 @@ export default function WritingIndex({ posts, topics, filters }: { posts: Pagina
                     name="description"
                     content="Long-form pieces about technology, product thinking, and ideas in progress."
                 />
+                <meta property="og:type" content="website" />
+                <meta property="og:title" content="Writing — Timadey" />
+                <meta
+                    property="og:description"
+                    content="Long-form pieces about technology, product thinking, and ideas in progress."
+                />
+                <meta property="og:url" content="/writing" />
+                <link rel="canonical" href="/writing" />
+                <meta name="twitter:card" content="summary" />
             </Head>
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Writing</h1>
@@ -42,7 +68,7 @@ export default function WritingIndex({ posts, topics, filters }: { posts: Pagina
 
                 <div className="mt-8 flex flex-col gap-4">
                     <div className="max-w-sm">
-                        <SearchInput value={q} onChange={setQ} placeholder="Search writing" />
+                        <SearchInput value={q} onChange={onSearch} placeholder="Search writing" />
                     </div>
                     <FilterBar
                         options={topics.map((t) => ({ label: t.name, value: t.slug }))}
@@ -54,14 +80,13 @@ export default function WritingIndex({ posts, topics, filters }: { posts: Pagina
 
                 <div className="mt-10 divide-y divide-hairline">
                     {posts.data.map((post) => (
-                        <article key={post.slug} className="py-6">
-                            <MetaLine type={post.featured ? 'Featured' : undefined} date={post.date ?? undefined} readingTime={post.reading_time} />
-                            <Link href={`/writing/${post.slug}`} className="mt-1 block text-xl font-semibold tracking-tight hover:text-link">
-                                {post.title}
-                            </Link>
-                            <p className="mt-1 text-meta">{post.excerpt}</p>
-                            {post.topics.length > 0 && <p className="mt-2 text-xs text-meta">{post.topics.join(' · ')}</p>}
-                        </article>
+                        <PostRow
+                            key={post.slug}
+                            href={`/writing/${post.slug}`}
+                            headline={post.title}
+                            meta={<MetaLine date={post.date ?? undefined} readingTime={post.reading_time} items={post.topics} />}
+                            excerpt={post.excerpt}
+                        />
                     ))}
                     {posts.data.length === 0 && (
                         <div className="py-8">

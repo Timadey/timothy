@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Post, Project};
+use App\Models\{Post, Project, Setting};
 use Illuminate\Http\Response;
 
 class SeoController extends Controller
 {
     public function sitemap(): Response
     {
-        $static = ['/', '/writing', '/notes', '/projects', '/collected', '/now', '/about', '/ask', '/search'];
+        $static = ['/', '/writing', '/notes', '/projects', '/collected', '/activity', '/now', '/about', '/ask', '/search'];
 
         $urls = collect($static)->map(fn ($path) => ['loc' => url($path), 'lastmod' => now()->toW3cString()]);
 
@@ -51,14 +51,14 @@ class SeoController extends Controller
 
         $items = $posts->map(function ($p) {
             $link = url('/'.($p->post_type === 'article' ? 'writing' : 'notes').'/'.$p->slug);
-            $title = e($p->title);
+            $title = e($p->titleOrSnippet());
             $description = e($p->excerpt ?: mb_substr(strip_tags((string) $p->body), 0, 300));
             $pubDate = $p->published_at?->toRfc7231String() ?? $p->created_at->toRfc7231String();
 
             return "    <item>\n      <title>{$title}</title>\n      <link>{$link}</link>\n      <guid isPermaLink=\"true\">{$link}</guid>\n      <description>{$description}</description>\n      <pubDate>{$pubDate}</pubDate>\n    </item>";
         })->implode("\n");
 
-        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\">\n  <channel>\n    <title>".e(config('app.name', 'Timadey'))."</title>\n    <link>".url('/')."</link>\n    <description>Latest writing and notes from Timadey.</description>\n{$items}\n  </channel>\n</rss>";
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\">\n  <channel>\n    <title>".e(Setting::get('site_title') ?: config('app.name', 'Timadey'))."</title>\n    <link>".url('/')."</link>\n    <description>Latest writing and notes from Timadey.</description>\n{$items}\n  </channel>\n</rss>";
 
         return response($xml, 200, ['Content-Type' => 'application/xml']);
     }

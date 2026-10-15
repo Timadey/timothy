@@ -4,6 +4,7 @@ import type { FormDataValues } from '@inertiajs/core';
 import { useState } from 'react';
 import { Button } from '@/Components/Button';
 import { ConfirmDialog } from '@/Components/ConfirmDialog';
+import { RichEditor } from '@/Components/RichEditor';
 import { Flash } from '@/Components/Flash';
 
 type ProjectData = {
@@ -94,16 +95,13 @@ export default function ProjectEdit({ project }: { project: ProjectData | null }
                         <textarea id="project-summary" value={data.summary} onChange={(e) => update('summary', e.target.value)} rows={2} className={fieldClass} />
                     </div>
                     <div>
-                        <label className="text-sm font-medium" htmlFor="project-description">
-                            Detailed overview (Markdown)
-                        </label>
-                        <textarea
-                            id="project-description"
-                            value={data.description}
-                            onChange={(e) => update('description', e.target.value)}
-                            rows={14}
-                            className={`${fieldClass} font-mono text-sm`}
-                        />
+                        <span className="text-sm font-medium" id="project-description-label">
+                            Detailed overview
+                        </span>
+                        <div className="mt-1">
+                            <RichEditor value={data.description} onChange={(html) => update('description', html)} />
+                        </div>
+                        {errors.description && <p className="mt-1 text-sm text-red-700">{errors.description}</p>}
                     </div>
                 </div>
 

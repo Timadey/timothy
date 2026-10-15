@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\{Post, Project, User};
+use App\Models\{Post, Project, Setting, User};
 
 it('serves rss with only public published posts', function () {
     $author = User::factory()->create();
@@ -25,7 +25,8 @@ it('serves sitemap with published content and static pages', function () {
 it('serves robots.txt disallowing admin', function () {
     $this->get('/robots.txt')->assertOk()
         ->assertSee('Disallow: /admin', false)
-        ->assertSee('Sitemap:', false);
+        ->assertSee('Allow: /', false)
+        ->assertSee('Sitemap: '.url('/sitemap.xml'), false);
 });
 
 it('renders editorial 404 page', function () {
@@ -67,4 +68,16 @@ it('excludes private projects from sitemap', function () {
 
     $xml = $this->get('/sitemap.xml')->assertOk()->getContent();
     expect($xml)->toContain('/projects/public-proj')->not->toContain('private-proj');
+});
+
+it('uses site_title setting for rss channel title', function () {
+    Setting::set('site_title', 'Custom Site Title');
+
+    $xml = $this->get('/rss.xml')->assertOk()->getContent();
+    expect($xml)->toContain('<title>Custom Site Title</title>');
+});
+
+it('falls back to app name for rss channel title when no setting exists', function () {
+    $xml = $this->get('/rss.xml')->assertOk()->getContent();
+    expect($xml)->toContain('<title>'.e(config('app.name')).'</title>');
 });

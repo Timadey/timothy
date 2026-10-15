@@ -26,7 +26,7 @@ export default function ArticleShow({ post, related, canonical, preview }: { pos
     return (
         <PublicLayout>
             <Head>
-                <title>{post.meta_title} — Timadey</title>
+                <title>{`${post.meta_title} — Timadey`}</title>
                 <meta name="description" content={post.meta_description ?? undefined} />
                 <link rel="canonical" href={canonical} />
                 <meta property="og:type" content="article" />

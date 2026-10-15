@@ -42,9 +42,10 @@ export default function Search({
     const submit = (next: string, nextType?: string | null) => {
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(() => {
+            const resolvedType = nextType === undefined ? type : nextType;
             router.get(
                 '/search',
-                { q: next || undefined, type: nextType ?? type ?? undefined },
+                { q: next || undefined, type: resolvedType || undefined },
                 { preserveState: true, preserveScroll: true },
             );
         }, 300);
@@ -88,8 +89,8 @@ export default function Search({
                                 {total} result{total === 1 ? '' : 's'}
                             </p>
                             <ul className="mt-4 divide-y divide-hairline">
-                                {results.map((r) => (
-                                    <li key={`${r.type}-${r.url}`} className="py-4">
+                                {results.map((r, i) => (
+                                    <li key={`${r.type}-${r.url}-${i}`} className="py-4">
                                         <div className="flex flex-wrap items-baseline gap-x-3">
                                             <span className="text-xs font-semibold uppercase tracking-wide text-meta">
                                                 {typeLabels[r.type] ?? r.type}
