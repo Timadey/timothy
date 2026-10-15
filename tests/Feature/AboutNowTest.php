@@ -1,14 +1,18 @@
 <?php
 
-use App\Models\{AboutSection, NowSection, SocialLink};
+use App\Models\{NowSection, Setting, SocialLink};
 
-it('shows visible about sections rendered', function () {
-    AboutSection::create(['key' => 'intro', 'title' => 'Intro', 'body' => 'I build **things**.', 'visible' => true, 'sort_order' => 0]);
-    AboutSection::create(['key' => 'hidden', 'title' => 'Hidden', 'body' => 'secret', 'visible' => false, 'sort_order' => 1]);
+it('renders the stored about body html', function () {
+    Setting::set('about_body', '<p>Hello <strong>world</strong></p>');
 
     $this->get('/about')->assertOk()
-        ->assertInertia(fn ($p) => $p->component('About')->has('sections', 1)
-            ->where('sections.0.body_html', fn ($h) => str_contains($h, '<strong>things</strong>')));
+        ->assertInertia(fn ($p) => $p->component('About')
+            ->where('body_html', '<p>Hello <strong>world</strong></p>'));
+});
+
+it('shows empty state when about body is missing', function () {
+    $this->get('/about')->assertOk()
+        ->assertInertia(fn ($p) => $p->component('About')->where('body_html', ''));
 });
 
 it('shows social links on about', function () {

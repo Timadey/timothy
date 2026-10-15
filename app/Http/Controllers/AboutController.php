@@ -2,21 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{AboutSection, Setting, SocialLink};
-use App\Services\MarkdownService;
+use App\Models\{Setting, SocialLink};
 use Inertia\{Inertia, Response};
 
 class AboutController extends Controller
 {
-    public function __invoke(MarkdownService $markdown): Response
+    public function __invoke(): Response
     {
         return Inertia::render('About', [
-            'sections' => AboutSection::where('visible', true)->orderBy('sort_order')->get()
-                ->map(fn ($s) => [
-                    'key' => $s->key,
-                    'title' => $s->title,
-                    'body_html' => $markdown->render((string) $s->body),
-                ]),
+            'body_html' => (string) Setting::get('about_body'),
             'social_links' => SocialLink::where('visible', true)->orderBy('sort_order')
                 ->get(['platform', 'url', 'label']),
             'contact_email' => Setting::get('contact_email'),

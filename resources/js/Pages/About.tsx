@@ -2,10 +2,9 @@ import PublicLayout from '@/Layouts/PublicLayout';
 import { Head } from '@inertiajs/react';
 import { Prose } from '@/Components/Prose';
 
-type Section = { key: string; title: string; body_html: string };
 type SocialLink = { platform: string; url: string; label: string | null };
 
-export default function About({ sections, social_links, contact_email }: { sections: Section[]; social_links: SocialLink[]; contact_email: string | null }) {
+export default function About({ body_html, social_links, contact_email }: { body_html: string; social_links: SocialLink[]; contact_email: string | null }) {
     return (
         <PublicLayout>
             <Head>
@@ -23,15 +22,7 @@ export default function About({ sections, social_links, contact_email }: { secti
                 <h1 className="text-3xl font-semibold tracking-tight">About</h1>
 
                 <div className="mt-8 space-y-10">
-                    {sections.map((s) => (
-                        <section key={s.key}>
-                            <h2 className="text-xl font-semibold tracking-tight">{s.title}</h2>
-                            <div className="mt-3">
-                                <Prose html={s.body_html} />
-                            </div>
-                        </section>
-                    ))}
-                    {sections.length === 0 && <p className="text-meta">Nothing here yet.</p>}
+                    {body_html ? <Prose html={body_html} /> : <p className="text-meta">Nothing here yet.</p>}
                 </div>
 
                 {(social_links.length > 0 || contact_email) && (
