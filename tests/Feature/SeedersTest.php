@@ -11,11 +11,11 @@ it('seeds demo content flagged as demo', function () {
         ->and(Post::where('is_demo', false)->count())->toBe(0);
 });
 
-it('seeds default now and about sections', function () {
+it('seeds default now sections and no about content', function () {
     $this->seed(\Database\Seeders\DemoContentSeeder::class);
 
     expect(\App\Models\NowSection::count())->toBeGreaterThanOrEqual(8)
-        ->and(\App\Models\AboutSection::count())->toBeGreaterThanOrEqual(6);
+        ->and(\Schema::hasTable('about_sections'))->toBeFalse();
 });
 
 it('is idempotent when seeded twice', function () {

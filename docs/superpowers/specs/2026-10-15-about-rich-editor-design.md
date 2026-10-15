@@ -49,7 +49,7 @@
 
 **Pest**
 1. Public `/about` returns the stored HTML body verbatim
-   (`Setting::put('about_body', '<p>Hello <strong>world</strong></p>')` →
+   (`Setting::set('about_body', '<p>Hello <strong>world</strong></p>')` →
    `assertInertia` `body_html` contains `<strong>`).
 2. Public `/about` with no `about_body` → empty state (existing "Nothing here
    yet." path).

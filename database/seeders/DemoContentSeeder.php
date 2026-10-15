@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\{AboutSection, CollectedItem, NowSection, Post, Project, Setting, SocialLink, Tag, Topic, User};
+use App\Models\{CollectedItem, NowSection, Post, Project, Setting, SocialLink, Tag, Topic, User};
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -136,18 +136,6 @@ class DemoContentSeeder extends Seeder
         ];
         foreach ($nowSections as $i => $s) {
             NowSection::updateOrCreate(['key' => $s['key']], $s + ['sort_order' => $i, 'visible' => true]);
-        }
-
-        $aboutSections = [
-            ['key' => 'intro', 'title' => 'Hello', 'body' => 'Demo introduction — replace this with your own words in Admin → About.'],
-            ['key' => 'background', 'title' => 'Background', 'body' => 'Demo background section. Nothing here is a real biography.'],
-            ['key' => 'interests', 'title' => 'Interests', 'body' => 'Demo interests: technology, product thinking, writing.'],
-            ['key' => 'principles', 'title' => 'Principles', 'body' => 'Demo principles: clarity over cleverness; ship and learn.'],
-            ['key' => 'ambitions', 'title' => 'Ambitions', 'body' => 'Demo ambitions section — edit with your own.'],
-            ['key' => 'contact', 'title' => 'Contact', 'body' => 'Demo contact section. Add your real contact details in Settings.'],
-        ];
-        foreach ($aboutSections as $i => $s) {
-            AboutSection::updateOrCreate(['key' => $s['key']], $s + ['sort_order' => $i, 'visible' => true]);
         }
 
         SocialLink::updateOrCreate(
