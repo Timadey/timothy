@@ -4,7 +4,7 @@ export const navItems = [
     { label: 'Notes', href: '/notes' },
     { label: 'Projects', href: '/projects' },
     { label: 'Collected', href: '/collected' },
-    { label: 'Now', href: '/now' },
+    // { label: 'Now', href: '/now' }, // hidden from nav by request; /now stays routable
     { label: 'About', href: '/about' },
     { label: 'Ask', href: '/ask' },
 ];
