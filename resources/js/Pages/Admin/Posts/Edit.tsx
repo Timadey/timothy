@@ -26,7 +26,9 @@ type PostData = {
     published_at?: string | null;
 };
 
-const empty: PostData = {
+type PostForm = Omit<PostData, 'tags' | 'topics'> & { tags: string; topics: string };
+
+const empty: PostForm = {
     title: '',
     slug: '',
     excerpt: '',
@@ -38,8 +40,8 @@ const empty: PostData = {
     cover_image: '',
     meta_title: '',
     meta_description: '',
-    tags: [],
-    topics: [],
+    tags: '',
+    topics: '',
 };
 
 const fieldClass = 'mt-1 w-full rounded-md border border-hairline px-3 py-2 text-sm focus:border-primary';
@@ -52,7 +54,11 @@ function commaList(value: string): string[] {
 }
 
 export default function PostEdit({ post }: { post: PostData | null }) {
-    const { data, setData, put, post: submitCreate, processing, errors } = useForm<PostData>(post ?? empty);
+    const { data, setData, put, post: submitCreate, processing, errors, transform } = useForm<PostForm>({
+        ...(post ?? empty),
+        tags: (post?.tags ?? []).join(', '),
+        topics: (post?.topics ?? []).join(', '),
+    });
     const [preview, setPreview] = useState(false);
     const [savedAt, setSavedAt] = useState<string | null>(null);
     const [dirty, setDirty] = useState(false);
@@ -61,6 +67,7 @@ export default function PostEdit({ post }: { post: PostData | null }) {
     const isNew = !post?.id;
 
     const save = () => {
+        transform((d) => ({ ...d, tags: commaList(d.tags), topics: commaList(d.topics) }));
         const opts = {
             preserveScroll: true,
             onStart: () => {
@@ -99,7 +106,7 @@ export default function PostEdit({ post }: { post: PostData | null }) {
         return () => window.removeEventListener('beforeunload', handler);
     }, [dirty]);
 
-    const update = <K extends keyof PostData>(key: K, value: FormDataValues<PostData, K>) => {
+    const update = <K extends keyof PostForm>(key: K, value: FormDataValues<PostForm, K>) => {
         setData(key, value);
         setDirty(true);
     };
@@ -248,8 +255,8 @@ export default function PostEdit({ post }: { post: PostData | null }) {
                             </label>
                             <input
                                 id="post-tags"
-                                value={data.tags.join(', ')}
-                                onChange={(e) => update('tags', commaList(e.target.value))}
+                                value={data.tags}
+                                onChange={(e) => update('tags', e.target.value)}
                                 className={fieldClass}
                             />
                         </div>
@@ -259,8 +266,8 @@ export default function PostEdit({ post }: { post: PostData | null }) {
                             </label>
                             <input
                                 id="post-topics"
-                                value={data.topics.join(', ')}
-                                onChange={(e) => update('topics', commaList(e.target.value))}
+                                value={data.topics}
+                                onChange={(e) => update('topics', e.target.value)}
                                 className={fieldClass}
                             />
                         </div>

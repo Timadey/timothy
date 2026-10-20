@@ -17,29 +17,37 @@ type ItemData = {
     tags: string[];
 };
 
-const empty: ItemData = {
+type ItemForm = Omit<ItemData, 'tags'> & { tags: string };
+
+const empty: ItemForm = {
     title: '',
     url: '',
     creator: '',
     item_type: 'book',
     annotation: '',
     visibility: 'public',
-    tags: [],
+    tags: '',
 };
+
+const commaList = (value: string): string[] => value.split(',').map((s) => s.trim()).filter(Boolean);
 
 const fieldClass = 'mt-1 w-full rounded-md border border-hairline px-3 py-2 text-sm focus:border-primary';
 
 const types = ['book', 'article', 'video', 'podcast', 'music', 'tool', 'quote', 'website', 'other'];
 
 export default function CollectedEdit({ item }: { item: ItemData | null }) {
-    const { data, setData, put, post: submitCreate, processing, errors } = useForm<ItemData>(item ?? empty);
+    const { data, setData, put, post: submitCreate, processing, errors, transform } = useForm<ItemForm>({
+        ...(item ?? empty),
+        tags: (item?.tags ?? []).join(', '),
+    });
     const [confirming, setConfirming] = useState(false);
     const isNew = !item?.id;
 
-    const update = <K extends keyof ItemData>(key: K, value: FormDataValues<ItemData, K>) => setData(key, value);
+    const update = <K extends keyof ItemForm>(key: K, value: FormDataValues<ItemForm, K>) => setData(key, value);
 
     const save = (e: React.FormEvent) => {
         e.preventDefault();
+        transform((d) => ({ ...d, tags: commaList(d.tags) }));
         const opts = { preserveScroll: true };
         if (item?.id) put(`/admin/collected/${item.id}`, opts);
         else submitCreate('/admin/collected', opts);
@@ -128,13 +136,8 @@ export default function CollectedEdit({ item }: { item: ItemData | null }) {
                         </label>
                         <input
                             id="item-tags"
-                            value={data.tags.join(', ')}
-                            onChange={(e) =>
-                                update(
-                                    'tags',
-                                    e.target.value.split(',').map((s) => s.trim()).filter(Boolean),
-                                )
-                            }
+                            value={data.tags}
+                            onChange={(e) => update('tags', e.target.value)}
                             className={fieldClass}
                         />
                     </div>

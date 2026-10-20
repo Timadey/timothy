@@ -24,7 +24,9 @@ type ProjectData = {
     tags: string[];
 };
 
-const empty: ProjectData = {
+type ProjectForm = Omit<ProjectData, 'tags'> & { tags: string };
+
+const empty: ProjectForm = {
     name: '',
     slug: '',
     summary: '',
@@ -37,22 +39,28 @@ const empty: ProjectData = {
     started_at: '',
     completed_at: '',
     featured: false,
-    tags: [],
+    tags: '',
 };
+
+const commaList = (value: string): string[] => value.split(',').map((s) => s.trim()).filter(Boolean);
 
 const fieldClass = 'mt-1 w-full rounded-md border border-hairline px-3 py-2 text-sm focus:border-primary';
 
 const statuses = ['idea', 'exploring', 'building', 'active', 'paused', 'completed'];
 
 export default function ProjectEdit({ project }: { project: ProjectData | null }) {
-    const { data, setData, put, post: submitCreate, processing, errors } = useForm<ProjectData>(project ?? empty);
+    const { data, setData, put, post: submitCreate, processing, errors, transform } = useForm<ProjectForm>({
+        ...(project ?? empty),
+        tags: (project?.tags ?? []).join(', '),
+    });
     const [confirming, setConfirming] = useState(false);
     const isNew = !project?.id;
 
-    const update = <K extends keyof ProjectData>(key: K, value: FormDataValues<ProjectData, K>) => setData(key, value);
+    const update = <K extends keyof ProjectForm>(key: K, value: FormDataValues<ProjectForm, K>) => setData(key, value);
 
     const save = (e: React.FormEvent) => {
         e.preventDefault();
+        transform((d) => ({ ...d, tags: commaList(d.tags) }));
         const opts = { preserveScroll: true };
         if (project?.id) put(`/admin/projects/${project.id}`, opts);
         else submitCreate('/admin/projects', opts);
@@ -189,13 +197,8 @@ export default function ProjectEdit({ project }: { project: ProjectData | null }
                         </label>
                         <input
                             id="project-tags"
-                            value={data.tags.join(', ')}
-                            onChange={(e) =>
-                                update(
-                                    'tags',
-                                    e.target.value.split(',').map((s) => s.trim()).filter(Boolean),
-                                )
-                            }
+                            value={data.tags}
+                            onChange={(e) => update('tags', e.target.value)}
                             className={fieldClass}
                         />
                     </div>
