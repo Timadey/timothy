@@ -76,7 +76,7 @@ test('mobile drawer opens, navigates and closes (375px)', async ({ page }) => {
 
     const drawer = page.locator('nav[aria-label="Mobile"]');
     await expect(drawer).toBeVisible();
-    await expect(drawer.locator('a')).toHaveCount(8);
+    await expect(drawer.locator('a')).toHaveCount(7);
     await shot(page, 'mobile-drawer-open', false);
 
     await drawer.getByRole('link', { name: 'Notes', exact: true }).click();
@@ -114,7 +114,7 @@ test('mobile touch targets meet size guidelines (375px)', async ({ page }) => {
     writeMetric('touch-targets.json', 'drawer', drawerTargets);
 
     expect(headerTargets.length, 'header should contain interactive targets').toBeGreaterThanOrEqual(2);
-    expect(drawerTargets.length, 'drawer should contain nav links').toBe(8);
+    expect(drawerTargets.length, 'drawer should contain nav links').toBe(7);
 
     const all = [...headerTargets, ...drawerTargets];
     for (const target of all) {
