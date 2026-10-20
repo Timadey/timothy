@@ -56,3 +56,32 @@ test('uploads a chosen image and inserts it into the document', async () => {
     await waitFor(() => expect(onChange).toHaveBeenCalled());
     expect(onChange.mock.calls.at(-1)?.[0]).toContain('src="/storage/uploads/photos/abc123.png"');
 });
+
+test('inserts a code block from the top bar button', async () => {
+    const onChange = vi.fn();
+    render(<RichEditor value="<p>Code time</p>" onChange={onChange} />);
+
+    const button = await screen.findByLabelText('Code block');
+    fireEvent.click(button);
+
+    await waitFor(() => expect(onChange).toHaveBeenCalled());
+    expect(onChange.mock.calls.at(-1)?.[0]).toContain('<pre');
+});
+
+test('keeps the inline Code control in the bubble menu separate from the block button', async () => {
+    render(<RichEditor value="<p>Inline</p>" onChange={() => {}} />);
+
+    const paragraph = await screen.findByText('Inline');
+    const prosemirror = paragraph.closest('.ProseMirror') as HTMLElement;
+    prosemirror.focus();
+
+    const range = document.createRange();
+    range.selectNodeContents(paragraph);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    document.dispatchEvent(new Event('selectionchange'));
+
+    expect(await screen.findByLabelText('Code')).toBeInTheDocument();
+    expect(screen.getByLabelText('Code block')).toBeInTheDocument();
+});

@@ -43,6 +43,12 @@ function bubbleButtonClass(active: boolean): string {
     }`;
 }
 
+function topBarButtonClass(active: boolean): string {
+    return `rounded px-2 py-1 text-xs font-medium ${
+        active ? 'bg-ink text-white' : 'text-ink hover:bg-surface'
+    }`;
+}
+
 export function RichEditor({ value, onChange }: RichEditorProps) {
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
@@ -149,6 +155,14 @@ export function RichEditor({ value, onChange }: RichEditorProps) {
                     className="rounded px-2 py-1 text-xs font-medium text-ink hover:bg-surface"
                 >
                     Link
+                </button>
+                <button
+                    type="button"
+                    aria-label="Code block"
+                    onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
+                    className={topBarButtonClass(editor?.isActive('codeBlock') ?? false)}
+                >
+                    Code
                 </button>
                 <button
                     type="button"
