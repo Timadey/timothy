@@ -5,6 +5,7 @@ import { BooksGrid } from './BooksGrid';
 import { VideoGrid } from './VideoGrid';
 import { MusicShelf } from './MusicShelf';
 import { FinderTools } from './FinderTools';
+import { WebsiteCards } from './WebsiteCards';
 
 export type ViewProps = {
     items: CollectedItem[];
@@ -17,6 +18,7 @@ const REGISTRY: Partial<Record<ItemType, ViewComponent>> = {
     video: VideoGrid,
     music: MusicShelf,
     tool: FinderTools,
+    website: WebsiteCards,
     article: EditorialList,
     podcast: EditorialList,
     quote: EditorialList,
