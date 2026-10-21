@@ -1,5 +1,6 @@
 <?php
 
+use App\Mail\AskAutoReply;
 use App\Mail\AskMessage;
 use Illuminate\Support\Facades\Mail;
 
@@ -53,6 +54,26 @@ it('treats a filled honeypot as a silent success', function () {
         ->assertSessionHas('flash.sent', true);
 
     Mail::assertNothingSent();
+});
+
+it('sends a personalized auto-reply to the sender once the message goes out', function () {
+    Mail::fake();
+
+    $this->from('/ask')->post('/ask', [
+        'from' => 'visitor@example.com',
+        'subject' => 'Hello there',
+        'message' => 'This is my message.',
+    ])->assertRedirect('/ask')
+        ->assertSessionHas('flash.sent', true);
+
+    Mail::assertSent(AskMessage::class);
+    Mail::assertSent(AskAutoReply::class, function (AskAutoReply $mail) {
+        return $mail->hasTo('visitor@example.com')
+            && $mail->envelope()->replyTo[0]->address === 'hi@timothyadeleke.com'
+            && $mail->envelope()->subject === 'Re: Hello there'
+            && $mail->content()->text === 'mail.ask-auto-reply'
+            && $mail->content()->with['subjectLine'] === 'Hello there';
+    });
 });
 
 it('rate limits the send endpoint to five per minute', function () {

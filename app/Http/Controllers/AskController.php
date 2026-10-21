@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AskAutoReply;
 use App\Mail\AskMessage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,6 +44,14 @@ class AskController extends Controller
                 'sent' => false,
                 'error' => 'Couldn’t send right now — email me directly at '.config('ask.to'),
             ]);
+        }
+
+        try {
+            Mail::to($data['from'])->send(new AskAutoReply(
+                subjectLine: $data['subject'],
+            ));
+        } catch (\Throwable $e) {
+            report($e);
         }
 
         return back()->with('flash', ['sent' => true, 'error' => null]);
