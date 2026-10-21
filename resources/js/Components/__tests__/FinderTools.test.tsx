@@ -41,21 +41,20 @@ test('arrow keys move the selection and Enter opens the selected tool', () => {
     expect(onOpen).toHaveBeenCalledWith(expect.objectContaining({ title: 'Tool 2' }));
 });
 
-test('first click selects, second click opens; Escape deselects', () => {
+test('a single click opens the modal; keyboard selection still works', () => {
     const onOpen = vi.fn();
     render(<FinderTools items={tools} onOpen={onOpen} />);
+    const listbox = screen.getByRole('listbox', { name: 'Tools' });
     const options = screen.getAllByRole('option');
-
-    fireEvent.click(options[3]);
-    expect(options[3]).toHaveAttribute('aria-selected', 'true');
-    expect(onOpen).not.toHaveBeenCalled();
 
     fireEvent.click(options[3]);
     expect(onOpen).toHaveBeenCalledWith(expect.objectContaining({ title: 'Tool 4' }));
 
-    fireEvent.click(options[3]);
-    fireEvent.keyDown(screen.getByRole('listbox', { name: 'Tools' }), { key: 'Escape' });
-    expect(options[3]).toHaveAttribute('aria-selected', 'false');
+    fireEvent.keyDown(listbox, { key: 'ArrowRight' });
+    expect(options[4]).toHaveAttribute('aria-selected', 'true');
+
+    fireEvent.keyDown(listbox, { key: 'Escape' });
+    expect(options[4]).toHaveAttribute('aria-selected', 'false');
 });
 
 test('tools always open the modal, even without an annotation', () => {

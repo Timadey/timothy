@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { CoverImage } from '@/Components/collected/CoverImage';
 import { TYPE_GLYPHS, type CollectedItem } from '@/collectedTypes';
-import { isCoarsePointer } from '@/motion';
 
 export type FinderToolsProps = {
     items: CollectedItem[];
@@ -94,16 +93,8 @@ export function FinderTools({ items, onOpen }: FinderToolsProps) {
             pan.current.moved = false;
             return;
         }
-        if (isCoarsePointer()) {
-            activate(index);
-            return;
-        }
-        if (selected === index) {
-            activate(index);
-        } else {
-            setSelected(index);
-            listRef.current?.focus();
-        }
+        setSelected(index);
+        activate(index);
     };
 
     const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -166,6 +157,7 @@ export function FinderTools({ items, onOpen }: FinderToolsProps) {
                                 src={item.cover_image}
                                 title={item.title}
                                 kind="other"
+                                fit="contain"
                                 glyph={TYPE_GLYPHS[item.item_type]}
                                 glyphClassName="h-7 w-7 text-ink"
                                 className="h-14 w-14 rounded-xl"
@@ -175,7 +167,7 @@ export function FinderTools({ items, onOpen }: FinderToolsProps) {
                     ))}
                 </div>
             </div>
-            <p className="mt-2 text-xs text-meta">Click to select · Enter to open · Drag or arrow keys to move</p>
+            <p className="mt-2 text-xs text-meta">Click or Enter to open · Drag or arrow keys to move</p>
         </div>
     );
 }

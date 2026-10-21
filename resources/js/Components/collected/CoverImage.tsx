@@ -24,6 +24,7 @@ export function CoverImage({
     title,
     kind = 'other',
     className = '',
+    fit = 'cover',
     glyph,
     glyphClassName = 'h-6 w-6 text-meta',
 }: {
@@ -31,6 +32,7 @@ export function CoverImage({
     title: string;
     kind?: Kind;
     className?: string;
+    fit?: 'cover' | 'contain';
     glyph?: GlyphComponent;
     glyphClassName?: string;
 }) {
@@ -56,7 +58,7 @@ export function CoverImage({
             alt={`Cover of ${title}`}
             loading="lazy"
             onError={() => setFailed(true)}
-            className={`${shell} w-full object-cover`}
+            className={`${shell} w-full ${fit === 'contain' ? 'object-contain' : 'object-cover'}`}
         />
     );
 }
