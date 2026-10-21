@@ -18,6 +18,9 @@ class StoreCollectedItemRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:300'],
             'url' => ['nullable', 'url', 'max:1000'],
+            'cover_image' => ['nullable', 'string', 'max:1000'],
+            'cover_image_file' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:4096'],
+            'cover_image_clear' => ['nullable', 'boolean'],
             'creator' => ['nullable', 'string', 'max:200'],
             'item_type' => ['required', Rule::in(CollectedTypes::values())],
             'annotation' => ['nullable', 'string', 'max:5000'],

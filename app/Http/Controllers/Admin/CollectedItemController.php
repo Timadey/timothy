@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCollectedItemRequest;
 use App\Models\{CollectedItem, Tag};
 use Illuminate\Http\{RedirectResponse, Request};
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\{Inertia, Response};
 
@@ -30,6 +31,7 @@ class CollectedItemController extends Controller
                 'id' => $i->id,
                 'title' => $i->title,
                 'url' => $i->url,
+                'cover_image' => $i->coverUrl(),
                 'creator' => $i->creator,
                 'item_type' => $i->item_type,
                 'visibility' => $i->visibility,
@@ -50,6 +52,9 @@ class CollectedItemController extends Controller
         $tags = $data['tags'] ?? [];
         unset($data['tags']);
 
+        unset($data['cover_image_file'], $data['cover_image_clear']);
+        $data['cover_image'] = $this->resolveCover($request, null);
+
         $item = CollectedItem::create($data);
         $this->syncTags($item, $tags);
 
@@ -65,6 +70,7 @@ class CollectedItemController extends Controller
                 'id' => $collectedItem->id,
                 'title' => $collectedItem->title,
                 'url' => $collectedItem->url,
+                'cover_image' => $collectedItem->cover_image,
                 'creator' => $collectedItem->creator,
                 'item_type' => $collectedItem->item_type,
                 'annotation' => $collectedItem->annotation,
@@ -80,6 +86,9 @@ class CollectedItemController extends Controller
         $tags = $data['tags'] ?? [];
         unset($data['tags']);
 
+        unset($data['cover_image_file'], $data['cover_image_clear']);
+        $data['cover_image'] = $this->resolveCover($request, $collectedItem->cover_image);
+
         $collectedItem->update($data);
         $this->syncTags($collectedItem, $tags);
 
@@ -91,6 +100,40 @@ class CollectedItemController extends Controller
         $collectedItem->delete();
 
         return redirect()->route('admin.collected.index')->with('status', 'Item removed.');
+    }
+
+    private function resolveCover(Request $request, ?string $existing): ?string
+    {
+        if ($request->boolean('cover_image_clear')) {
+            $this->purgeStoredCover($existing);
+
+            return null;
+        }
+
+        if ($file = $request->file('cover_image_file')) {
+            $this->purgeStoredCover($existing);
+
+            return $file->store('covers', 'public');
+        }
+
+        $value = trim((string) $request->input('cover_image', ''));
+
+        if ($value === '') {
+            return $existing;
+        }
+
+        if ($value !== $existing) {
+            $this->purgeStoredCover($existing);
+        }
+
+        return $value;
+    }
+
+    private function purgeStoredCover(?string $value): void
+    {
+        if ($value !== null && $value !== '' && ! str_starts_with($value, 'http')) {
+            Storage::disk('public')->delete($value);
+        }
     }
 
     private function syncTags(CollectedItem $item, array $tags): void

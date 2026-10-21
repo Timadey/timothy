@@ -13,6 +13,7 @@ class CollectedItemResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'url' => $this->url,
+            'cover_image' => $this->coverUrl(),
             'creator' => $this->creator,
             'item_type' => $this->item_type,
             'annotation' => $this->annotation,

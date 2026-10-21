@@ -125,6 +125,7 @@ Single public project. Response: `{ "data": { …project fields… } }`. `404` f
       "id": 1,
       "title": "Thinking in Systems",
       "url": null,
+      "cover_image": null,
       "creator": "Donella Meadows",
       "item_type": "book",
       "annotation": "A classic introduction to systems thinking.",
