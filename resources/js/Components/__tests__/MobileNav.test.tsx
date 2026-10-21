@@ -64,6 +64,6 @@ test('hover styles use the system blue highlight', () => {
     render(<MobileNav current="/" />);
     fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
     const link = screen.getByRole('link', { name: /Home/ });
-    expect(link.className).toContain('hover:bg-[#0a84ff]');
+    expect(link.className).toContain('hover:bg-[#007aff]');
     expect(link.className).toContain('hover:text-white');
 });

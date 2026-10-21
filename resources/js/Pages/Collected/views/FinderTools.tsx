@@ -131,7 +131,7 @@ export function FinderTools({ items, onOpen }: FinderToolsProps) {
                 onPointerMove={onPointerMove}
                 onPointerUp={endPan}
                 onPointerLeave={endPan}
-                className="max-h-[70vh] min-h-64 cursor-grab overflow-auto p-4 active:cursor-grabbing focus-visible:outline-2"
+                className="max-h-[70vh] cursor-grab overflow-auto p-4 active:cursor-grabbing focus-visible:outline-2"
             >
                 <div
                     className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8"

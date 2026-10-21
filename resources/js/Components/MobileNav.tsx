@@ -48,9 +48,9 @@ export function MobileNav({ current }: { current: string }) {
                                     href={item.href}
                                     onClick={() => setOpen(false)}
                                     aria-current={isCurrent ? 'page' : undefined}
-                                    className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium ${
+                                    className={`flex items-center gap-2 rounded-md px-3 py-3 text-sm font-medium ${
                                         isCurrent ? 'text-primary' : 'text-ink'
-                                    } hover:bg-[#0a84ff] hover:text-white focus-visible:bg-[#0a84ff] focus-visible:text-white`}
+                                    } hover:bg-[#007aff] hover:text-white focus-visible:bg-[#007aff] focus-visible:text-white`}
                                 >
                                     <span className="w-4 shrink-0">
                                         {isCurrent && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
