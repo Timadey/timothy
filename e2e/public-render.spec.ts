@@ -161,3 +161,11 @@ test('head metadata on home and article', async ({ page }) => {
     writeMetric('head-metadata.json', 'home', homeHead);
     writeMetric('head-metadata.json', 'article', { path: articlePath, ...articleHead });
 });
+
+test('footer RSS link opens the feed, not an error dialog', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: 'RSS' }).click();
+    await page.waitForURL('**/rss.xml');
+    await expect(page.locator('#inertia-error-dialog')).toHaveCount(0);
+    await expect(page.locator('body')).toContainText('<rss');
+});

@@ -14,6 +14,9 @@
     @if ($seo['canonical'])
         <link rel="canonical" href="{{ $seo['canonical'] }}">
     @endif
+    @if ($seo['rss'])
+        <link rel="alternate" type="application/rss+xml" title="RSS feed" href="/rss.xml">
+    @endif
     @foreach ($seo['og'] as $property => $content)
         @foreach ((array) $content as $value)
             <meta property="{{ $property }}" content="{{ $value }}">

@@ -157,3 +157,11 @@ it('emits parseable json-ld on writing index and about', function () {
     expect($aboutBlocks)->not->toBeEmpty();
     expect(collect($aboutBlocks)->firstWhere('@type', 'Person'))->not->toBeNull();
 });
+
+it('advertises the rss feed for autodiscovery on public pages', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toContain('rel="alternate"')
+        ->toContain('type="application/rss+xml"')
+        ->toContain('href="/rss.xml"');
+});

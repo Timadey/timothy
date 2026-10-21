@@ -14,6 +14,7 @@ class Seo
      *     description: ?string,
      *     canonical: ?string,
      *     robots: ?string,
+     *     rss: bool,
      *     og: array<string, string|array<int, string>>,
      *     twitter: array<string, string>,
      *     jsonLd: array<int, array<string, mixed>>
@@ -36,6 +37,8 @@ class Seo
 
             return $base;
         }
+
+        $base['rss'] = true;
 
         return match ($component) {
             'Home' => self::home($props, $base),
@@ -317,6 +320,7 @@ class Seo
             'description' => $tagline,
             'canonical' => self::canonicalPath(),
             'robots' => null,
+            'rss' => false,
             'og' => self::ogTags(
                 'website',
                 $tagline !== null ? "{$siteTitle} — {$tagline}" : $siteTitle,

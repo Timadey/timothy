@@ -55,9 +55,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                         <Link href="/ask" className="hover:text-ink">
                             Ask me anything
                         </Link>
-                        <Link href="/rss.xml" className="hover:text-ink">
+                        <a href="/rss.xml" className="hover:text-ink">
                             RSS
-                        </Link>
+                        </a>
                         {socialLinks.map((l) => (
                             <a
                                 key={l.url}
