@@ -5,10 +5,9 @@ import { SearchInput } from '@/Components/SearchInput';
 import { FilterBar } from '@/Components/FilterBar';
 import { Pagination } from '@/Components/Pagination';
 import { EmptyState } from '@/Components/EmptyState';
-import { MetaLine } from '@/Components/MetaLine';
-import { PostRow } from '@/Components/PostRow';
+import { NoteFeedItem } from '@/Components/NoteFeedItem';
 
-type NoteRow = { slug: string; headline: string; teaser: string; date: string | null; tags: string[] };
+type NoteRow = { slug: string; teaser: string; body_html: string; date: string | null; tags: string[] };
 type Paginated = { data: NoteRow[]; links: { url: string | null; label: string; active: boolean }[] };
 type Filters = { q?: string; tag?: string };
 
@@ -63,14 +62,14 @@ export default function NotesIndex({ notes, tags, filters }: { notes: Paginated;
                     />
                 </div>
 
-                <div className="mt-10 divide-y divide-hairline">
+                <div className="mt-10">
                     {notes.data.map((note) => (
-                        <PostRow
+                        <NoteFeedItem
                             key={note.slug}
-                            href={`/notes/${note.slug}`}
-                            headline={note.headline}
-                            meta={<MetaLine date={note.date ?? undefined} items={note.tags} />}
-                            excerpt={note.teaser}
+                            teaser={note.teaser}
+                            bodyHtml={note.body_html}
+                            date={note.date}
+                            tags={note.tags}
                         />
                     ))}
                     {notes.data.length === 0 && (
