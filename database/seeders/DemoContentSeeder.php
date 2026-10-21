@@ -106,22 +106,30 @@ class DemoContentSeeder extends Seeder
         }
 
         $collected = [
-            ['title' => 'Thinking in Systems', 'creator' => 'Donella Meadows', 'item_type' => 'book', 'annotation' => 'Demo annotation: a classic introduction to systems thinking.', 'cover_image' => 'https://picsum.photos/seed/timadey-book-1/640/960'],
-            ['title' => 'The Design of Everyday Things', 'creator' => 'Don Norman', 'item_type' => 'book', 'annotation' => 'Demo annotation: why affordances matter.'],
-            ['title' => 'Demo: Article on personal knowledge management', 'creator' => 'Example Author', 'item_type' => 'article', 'annotation' => 'Demo annotation: useful framing for digital gardens.', 'url' => 'https://example.com'],
+            ['title' => 'Thinking in Systems', 'creator' => 'Donella Meadows', 'item_type' => 'book', 'annotation' => 'Demo annotation: a classic introduction to systems thinking.', 'cover_image' => 'https://picsum.photos/seed/timadey-book-1/640/960', 'tags' => ['systems', 'thinking']],
+            ['title' => 'The Design of Everyday Things', 'creator' => 'Don Norman', 'item_type' => 'book', 'annotation' => 'Demo annotation: why affordances matter.', 'tags' => ['design']],
+            ['title' => 'Demo: Article on personal knowledge management', 'creator' => 'Example Author', 'item_type' => 'article', 'annotation' => 'Demo annotation: useful framing for digital gardens.', 'url' => 'https://example.com', 'tags' => ['writing']],
             ['title' => 'Demo: Podcast episode on neurotech', 'creator' => 'Example Podcast', 'item_type' => 'podcast', 'annotation' => 'Demo annotation: broad overview of the field.'],
-            ['title' => 'Demo: Talk on product craft', 'creator' => 'Example Speaker', 'item_type' => 'video', 'annotation' => 'Demo annotation: good primer on product judgment.', 'cover_image' => 'https://picsum.photos/seed/timadey-video-1/1280/720'],
-            ['title' => 'Figma', 'creator' => 'Example', 'item_type' => 'tool', 'annotation' => 'Demo annotation: everyday design tool.'],
+            ['title' => 'Demo: Talk on product craft', 'creator' => 'Example Speaker', 'item_type' => 'video', 'annotation' => 'Demo annotation: good primer on product judgment.', 'cover_image' => 'https://picsum.photos/seed/timadey-video-1/1280/720', 'tags' => ['design']],
+            ['title' => 'Figma', 'creator' => 'Example', 'item_type' => 'tool', 'annotation' => 'Demo annotation: everyday design tool.', 'tags' => ['design']],
             ['title' => 'Demo quote about curiosity', 'creator' => 'Example', 'item_type' => 'quote', 'annotation' => 'Demo annotation: stands in for a real saved quote.'],
             ['title' => 'Demo: Favorite album this month', 'creator' => 'Example Artist', 'item_type' => 'music', 'annotation' => 'Demo annotation: listening on repeat.', 'cover_image' => 'https://picsum.photos/seed/timadey-music-1/640/640'],
             ['title' => 'Demo: Reference website', 'creator' => 'Example', 'item_type' => 'website', 'annotation' => 'Demo annotation: handy reference.', 'url' => 'https://example.com', 'cover_image' => 'https://picsum.photos/seed/timadey-site-1/1200/630'],
             ['title' => 'Demo: Open source utility', 'creator' => 'Example Org', 'item_type' => 'tool', 'annotation' => 'Demo annotation: small quality-of-life tool.', 'url' => 'https://example.com'],
         ];
         foreach ($collected as $c) {
-            CollectedItem::updateOrCreate(
+            $tags = $c['tags'] ?? [];
+            unset($c['tags']);
+            $item = CollectedItem::updateOrCreate(
                 ['title' => $c['title']],
                 $c + ['visibility' => 'public', 'is_demo' => true]
             );
+            if ($tags !== []) {
+                $item->tags()->sync(
+                    collect($tags)->map(fn ($name) =>
+                        Tag::firstOrCreate(['slug' => $name], ['name' => $name])->id)->all()
+                );
+            }
         }
 
         $nowSections = [
