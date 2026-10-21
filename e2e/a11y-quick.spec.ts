@@ -31,6 +31,7 @@ test('every public page has exactly one h1 and core landmarks', async ({ page })
 
     for (const path of PUBLIC_PATHS) {
         await page.goto(path);
+        await page.locator('main').waitFor({ state: 'attached', timeout: 5000 }).catch(() => undefined);
         const h1Count = await page.locator('main h1').count();
         if (h1Count !== 1) violations.push(`${path}: expected 1 h1, found ${h1Count}`);
 
@@ -42,6 +43,7 @@ test('every public page has exactly one h1 and core landmarks', async ({ page })
 
     const articlePath = await discoverFirstHref(page, '/writing', '/writing/');
     await page.goto(articlePath);
+    await page.locator('main').waitFor({ state: 'attached', timeout: 5000 }).catch(() => undefined);
     const articleH1 = await page.locator('main h1').count();
     if (articleH1 !== 1) violations.push(`${articlePath}: expected 1 h1, found ${articleH1}`);
 
@@ -91,6 +93,7 @@ test('buttons expose accessible names', async ({ page }) => {
 
     for (const path of ['/', '/writing', '/admin/login']) {
         await page.goto(path);
+        await page.locator('h1').waitFor({ state: 'attached', timeout: 5000 }).catch(() => undefined);
         const nameless = await page.evaluate(() =>
             Array.from(document.querySelectorAll('button'))
                 .filter((button) => {

@@ -91,6 +91,7 @@ test('mobile drawer opens, navigates and closes (375px)', async ({ page }) => {
 test('mobile touch targets meet size guidelines (375px)', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto('/');
+    await expect(page.locator('button[aria-label="Open menu"]')).toBeVisible();
 
     const measure = async (selector: string): Promise<{ text: string; width: number; height: number }[]> =>
         page.$$eval(selector, (elements) =>
