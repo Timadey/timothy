@@ -44,7 +44,8 @@
 ## 4. Runtime wiring (Coolify)
 
 - Service: Dockerfile build, port **80**, health check path `/up` (Laravel route already exists — Playwright's webServer uses it).
-- Env vars: `APP_KEY`, `APP_URL`, `APP_ENV=production`, `APP_DEBUG=false`, `DB_CONNECTION/DB_HOST/DB_PORT/DB_DATABASE/DB_USERNAME/DB_PASSWORD` (existing Coolify DB), `MAIL_*` (Ask feature), `SESSION_DRIVER=database`, `LOG_CHANNEL=stderr`.
+- Env vars: `APP_KEY`, `APP_URL`, `APP_ENV=production`, `APP_DEBUG=false`, `DB_CONNECTION/DB_HOST/DB_PORT/DB_DATABASE/DB_USERNAME/DB_PASSWORD` (existing Coolify DB), `MAIL_*` (Ask feature), `SESSION_DRIVER=database`, `LOG_CHANNEL=stderr`, `ADMIN_EMAIL`/`ADMIN_PASSWORD` (owner account).
+- **First boot in production:** the boot script migrates but does **not** seed (by design — demo content is a choice). Run `php artisan db:seed --force` once via Coolify's shell with `ADMIN_EMAIL`/`ADMIN_PASSWORD` set — otherwise no owner account exists and admin login is impossible. Note: `DemoContentSeeder` falls back to `User::factory()` when no owner exists, and Faker is a dev dependency absent from the `--no-dev` image, so the `ADMIN_*` env pair is **required** for seeding (verified during smoke testing).
 - Persistent disk mounted at `/var/www/html/storage`.
 - Proxy terminates SSL; container speaks plain HTTP — matches reference `listen 80` + comment.
 
