@@ -165,3 +165,14 @@ it('advertises the rss feed for autodiscovery on public pages', function () {
         ->toContain('type="application/rss+xml"')
         ->toContain('href="/rss.xml"');
 });
+
+it('emits favicon, touch icon, and theme-color in the head', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('<link rel="icon" href="/favicon.ico">')
+        ->toContain('<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">')
+        ->toContain('<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">')
+        ->toContain('<link rel="apple-touch-icon" href="/apple-touch-icon.png">')
+        ->toContain('<meta name="theme-color" content="#ffffff">');
+});
