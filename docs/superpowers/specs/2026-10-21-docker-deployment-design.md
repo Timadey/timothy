@@ -8,7 +8,7 @@
 - Get timadey deployable on **Coolify** using the same deployment pattern as the user's `docs_and_decks` project: root `Dockerfile`, `conf/nginx/nginx-site.conf`, boot-time `scripts/00-laravel-deploy.sh` hook, single container (nginx + php-fpm) serving port 80, SSL terminated by Coolify's proxy (the reference nginx conf's comment — "Render provisions and terminates SSL" — describes exactly this arrangement).
 - **PHP must be the version patched in today's security release (2026-10-21)**: PHP shipped 8.5.12 / 8.4.27 / 8.3.36 / 8.2.35 fixing CVE-2026-109618 + CVE-2026-109619 (two unauthenticated RCEs, CVSS 9.2, public PoCs circulating). Chosen: **PHP 8.4.27** (matches local dev's 8.4 line, supported by `php: ^8.2` + Laravel 12).
 - The reference base image `richarvey/nginx-php-fpm:3.1.6` was **last pushed 2023-06-10** (abandoned, unpatched, EOL Alpine repos) — using it verbatim is impossible under the security requirement; we keep its architecture/behavior but rebuild it on official `php:8.4.27-fpm-bookworm`.
-- Out of scope: queue worker and scheduler (the app has no queued jobs and only the stock `inspire` command), MySQL support, S3 media storage, CI workflow changes, README/docs updates, Coolify UI setup and SMTP credential entry (user's tasks).
+- Out of scope: queue worker and scheduler (the app has no queued jobs and only the stock `inspire` command), MySQL support, S3 media storage, CI workflow changes, README/docs updates (exception: the one-line README §Docker pointer required by the scaffold replacement below), Coolify UI setup and SMTP credential entry (user's tasks).
 
 ## 2. Decisions
 
@@ -21,6 +21,8 @@
 - **Mail:** Ask feature sends mail in-process (no queue) — `MAIL_*` envs are set in Coolify UI; boot does not touch mail.
 - **Storage persistence:** persistent volume mounted over `storage/` in Coolify (hero avatars, post covers, uploads live under `storage/app/public/`); image bakes the directory structure so first-run volume init is valid; boot runs `storage:link` + permission fixes.
 - **nginx conf = reference verbatim + gzip only** (no other drift), still on `fastcgi_pass unix:/var/run/php-fpm.sock` — so php-fpm is overridden to that socket (official image defaults to TCP 9000).
+- **Full `php artisan optimize` at boot is safe:** verified locally — `php artisan route:cache` exits 0 ("Routes cached successfully") despite the closure routes in `routes/web.php` (Laravel 12 serializes them), then `event:cache` + `config:cache` also exit 0. No boot-script deviation needed from the spec's `php artisan optimize`.
+- **Stale Phase-5 scaffold replaced** (user decision): the repo ships `docker/Dockerfile` + `docker/nginx.conf` + `docker/README.md` + `docker-compose.yml` (committed `0380505`, labeled "Phase 5 target scaffold" for a traditional VPS target: split `php:8.4-fpm` + separate `nginx:alpine` + own `postgres:16`, floating `php:8.4-fpm` tag, Node asset stage). It contradicts this design on every axis (own DB vs existing Coolify DB; Node build vs committed assets; no PHP pin; split services vs single container) and would leave a misleading, unpatched deployment path in the repo. **Delete all four files** and update README.md's §Docker line to point at the root `Dockerfile` + this spec. Verified: nothing else references them (no CI, no scripts — only README.md:83).
 
 ## 3. Files
 
@@ -36,6 +38,8 @@
 | `.gitignore` | modify | After `/public/build`, add `!/public/build` (reference pattern) |
 | `public/build/**` | commit | Fresh `npm run build` output (assets already built today) |
 | `tests/Feature/DeploymentAssetsTest.php` | create | TDD guard (below) |
+| `docker/Dockerfile`, `docker/nginx.conf`, `docker/README.md`, `docker-compose.yml` | **delete** | Stale Phase-5 scaffold — superseded (see §2) |
+| `README.md` (§Docker line 83) | modify | Replace the `docker/` scaffold pointer with: root `Dockerfile` (nginx + PHP 8.4.27 single container) deploys on Coolify — see this spec |
 
 ## 4. Runtime wiring (Coolify)
 
@@ -52,12 +56,13 @@
 3. `scripts/00-laravel-deploy.sh` exists and contains `migrate --force` + `APP_KEY` guard; `scripts/start.sh` starts supervisord.
 4. `.gitignore` contains `!/public/build`; `public/build/manifest.json` exists and is non-empty.
 5. `.dockerignore` exists and excludes `.git` and `node_modules`.
+6. `docker-compose.yml` and `docker/` no longer exist (stale scaffold replaced).
 
 All RED before the files are created, GREEN after implementation.
 
 **Build/smoke verification (manual commands in plan, expected outputs stated):**
 - `docker build -t timadey:deploy .` succeeds (version assertion passes) → `docker run --rm timadey:deploy php -v` prints `8.4.27`.
-- Smoke run against local Postgres (host gateway): env `APP_KEY` (fresh `key:generate --show`), `DB_*` pointing at local `timadey` db (migrations already applied → `migrate --force` is a no-op), start container → `curl http://localhost:8080/up` → 200; `curl http://localhost:8080/` → 200 with the brand favicon `<link>` tags present in HTML.
+- Smoke run against local Postgres via host gateway (`--add-host=host.docker.internal:host-gateway`): fresh `APP_KEY` from `php artisan key:generate --show` (does not modify `.env`), a **throwaway database** `timadey_docker_smoke` (created via PDO from `.env` creds so local dev data is never touched; migrations exercise the full schema; `db:seed` supplies home-page content; dropped afterwards) → `curl http://localhost:8080/up` → 200; `curl http://localhost:8080/` → 200 with the brand favicon `<link>` tags present in HTML; `docker logs` shows the boot script + php-fpm + nginx under supervisord.
 
 **Regression:** full Pest suite stays green (no application code changes).
 
