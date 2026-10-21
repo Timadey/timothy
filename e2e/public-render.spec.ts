@@ -155,7 +155,7 @@ test('head metadata on home and article', async ({ page }) => {
     expect(articleHead.canonical, 'article canonical').toBeTruthy();
     expect(articleHead.canonical).toContain('/writing/');
     expect(articleHead.ogTitle, 'article og:title').toBeTruthy();
-    expect(articleHead.twitterCard, 'article twitter:card').toBe('summary');
+    expect(articleHead.twitterCard, 'article twitter:card').toBe('summary_large_image');
     expect(articleHead.description, 'article description').toBeTruthy();
 
     writeMetric('head-metadata.json', 'home', homeHead);
