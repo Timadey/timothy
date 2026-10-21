@@ -3,29 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\CollectedItem;
+use App\Support\CollectedTypes;
 use Illuminate\Http\Request;
 use Inertia\{Inertia, Response};
 
 class CollectedController extends Controller
 {
-    private const TYPES = [
-        'book' => 'Books',
-        'article' => 'Articles',
-        'video' => 'Videos',
-        'podcast' => 'Podcasts',
-        'music' => 'Music',
-        'tool' => 'Tools',
-        'quote' => 'Quotes',
-        'website' => 'Websites',
-        'other' => 'Other',
-    ];
-
     public function index(Request $request): Response
     {
         $query = CollectedItem::publiclyVisible()->with('tags')->latest('created_at');
 
         if ($type = $request->query('type')) {
-            $query->where('item_type', array_key_exists($type, self::TYPES) ? $type : 'other');
+            $query->where('item_type', array_key_exists($type, CollectedTypes::TYPES) ? $type : 'other');
         }
         if ($q = $request->query('q')) {
             $needle = '%'.mb_strtolower($q).'%';
@@ -48,7 +37,7 @@ class CollectedController extends Controller
                 'date' => $i->created_at->format('M j, Y'),
                 'tags' => $i->tags->pluck('name'),
             ]),
-            'types' => collect(self::TYPES)
+            'types' => collect(CollectedTypes::TYPES)
                 ->map(fn ($label, $value) => ['value' => $value, 'label' => $label])
                 ->values(),
             'filters' => $request->only(['type', 'q', 'tag']),

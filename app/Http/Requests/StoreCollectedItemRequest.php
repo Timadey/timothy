@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\CollectedTypes;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +19,7 @@ class StoreCollectedItemRequest extends FormRequest
             'title' => ['required', 'string', 'max:300'],
             'url' => ['nullable', 'url', 'max:1000'],
             'creator' => ['nullable', 'string', 'max:200'],
-            'item_type' => ['required', Rule::in(['book', 'article', 'video', 'podcast', 'music', 'tool', 'quote', 'website', 'other'])],
+            'item_type' => ['required', Rule::in(CollectedTypes::values())],
             'annotation' => ['nullable', 'string', 'max:5000'],
             'visibility' => ['required', Rule::in(['public', 'private'])],
             'tags' => ['array'],
