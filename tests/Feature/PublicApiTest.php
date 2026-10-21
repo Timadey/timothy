@@ -140,5 +140,5 @@ it('soft-deletes collected items and hides them from public surfaces', function 
     expect(CollectedItem::withTrashed()->find($item->id)->deleted_at)->not->toBeNull();
     $this->getJson('/api/collected')->assertOk()->assertJsonCount(0, 'data');
     $this->get('/collected')->assertOk()
-        ->assertInertia(fn ($p) => $p->component('Collected/Index')->where('items.total', 0));
+        ->assertInertia(fn ($p) => $p->component('Collected/Index')->where('items', null)->where('categories', []));
 });
