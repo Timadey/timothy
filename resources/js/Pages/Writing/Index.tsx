@@ -50,13 +50,13 @@ export default function WritingIndex({ posts, topics, filters }: { posts: Pagina
                 <title>Writing — Timadey</title>
                 <meta
                     name="description"
-                    content="Long-form pieces about technology, product thinking, and ideas in progress."
+                    content="I lay out my thoughts here. Mostly about technology, products, ideas or philosophy and sometimes reflections of life."
                 />
                 <meta property="og:type" content="website" />
                 <meta property="og:title" content="Writing — Timadey" />
                 <meta
                     property="og:description"
-                    content="Long-form pieces about technology, product thinking, and ideas in progress."
+                    content="I lay out my thoughts here. Mostly about technology, products, ideas or philosophy and sometimes reflections of life."
                 />
                 <meta property="og:url" content="/writing" />
                 <link rel="canonical" href="/writing" />
@@ -64,7 +64,7 @@ export default function WritingIndex({ posts, topics, filters }: { posts: Pagina
             </Head>
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Writing</h1>
-                <p className="mt-2 text-meta">Long-form pieces about technology, product thinking, and ideas in progress.</p>
+                <p className="mt-2 text-meta">I lay out my thoughts here. Mostly about technology, products, ideas or philosophy and sometimes reflections of life.</p>
 
                 <div className="mt-8 flex flex-col gap-4">
                     <div className="max-w-sm">

@@ -46,17 +46,17 @@ export default function CollectedIndex({ categories, items, filters }: Props) {
         <PublicLayout>
             <Head>
                 <title>Collected — Timadey</title>
-                <meta name="description" content="Books, articles, videos, and tools I keep coming back to." />
+                <meta name="description" content="Find my stacks here. What I use day to day. Also contains books, articles, videos, and other tools I find interesting." />
                 <meta property="og:type" content="website" />
                 <meta property="og:title" content="Collected — Timadey" />
-                <meta property="og:description" content="Books, articles, videos, and tools I keep coming back to." />
+                <meta property="og:description" content="Find my stacks here. What I use day to day. Also contains books, articles, videos, and other tools I find interesting." />
                 <meta property="og:url" content="/collected" />
                 <link rel="canonical" href="/collected" />
                 <meta name="twitter:card" content="summary" />
             </Head>
             <div className="mx-auto max-w-4xl px-4 pt-10 pb-16 sm:px-6">
                 <h1 className="text-3xl font-semibold tracking-tight">Collected</h1>
-                <p className="mt-2 text-meta">Books, articles, videos, and tools I keep coming back to.</p>
+                <p className="mt-2 text-meta">Find my stacks here. What I use day to day. Also contains books, articles, videos, and other tools I find interesting.</p>
 
                 <div className={`mt-8 overflow-hidden rounded-xl border border-hairline bg-white ${pushing ? 'animate-pushback' : ''}`}>
                     <div className="relative flex h-10 items-center border-b border-hairline bg-[#f6f6f6] px-4">

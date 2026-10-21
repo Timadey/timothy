@@ -27,7 +27,7 @@ export default function Ask({ recipient, flash }: { recipient: string; flash?: F
             </Head>
             <div className="mx-auto max-w-2xl px-6 pt-12 pb-16">
                 <h1 className="text-3xl font-semibold tracking-tight">Ask Timadey</h1>
-                <p className="mt-2 text-lg text-ink">Send me a note — I read everything.</p>
+                <p className="mt-2 text-lg text-ink">I am trying to increase the number of souls I meet in my lifetime. So if you have not met me, you should send me a note. Really. I do reply. </p>
 
                 <div className="mt-8">
                     {sent ? (
