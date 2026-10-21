@@ -4,7 +4,9 @@ import { CoverImage } from '@/Components/collected/CoverImage';
 
 test('renders the cover image when present', () => {
     render(<CoverImage src="https://cdn.example.com/c.jpg" title="Systems Design" kind="book" />);
-    expect(screen.getByAltText('Cover of Systems Design')).toHaveAttribute('src', 'https://cdn.example.com/c.jpg');
+    const img = screen.getByAltText('Cover of Systems Design');
+    expect(img).toHaveAttribute('src', 'https://cdn.example.com/c.jpg');
+    expect(img.className).toContain('w-full');
 });
 
 test('falls back to serif initials when no cover is set', () => {

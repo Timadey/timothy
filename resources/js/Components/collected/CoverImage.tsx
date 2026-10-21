@@ -56,7 +56,7 @@ export function CoverImage({
             alt={`Cover of ${title}`}
             loading="lazy"
             onError={() => setFailed(true)}
-            className={`${shell} object-cover`}
+            className={`${shell} w-full object-cover`}
         />
     );
 }
