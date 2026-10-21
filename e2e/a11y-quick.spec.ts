@@ -115,8 +115,8 @@ test('prefers-reduced-motion: site stays usable', async ({ page }) => {
     await expect(page.locator('main h1')).toBeVisible();
 
     await page.locator('button[aria-label="Open menu"]').click();
-    await expect(page.locator('nav[aria-label="Mobile"]')).toBeVisible();
-    await page.locator('nav[aria-label="Mobile"]').getByRole('link', { name: 'Writing', exact: true }).click();
+    await expect(page.locator('nav[aria-label="Menu"]')).toBeVisible();
+    await page.locator('nav[aria-label="Menu"]').getByRole('link', { name: 'Writing', exact: true }).click();
     await page.waitForURL((url) => url.pathname === '/writing');
     await expect(page.locator('main h1')).toHaveText('Writing');
     await shot(page, 'reduced-motion-mobile-writing');

@@ -74,7 +74,7 @@ test('mobile drawer opens, navigates and closes (375px)', async ({ page }) => {
     await expect(toggle).toBeVisible();
     await toggle.click();
 
-    const drawer = page.locator('nav[aria-label="Mobile"]');
+    const drawer = page.locator('nav[aria-label="Menu"]');
     await expect(drawer).toBeVisible();
     await expect(drawer.locator('a')).toHaveCount(7);
     await shot(page, 'mobile-drawer-open', false);
@@ -108,7 +108,7 @@ test('mobile touch targets meet size guidelines (375px)', async ({ page }) => {
 
     const headerTargets = await measure('header a, header button');
     await page.locator('button[aria-label="Open menu"]').click();
-    const drawerTargets = await measure('nav[aria-label="Mobile"] a');
+    const drawerTargets = await measure('nav[aria-label="Menu"] a');
 
     writeMetric('touch-targets.json', 'header', headerTargets);
     writeMetric('touch-targets.json', 'drawer', drawerTargets);
