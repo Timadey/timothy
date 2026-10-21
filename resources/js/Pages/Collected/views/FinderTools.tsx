@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import { LayoutGrid, List } from 'lucide-react';
 import { CoverImage } from '@/Components/collected/CoverImage';
 import { TYPE_GLYPHS, type CollectedItem } from '@/collectedTypes';
 import { isCoarsePointer } from '@/motion';
@@ -130,63 +129,50 @@ export function FinderTools({ items, onOpen }: FinderToolsProps) {
 
     return (
         <div>
-            <div className="overflow-hidden rounded-lg border border-hairline bg-white">
-                <div className="flex items-center gap-2 border-b border-hairline bg-surface px-3 py-2" aria-hidden="true">
-                    <span className="h-3 w-3 rounded-full border border-hairline bg-white" />
-                    <span className="h-3 w-3 rounded-full border border-hairline bg-white" />
-                    <span className="h-3 w-3 rounded-full border border-hairline bg-white" />
-                    <span className="ml-2 text-xs font-medium text-meta">Tools</span>
-                    <span className="ml-auto flex items-center gap-2 text-meta">
-                        <LayoutGrid className="h-3.5 w-3.5" />
-                        <List className="h-3.5 w-3.5" />
-                    </span>
-                </div>
-
+            <div
+                ref={listRef}
+                role="listbox"
+                aria-label="Tools"
+                aria-activedescendant={selected !== null && items[selected] ? `tool-opt-${items[selected].id}` : undefined}
+                tabIndex={0}
+                onKeyDown={onKeyDown}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={endPan}
+                onPointerLeave={endPan}
+                className="max-h-[70vh] min-h-64 cursor-grab overflow-auto p-4 active:cursor-grabbing focus-visible:outline-2"
+            >
                 <div
-                    ref={listRef}
-                    role="listbox"
-                    aria-label="Tools"
-                    aria-activedescendant={selected !== null && items[selected] ? `tool-opt-${items[selected].id}` : undefined}
-                    tabIndex={0}
-                    onKeyDown={onKeyDown}
-                    onPointerDown={onPointerDown}
-                    onPointerMove={onPointerMove}
-                    onPointerUp={endPan}
-                    onPointerLeave={endPan}
-                    className="max-h-[70vh] min-h-64 cursor-grab overflow-auto p-4 active:cursor-grabbing focus-visible:outline-2"
+                    className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8"
+                    onClick={(event) => {
+                        if (event.target === event.currentTarget) setSelected(null);
+                    }}
                 >
-                    <div
-                        className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8"
-                        onClick={(event) => {
-                            if (event.target === event.currentTarget) setSelected(null);
-                        }}
-                    >
-                        {items.map((item, index) => (
-                            <div
-                                key={item.id}
-                                id={`tool-opt-${item.id}`}
-                                role="option"
-                                aria-selected={selected === index}
-                                ref={(el) => {
-                                    cellRefs.current[index] = el;
-                                }}
-                                onClick={() => onCellClick(index)}
-                                className={`flex cursor-pointer select-none flex-col items-center gap-1.5 rounded-md border p-2 text-center transition ${
-                                    selected === index ? 'border-primary bg-primary/10' : 'border-transparent hover:bg-surface'
-                                }`}
-                            >
-                                <CoverImage
-                                    src={item.cover_image}
-                                    title={item.title}
-                                    kind="other"
-                                    glyph={TYPE_GLYPHS[item.item_type]}
-                                    glyphClassName="h-7 w-7 text-ink"
-                                    className="h-14 w-14 rounded-xl"
-                                />
-                                <span className="w-full truncate text-xs text-ink">{item.title}</span>
-                            </div>
-                        ))}
-                    </div>
+                    {items.map((item, index) => (
+                        <div
+                            key={item.id}
+                            id={`tool-opt-${item.id}`}
+                            role="option"
+                            aria-selected={selected === index}
+                            ref={(el) => {
+                                cellRefs.current[index] = el;
+                            }}
+                            onClick={() => onCellClick(index)}
+                            className={`flex cursor-pointer select-none flex-col items-center gap-1.5 rounded-md border p-2 text-center transition ${
+                                selected === index ? 'border-primary bg-primary/10' : 'border-transparent hover:bg-surface'
+                            }`}
+                        >
+                            <CoverImage
+                                src={item.cover_image}
+                                title={item.title}
+                                kind="other"
+                                glyph={TYPE_GLYPHS[item.item_type]}
+                                glyphClassName="h-7 w-7 text-ink"
+                                className="h-14 w-14 rounded-xl"
+                            />
+                            <span className="w-full truncate text-xs text-ink">{item.title}</span>
+                        </div>
+                    ))}
                 </div>
             </div>
             <p className="mt-2 text-xs text-meta">Click to select · Enter to open · Drag or arrow keys to move</p>
