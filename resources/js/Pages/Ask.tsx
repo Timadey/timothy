@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ExternalLink, Send } from 'lucide-react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { Button } from '@/Components/Button';
 import { ComposeBody } from '@/Components/ask/ComposeBody';
 import { MailWindow } from '@/Components/ask/MailWindow';
 import { SentView } from '@/Components/ask/SentView';
@@ -38,22 +39,14 @@ export default function Ask({ recipient, flash }: { recipient: string; flash?: F
                             title="New Message"
                             toolbar={
                                 <>
-                                    <button
-                                        type="submit"
-                                        form="ask-compose"
-                                        disabled={form.processing}
-                                        className="inline-flex items-center gap-1.5 rounded-full bg-[#0a84ff] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#0071e3] disabled:opacity-60"
-                                    >
+                                    <Button type="submit" form="ask-compose" size="sm" disabled={form.processing}>
                                         <Send className="h-3.5 w-3.5" aria-hidden="true" />
                                         {form.processing ? 'Sending…' : 'Send'}
-                                    </button>
-                                    <a
-                                        href={mailtoHref}
-                                        className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-white px-3.5 py-1.5 text-sm font-medium text-ink hover:bg-surface"
-                                    >
+                                    </Button>
+                                    <Button variant="secondary" size="sm" external href={mailtoHref}>
                                         <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                                         Open in email client
-                                    </a>
+                                    </Button>
                                 </>
                             }
                         >
@@ -85,7 +78,7 @@ export default function Ask({ recipient, flash }: { recipient: string; flash?: F
 
                 <p className="mt-6 text-sm text-meta">
                     You can also reach me directly at{' '}
-                    <a href={`mailto:${recipient}`} className="text-[#0a84ff] underline-offset-2 hover:underline">
+                    <a href={`mailto:${recipient}`} className="text-[#007aff] underline-offset-2 hover:underline">
                         {recipient}
                     </a>
                 </p>

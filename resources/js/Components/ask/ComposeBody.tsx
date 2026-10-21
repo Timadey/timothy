@@ -50,7 +50,7 @@ export function ComposeBody({ recipient, from, subject, message, errors, disable
 
             <div className={rowClass}>
                 <span className={labelClass}>To</span>
-                <span className="mt-0.5 inline-flex items-center rounded-full bg-[#0a84ff]/10 px-2.5 py-0.5 text-sm text-[#0a84ff]">
+                <span className="mt-0.5 inline-flex items-center rounded-full bg-[#007aff]/10 px-2.5 py-0.5 text-sm text-[#007aff]">
                     {recipient}
                 </span>
             </div>

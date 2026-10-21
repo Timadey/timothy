@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { Button } from '@/Components/Button';
 
 export type HeroData = {
     headline: string;
@@ -57,12 +58,9 @@ export function Hero({ hero }: { hero: HeroData }) {
             </h1>
             {hero.status && <p className="mt-4 max-w-2xl text-lg leading-relaxed text-meta">{hero.status}</p>}
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Link
-                    href="/ask"
-                    className="inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-ink"
-                >
+                <Button href="/ask" size="lg" variant="brand">
                     Ask me anything
-                </Link>
+                </Button>
                 <Link href="/writing" className="text-sm font-medium text-link hover:underline">
                     Read what I’ve written
                 </Link>
