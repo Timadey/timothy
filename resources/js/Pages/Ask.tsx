@@ -1,43 +1,94 @@
+import { Head, useForm } from '@inertiajs/react';
+import { ExternalLink, Send } from 'lucide-react';
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Head } from '@inertiajs/react';
-import { MessageCircle } from 'lucide-react';
+import { ComposeBody } from '@/Components/ask/ComposeBody';
+import { MailWindow } from '@/Components/ask/MailWindow';
+import { SentView } from '@/Components/ask/SentView';
 
-const suggested = [
-    'What kinds of problems is Timadey most interested in solving?',
-    'What is Timadey currently building?',
-    'Which articles should I read to understand the worldview?',
-];
+type Flash = { sent?: boolean | null; error?: string | null };
 
-export default function Ask() {
+export default function Ask({ recipient, flash }: { recipient: string; flash?: Flash }) {
+    const form = useForm({ from: '', subject: '', message: '', website: '' });
+    const sent = flash?.sent === true;
+
+    const mailtoHref = `mailto:${recipient}?subject=${encodeURIComponent(form.data.subject)}&body=${encodeURIComponent(form.data.message)}`;
+
+    const reset = () => {
+        form.reset();
+        form.clearErrors();
+    };
+
     return (
         <PublicLayout>
             <Head>
                 <title>Ask Timadey</title>
-                <meta
-                    name="description"
-                    content="An AI guide to the published writing, projects, and ideas on this site — arriving in Phase 3."
-                />
+                <meta name="description" content="Send Timadey an email straight from this page." />
             </Head>
-            <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">
-                <div className="flex items-center gap-2">
-                    <MessageCircle className="h-5 w-5" />
-                    <h1 className="text-3xl font-semibold tracking-tight">Ask Timadey</h1>
+            <div className="mx-auto max-w-2xl px-6 pt-12 pb-16">
+                <h1 className="text-3xl font-semibold tracking-tight">Ask Timadey</h1>
+                <p className="mt-2 text-lg text-ink">Send me a note — I read everything.</p>
+
+                <div className="mt-8">
+                    {sent ? (
+                        <MailWindow title="Sent">
+                            <SentView recipient={recipient} onWriteAnother={reset} />
+                        </MailWindow>
+                    ) : (
+                        <MailWindow
+                            title="New Message"
+                            toolbar={
+                                <>
+                                    <button
+                                        type="submit"
+                                        form="ask-compose"
+                                        disabled={form.processing}
+                                        className="inline-flex items-center gap-1.5 rounded-full bg-[#0a84ff] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#0071e3] disabled:opacity-60"
+                                    >
+                                        <Send className="h-3.5 w-3.5" aria-hidden="true" />
+                                        {form.processing ? 'Sending…' : 'Send'}
+                                    </button>
+                                    <a
+                                        href={mailtoHref}
+                                        className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-white px-3.5 py-1.5 text-sm font-medium text-ink hover:bg-surface"
+                                    >
+                                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                                        Open in email client
+                                    </a>
+                                </>
+                            }
+                        >
+                            {flash?.error && (
+                                <div role="alert" className="border-b border-hairline bg-red-50 px-6 py-3 text-sm text-red-800">
+                                    {flash.error}{' '}
+                                    <a href={`mailto:${recipient}`} className="underline">
+                                        {recipient}
+                                    </a>
+                                </div>
+                            )}
+                            <ComposeBody
+                                recipient={recipient}
+                                from={form.data.from}
+                                subject={form.data.subject}
+                                message={form.data.message}
+                                errors={form.errors}
+                                disabled={form.processing}
+                                honeypot={{
+                                    value: form.data.website,
+                                    onChange: (value) => form.setData('website', value),
+                                }}
+                                onChange={(field, value) => form.setData(field, value)}
+                                onSubmit={() => form.post('/ask', { preserveScroll: true })}
+                            />
+                        </MailWindow>
+                    )}
                 </div>
-                <p className="mt-4 max-w-2xl text-lg text-ink">
-                    An AI guide to the published writing, projects, and ideas on this site.
+
+                <p className="mt-6 text-sm text-meta">
+                    You can also reach me directly at{' '}
+                    <a href={`mailto:${recipient}`} className="text-[#0a84ff] underline-offset-2 hover:underline">
+                        {recipient}
+                    </a>
                 </p>
-                <div className="mt-6 rounded-md border border-hairline bg-surface px-5 py-4 text-sm text-meta">
-                    Arriving in Phase 3. This page will answer questions using only published material on this site,
-                    with links back to the sources — never invented facts.
-                </div>
-                <h2 className="mt-10 text-sm font-semibold uppercase tracking-wider text-meta">Questions it will answer</h2>
-                <ul className="mt-4 divide-y divide-hairline">
-                    {suggested.map((q) => (
-                        <li key={q} className="py-3 text-ink opacity-60">
-                            {q}
-                        </li>
-                    ))}
-                </ul>
             </div>
         </PublicLayout>
     );
