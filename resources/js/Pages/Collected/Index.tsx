@@ -1,46 +1,44 @@
 import PublicLayout from '@/Layouts/PublicLayout';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import { SearchInput } from '@/Components/SearchInput';
-import { FilterBar } from '@/Components/FilterBar';
 import { Pagination } from '@/Components/Pagination';
 import { EmptyState } from '@/Components/EmptyState';
+import { ItemModal } from '@/Components/collected/ItemModal';
+import { EditorialList } from '@/Pages/Collected/views/EditorialList';
+import { TYPE_GLYPHS, type CategoryTile, type CollectedItem, type Paginated } from '@/collectedTypes';
 
-type Item = {
-    title: string;
-    url: string | null;
-    creator: string | null;
-    item_type: string;
-    annotation: string | null;
-    date: string;
-    tags: string[];
+type Props = {
+    categories: CategoryTile[];
+    items: Paginated<CollectedItem> | null;
+    filters: { q: string | null };
 };
 
-type Paginated = { data: Item[]; links: { url: string | null; label: string; active: boolean }[] };
-type Filters = { type?: string; q?: string; tag?: string };
-type TypeOption = { value: string; label: string };
-
-export default function CollectedIndex({ items, types, filters }: { items: Paginated; types: TypeOption[]; filters: Filters }) {
+export default function CollectedIndex({ categories, items, filters }: Props) {
     const [q, setQ] = useState(filters.q ?? '');
+    const [open, setOpen] = useState<CollectedItem | null>(null);
+    const [pushing, setPushing] = useState(false);
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    useEffect(() => {
-        setQ(filters.q ?? '');
-    }, [filters.q]);
-
+    useEffect(() => setQ(filters.q ?? ''), [filters.q]);
     useEffect(() => () => {
         if (timer.current) clearTimeout(timer.current);
     }, []);
-
-    const apply = (patch: Record<string, string | undefined>) =>
-        router.get('/collected', { ...filters, q: q || undefined, ...patch }, { preserveState: true, preserveScroll: true });
 
     const onSearch = (next: string) => {
         setQ(next);
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(() => {
-            router.get('/collected', { ...filters, q: next || undefined }, { preserveState: true, preserveScroll: true });
+            router.get('/collected', { q: next || undefined }, { preserveState: true, preserveScroll: true });
         }, 300);
+    };
+
+    const launchFrom = (event: React.MouseEvent<HTMLAnchorElement>) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const root = document.documentElement;
+        root.style.setProperty('--launch-x', `${rect.left + rect.width / 2}px`);
+        root.style.setProperty('--launch-y', `${rect.top + rect.height / 2}px`);
+        setPushing(true);
     };
 
     return (
@@ -55,55 +53,74 @@ export default function CollectedIndex({ items, types, filters }: { items: Pagin
                 <link rel="canonical" href="/collected" />
                 <meta name="twitter:card" content="summary" />
             </Head>
-            <div className="mx-auto max-w-3xl px-6 pt-12 pb-16">
+            <div className="mx-auto max-w-4xl px-4 pt-10 pb-16 sm:px-6">
                 <h1 className="text-3xl font-semibold tracking-tight">Collected</h1>
                 <p className="mt-2 text-meta">Books, articles, videos, and tools I keep coming back to.</p>
 
-                <div className="mt-8 flex flex-col gap-4">
-                    <div className="max-w-sm">
-                        <SearchInput value={q} onChange={onSearch} placeholder="Search collection" />
+                <div className={`mt-8 overflow-hidden rounded-lg border border-hairline bg-white ${pushing ? 'animate-pushback' : ''}`}>
+                    <div className="flex items-center gap-2 border-b border-hairline bg-surface px-4 py-2.5" aria-hidden="true">
+                        <span className="h-3 w-3 rounded-full border border-hairline bg-white" />
+                        <span className="h-3 w-3 rounded-full border border-hairline bg-white" />
+                        <span className="h-3 w-3 rounded-full border border-hairline bg-white" />
+                        <span className="ml-2 text-xs font-medium text-meta">Collected</span>
                     </div>
-                    <FilterBar
-                        options={types}
-                        active={filters.type ?? ''}
-                        onSelect={(v) => apply({ type: v || undefined })}
-                        allLabel="Everything"
-                    />
-                </div>
 
-                <div className="mt-10 divide-y divide-hairline">
-                    {items.data.map((item) => (
-                        <article key={`${item.item_type}-${item.title}`} className="py-5">
-                            <div className="flex flex-wrap items-baseline gap-x-3">
-                                <span className="text-xs font-semibold uppercase tracking-wide text-meta">{item.item_type}</span>
-                                <span className="text-xs text-meta">{item.date}</span>
-                            </div>
-                            {item.url ? (
-                                <a
-                                    href={item.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="mt-1 block text-lg font-medium hover:text-link"
-                                >
-                                    {item.title} ↗
-                                </a>
-                            ) : (
-                                <p className="mt-1 text-lg font-medium">{item.title}</p>
-                            )}
-                            {item.creator && <p className="mt-0.5 text-sm text-meta">{item.creator}</p>}
-                            {item.annotation && <p className="mt-2 max-w-2xl text-sm text-ink">{item.annotation}</p>}
-                            {item.tags.length > 0 && <p className="mt-2 text-xs text-meta">{item.tags.join(' · ')}</p>}
-                        </article>
-                    ))}
-                    {items.data.length === 0 && (
-                        <div className="py-8">
-                            <EmptyState title="Nothing collected yet" hint="Try a different search or type." />
+                    <div className="px-4 py-5 sm:px-6">
+                        <div className="max-w-sm">
+                            <SearchInput value={q} onChange={onSearch} placeholder="Search collection" />
                         </div>
-                    )}
-                </div>
 
-                <Pagination links={items.links} />
+                        {categories.length === 0 && items === null && (
+                            <div className="mt-6">
+                                <EmptyState title="Nothing collected yet" hint="Categories will appear here once there's something to show." />
+                            </div>
+                        )}
+
+                        <ul className="mt-6 grid grid-cols-3 gap-4 sm:grid-cols-4 sm:gap-6 lg:grid-cols-6" aria-label="Categories">
+                            {categories.map((category, index) => {
+                                const Glyph = TYPE_GLYPHS[category.type];
+                                return (
+                                    <li key={category.type} className="animate-tile-in" style={{ animationDelay: `${index * 35}ms` }}>
+                                        <Link
+                                            href={category.href}
+                                            onClick={launchFrom}
+                                            aria-label={`${category.label}, ${category.count} items`}
+                                            className="group flex flex-col items-center gap-2 rounded-md p-2 transition hover:bg-surface/80"
+                                        >
+                                            <span className="relative">
+                                                <span className="flex h-16 w-16 items-center justify-center rounded-[10px] border border-hairline bg-surface transition group-hover:border-meta/60 sm:h-[72px] sm:w-[72px]">
+                                                    <Glyph className="h-7 w-7 text-ink" strokeWidth={1.5} aria-hidden="true" />
+                                                </span>
+                                                <span className="absolute -right-2 -top-2 min-w-5 rounded-full border border-hairline bg-white px-1.5 py-px text-center text-[10px] font-medium leading-4 text-meta">
+                                                    {category.count}
+                                                </span>
+                                            </span>
+                                            <span className="text-center text-sm text-ink">{category.label}</span>
+                                        </Link>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+
+                        {items && (
+                            <section className="mt-8 border-t border-hairline pt-6" aria-label="Search results" aria-live="polite">
+                                <p className="text-sm text-meta">
+                                    {items.total} {items.total === 1 ? 'result' : 'results'} for “{filters.q}”
+                                </p>
+                                <div className="mt-2">
+                                    {items.data.length > 0 ? (
+                                        <EditorialList items={items.data} onOpen={setOpen} lead={false} />
+                                    ) : (
+                                        <EmptyState title="No matches" hint="Try different words." />
+                                    )}
+                                </div>
+                                <Pagination links={items.links} />
+                            </section>
+                        )}
+                    </div>
+                </div>
             </div>
+            <ItemModal item={open} onClose={() => setOpen(null)} />
         </PublicLayout>
     );
 }
