@@ -9,7 +9,7 @@ use Inertia\{Inertia, Response};
 
 class NoteController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, MarkdownService $markdown): Response
     {
         $query = Post::publiclyVisible()->ofType('note')->with('tags')->latest('published_at');
 
@@ -28,6 +28,7 @@ class NoteController extends Controller
                 'slug' => $p->slug,
                 'headline' => $p->streamHeadline(),
                 'teaser' => $p->streamTeaser(),
+                'body_html' => $markdown->render((string) $p->body),
                 'date' => $p->published_at?->format('M j, Y'),
                 'tags' => $p->tags->pluck('name'),
             ]),

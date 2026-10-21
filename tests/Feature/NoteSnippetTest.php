@@ -46,7 +46,7 @@ it('uses the snippet as the RSS item title', function () {
     expect($xml)->toContain('Shipping the quick notes feature today');
 });
 
-it('exposes headline and teaser in the notes stream payload', function () {
+it('exposes headline, teaser, and body_html in the notes stream payload', function () {
     $long = 'Why does there seem to be such an intense, adversarial divide between genders today? '
         .'Living in the West, it often feels as though both men and women are intent on mutual destruction rather than finding common ground. '
         .str_repeat('More observations to push this past the teaser limit. ', 8);
@@ -55,7 +55,7 @@ it('exposes headline and teaser in the notes stream payload', function () {
     $this->get('/notes')->assertInertia(fn ($page) => $page
         ->component('Notes/Index')
         ->where('notes.data.0', function ($note) {
-            if (! isset($note['headline'], $note['teaser'])) {
+            if (! isset($note['headline'], $note['teaser'], $note['body_html'])) {
                 return false;
             }
             $base = rtrim($note['headline'], '…');
@@ -65,9 +65,10 @@ it('exposes headline and teaser in the notes stream payload', function () {
                 && str_starts_with($note['headline'], 'Why does there seem')
                 && $note['teaser'] !== ''
                 && mb_strlen($note['teaser']) <= 281
-                && ! str_starts_with($note['teaser'], $base);
+                && ! str_starts_with($note['teaser'], $base)
+                && $note['body_html'] !== ''
+                && str_contains($note['body_html'], '<p>');
         })
-        ->missing('notes.data.0.body_html')
         ->missing('notes.data.0.excerpt_text'));
 });
 
