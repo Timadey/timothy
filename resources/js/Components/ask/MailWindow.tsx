@@ -5,7 +5,7 @@ const LIGHTS = ['bg-[#ff5f57]', 'bg-[#febc2e]', 'bg-[#28c840]'];
 export function MailWindow({ title, toolbar, children }: { title: string; toolbar?: ReactNode; children: ReactNode }) {
     return (
         <div
-            className="animate-page-launch overflow-hidden rounded-xl border border-hairline bg-white shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)]"
+            className="animate-page-launch overflow-hidden rounded-xl border border-hairline bg-white"
             role="group"
             aria-label={title}
         >

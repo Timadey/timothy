@@ -35,7 +35,7 @@ Visitor lands on `/ask` → sees the "New Message" compose window → fills From
 
 **Compose window** (Mac Mail.app-inspired, consistent with Collected's Finder chrome):
 
-- Rounded-xl card, real macOS-style drop shadow, `bg-surface` / `border-hairline` tokens.
+- Rounded-xl card, **border-only, no drop shadow** (matches the Collected Finder window; only floating modals use shadows on this site), `bg-surface` / `border-hairline` tokens.
 - **Title bar**: traffic-light dots in classic colors (`#ff5f57`, `#febc2e`, `#28c840`), centered title **"New Message"** (system font, medium weight).
 - **Toolbar row** under the title bar: **Send** on the left — blue-filled pill button with paper-plane icon, macOS style. Send lives in the toolbar, not a footer.
 - **Field rows** in Mail.app compose order, each separated by a hairline:
