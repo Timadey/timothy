@@ -890,9 +890,9 @@ test('ask: compose sends and shows the sent view', async ({ page }) => {
     await expect(page.getByRole('heading', { level: 1, name: 'Ask Timadey' })).toBeVisible();
     await expect(page.getByRole('group', { name: 'New Message' })).toBeVisible();
 
-    await page.getByLabel('From').fill('visitor@example.com');
-    await page.getByLabel('Subject').fill('Hello from e2e');
-    await page.getByLabel('Message').fill('Testing the ask composer.');
+    await page.getByRole('textbox', { name: 'From' }).fill('visitor@example.com');
+    await page.getByRole('textbox', { name: 'Subject' }).fill('Hello from e2e');
+    await page.getByRole('textbox', { name: 'Message' }).fill('Testing the ask composer.');
     await shot(page, 'ask-compose');
 
     await page.getByRole('button', { name: 'Send' }).click();

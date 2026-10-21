@@ -7,7 +7,7 @@ import { SentView } from '@/Components/ask/SentView';
 
 type Flash = { sent?: boolean | null; error?: string | null };
 
-export default function Ask({ recipient, flash }: { recipient: string; flash?: Flash }) {
+export default function Ask({ recipient, flash }: { recipient: string; flash?: Flash | null }) {
     const form = useForm({ from: '', subject: '', message: '', website: '' });
     const sent = flash?.sent === true;
 
