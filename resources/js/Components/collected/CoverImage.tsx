@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import { useState, type ComponentType } from 'react';
 
 type Kind = 'book' | 'music' | 'video' | 'other';
+type GlyphComponent = ComponentType<{ className?: string; strokeWidth?: number }>;
 
 const RATIO: Record<Kind, string> = {
     book: 'aspect-[2/3]',
@@ -31,7 +31,7 @@ export function CoverImage({
     title: string;
     kind?: Kind;
     className?: string;
-    glyph?: LucideIcon;
+    glyph?: GlyphComponent;
     glyphClassName?: string;
 }) {
     const [failed, setFailed] = useState(false);

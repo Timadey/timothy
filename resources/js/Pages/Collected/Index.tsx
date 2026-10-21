@@ -33,7 +33,7 @@ export default function CollectedIndex({ categories, items, filters }: Props) {
         }, 300);
     };
 
-    const launchFrom = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const launchFrom = (event: React.MouseEvent<Element>) => {
         const rect = event.currentTarget.getBoundingClientRect();
         const root = document.documentElement;
         root.style.setProperty('--launch-x', `${rect.left + rect.width / 2}px`);

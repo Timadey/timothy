@@ -38,7 +38,7 @@ export default function CollectedShow({ type, label, segment, items, tags, filte
         return () => window.clearTimeout(timer);
     }, [launchClass]);
 
-    const goBack = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const goBack = (event: React.MouseEvent<Element>) => {
         if (prefersReducedMotion()) return;
         event.preventDefault();
         shellRef.current?.classList.add('animate-page-leave');
@@ -50,7 +50,7 @@ export default function CollectedShow({ type, label, segment, items, tags, filte
     return (
         <PublicLayout>
             <Head>
-                <title>{label} — Collected — Timadey</title>
+                <title>{`${label} — Collected — Timadey`}</title>
                 <meta name="description" content={`Things I've collected: ${label.toLowerCase()}.`} />
                 <link rel="canonical" href={`/collected/${segment}`} />
                 <meta property="og:type" content="website" />
