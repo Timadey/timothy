@@ -5,11 +5,13 @@ import { SearchInput } from '@/Components/SearchInput';
 import { FilterBar } from '@/Components/FilterBar';
 import { Badge } from '@/Components/Badge';
 import { Flash } from '@/Components/Flash';
+import { ITEM_TYPES, TYPE_LABELS } from '@/collectedTypes';
 
 type ItemRow = {
     id: number;
     title: string;
     url: string | null;
+    cover_image: string | null;
     creator: string | null;
     item_type: string;
     visibility: string;
@@ -18,17 +20,7 @@ type ItemRow = {
 
 type Paginated = { data: ItemRow[]; links: { url: string | null; label: string; active: boolean }[] };
 
-const typeOptions = [
-    { label: 'Books', value: 'book' },
-    { label: 'Articles', value: 'article' },
-    { label: 'Videos', value: 'video' },
-    { label: 'Podcasts', value: 'podcast' },
-    { label: 'Music', value: 'music' },
-    { label: 'Tools', value: 'tool' },
-    { label: 'Quotes', value: 'quote' },
-    { label: 'Websites', value: 'website' },
-    { label: 'Other', value: 'other' },
-];
+const typeOptions = ITEM_TYPES.map((t) => ({ label: TYPE_LABELS[t], value: t }));
 
 export default function CollectedIndex({
     items,
@@ -58,6 +50,9 @@ export default function CollectedIndex({
                 <table className="w-full text-left text-sm">
                     <thead className="border-b border-hairline text-xs uppercase text-meta">
                         <tr>
+                            <th className="px-4 py-3">
+                                <span className="sr-only">Cover</span>
+                            </th>
                             <th className="px-4 py-3">Title</th>
                             <th className="px-4 py-3">Type</th>
                             <th className="px-4 py-3">Creator</th>
@@ -71,6 +66,13 @@ export default function CollectedIndex({
                     <tbody>
                         {items.data.map((i) => (
                             <tr key={i.id} className="border-b border-hairline last:border-0">
+                                <td className="px-4 py-2">
+                                    {i.cover_image ? (
+                                        <img src={i.cover_image} alt="" loading="lazy" className="h-8 w-8 rounded-sm border border-hairline object-cover" />
+                                    ) : (
+                                        <span aria-hidden="true" className="block h-8 w-8 rounded-sm border border-hairline bg-surface" />
+                                    )}
+                                </td>
                                 <td className="px-4 py-3 font-medium">{i.title}</td>
                                 <td className="px-4 py-3">
                                     <Badge>{i.item_type}</Badge>
@@ -87,7 +89,7 @@ export default function CollectedIndex({
                         ))}
                         {items.data.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="px-4 py-8 text-center text-meta">
+                                <td colSpan={7} className="px-4 py-8 text-center text-meta">
                                     Nothing collected yet.
                                 </td>
                             </tr>
