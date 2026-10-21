@@ -36,6 +36,43 @@ class CollectedController extends Controller
         ]);
     }
 
+    public function show(Request $request, string $type): Response
+    {
+        $singular = CollectedTypes::fromSegment($type);
+        abort_unless($singular !== null, 404);
+
+        abort_unless(
+            CollectedItem::publiclyVisible()->where('item_type', $singular)->exists(),
+            404
+        );
+
+        $query = CollectedItem::publiclyVisible()
+            ->where('item_type', $singular)
+            ->with('tags')
+            ->latest('created_at');
+
+        if ($tag = $request->query('tag')) {
+            $query->whereHas('tags', fn ($t) => $t->where('slug', $tag));
+        }
+
+        $tags = Tag::whereHas('collectedItems', fn ($q) => $q
+                ->where('collected_items.item_type', $singular)
+                ->where('visibility', 'public'))
+            ->orderBy('name')
+            ->get(['name', 'slug'])
+            ->map(fn ($t) => ['label' => $t->name, 'slug' => $t->slug])
+            ->values();
+
+        return Inertia::render('Collected/Show', [
+            'type' => $singular,
+            'label' => CollectedTypes::label($singular),
+            'segment' => $type,
+            'items' => $query->paginate(20)->withQueryString()->through(fn ($i) => $this->mapItem($i)),
+            'tags' => $tags,
+            'filters' => $request->only(['tag']),
+        ]);
+    }
+
     /** @return array<int, array{type: string, label: string, count: int, href: string}> */
     private function drawerCategories(): array
     {

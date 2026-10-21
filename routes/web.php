@@ -84,6 +84,9 @@ Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'
 Route::get('/projects/{slug}', [\App\Http\Controllers\ProjectController::class, 'show'])->name('projects.show');
 
 Route::get('/collected', [\App\Http\Controllers\CollectedController::class, 'index'])->name('collected.index');
+Route::get('/collected/{type}', [\App\Http\Controllers\CollectedController::class, 'show'])
+    ->where('type', '[a-z]+')
+    ->name('collected.show');
 
 Route::get('/activity', \App\Http\Controllers\ActivityController::class)->name('activity.index');
 
