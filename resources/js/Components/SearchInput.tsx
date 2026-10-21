@@ -18,7 +18,7 @@ export function SearchInput({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full rounded-md border border-hairline bg-white py-2 pl-9 pr-3 text-sm text-ink placeholder:text-meta focus:border-primary"
+                className="w-full appearance-none rounded-lg border-0 bg-surface py-2.5 pl-9 pr-3 text-sm text-ink placeholder:text-meta focus:outline-none focus:ring-2 focus:ring-primary/25"
             />
         </label>
     );
