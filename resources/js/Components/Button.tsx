@@ -4,6 +4,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
     variant?: 'primary' | 'secondary' | 'ghost';
     href?: string;
+    external?: boolean;
     children: ReactNode;
 };
 
@@ -13,8 +14,15 @@ const styles = {
     ghost: 'text-ink hover:underline',
 };
 
-export function Button({ variant = 'primary', href, className = '', children, ...rest }: Props) {
+export function Button({ variant = 'primary', href, external = false, className = '', children, ...rest }: Props) {
     const cls = `inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition ${styles[variant]} ${className}`;
+    if (href && external) {
+        return (
+            <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+                {children}
+            </a>
+        );
+    }
     if (href) {
         return (
             <Link href={href} className={cls}>
