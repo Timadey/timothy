@@ -81,14 +81,16 @@ it('renders article json-ld with headline and datePublished matching db', functi
         ->and($article['mainEntityOfPage']['@id'])->toContain('/writing/quantum-gardening');
 });
 
-it('emits og and twitter image only when cover is set', function () {
+it('emits cover image when set and brand card otherwise', function () {
     seoMakeArticle(['title' => 'No Cover', 'slug' => 'no-cover', 'cover_image' => null]);
     seoMakeArticle(['title' => 'With Cover', 'slug' => 'with-cover', 'cover_image' => 'covers/hero.jpg']);
 
     $without = $this->get('/writing/no-cover')->assertOk()->getContent();
-    expect($without)->not->toContain('property="og:image"')
-        ->not->toContain('name="twitter:image"')
-        ->toContain('name="twitter:card" content="summary"');
+    $cardUrl = url('/images/og-card.png');
+    expect($without)
+        ->toContain('property="og:image" content="'.$cardUrl.'"')
+        ->toContain('name="twitter:image" content="'.$cardUrl.'"')
+        ->toContain('name="twitter:card" content="summary_large_image"');
 
     $with = $this->get('/writing/with-cover')->assertOk()->getContent();
     $coverUrl = url('/covers/hero.jpg');

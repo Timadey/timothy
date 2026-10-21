@@ -40,7 +40,7 @@ class Seo
 
         $base['rss'] = true;
 
-        return match ($component) {
+        $result = match ($component) {
             'Home' => self::home($props, $base),
             'Writing/Show' => self::writingShow($props, $base),
             'Writing/Index' => self::collection($base, 'Writing', 'Essays and articles.'),
@@ -56,6 +56,16 @@ class Seo
             'Ask' => self::searchLike($base, 'Ask'),
             default => $base,
         };
+
+        if (! isset($result['og']['og:image'])) {
+            $result['og']['og:image'] = url('/images/og-card.png');
+        }
+        if (! isset($result['twitter']['twitter:image'])) {
+            $result['twitter']['twitter:image'] = url('/images/og-card.png');
+            $result['twitter']['twitter:card'] = 'summary_large_image';
+        }
+
+        return $result;
     }
 
     /** @param array<string, mixed> $props */
@@ -326,13 +336,13 @@ class Seo
                 $tagline !== null ? "{$siteTitle} — {$tagline}" : $siteTitle,
                 $tagline,
                 self::canonicalPath(),
-                null,
+                url('/images/og-card.png'),
                 $siteTitle
             ),
             'twitter' => self::twitterTags(
                 $tagline !== null ? "{$siteTitle} — {$tagline}" : $siteTitle,
                 $tagline,
-                null
+                url('/images/og-card.png')
             ),
             'jsonLd' => [],
         ];
