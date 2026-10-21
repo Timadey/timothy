@@ -20,7 +20,8 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             </a>
             <header className="sticky top-0 z-30 border-b border-hairline bg-white/90 backdrop-blur">
                 <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-                    <Link href="/" className="text-lg font-bold tracking-tight text-primary">
+                    <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight text-primary">
+                        <img src="/images/logo-mark.png" alt="Timadey" width={28} height={28} className="rounded-lg" />
                         Timadey
                     </Link>
                     <nav className="hidden gap-5 md:flex" aria-label="Primary">

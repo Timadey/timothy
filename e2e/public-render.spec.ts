@@ -169,3 +169,10 @@ test('footer RSS link opens the feed, not an error dialog', async ({ page }) => 
     await expect(page.locator('#inertia-error-dialog')).toHaveCount(0);
     await expect(page.locator('body')).toContainText('<rss');
 });
+
+test('header shows the brand monogram next to the site name', async ({ page }) => {
+    await page.goto('/');
+    const mark = page.locator('header img[alt="Timadey"]');
+    await expect(mark).toBeVisible();
+    await expect(mark).toHaveAttribute('src', '/images/logo-mark.png');
+});
