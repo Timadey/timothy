@@ -12,7 +12,10 @@ export default function Login() {
                 Skip to content
             </a>
             <header className="px-4 py-3">
-                <span className="text-sm font-semibold tracking-tight text-primary">Timadey Admin</span>
+                <span className="flex items-center gap-2 text-sm font-semibold tracking-tight text-primary">
+                    <img src="/images/logo-mark.png" alt="Timadey" width={28} height={28} className="rounded-lg" />
+                    Timadey Admin
+                </span>
             </header>
             <main id="main" className="flex flex-1 items-center justify-center px-4">
                 <form

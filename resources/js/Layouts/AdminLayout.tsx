@@ -86,7 +86,8 @@ export default function AdminLayout({ children, title }: { children: React.React
             )}
             <div className="mx-auto flex max-w-6xl">
                 <aside className="hidden w-56 shrink-0 border-r border-hairline bg-white p-4 md:block md:min-h-screen">
-                    <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-wider text-meta">
+                    <p className="mb-4 flex items-center gap-2 px-3 text-xs font-semibold uppercase tracking-wider text-meta">
+                        <img src="/images/logo-mark.png" alt="Timadey" width={24} height={24} className="rounded-md" />
                         Timadey
                     </p>
                     {nav}

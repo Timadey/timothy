@@ -214,3 +214,11 @@ test('login validation: native required fields and invalid credentials', async (
         detail: `Invalid credentials render as: "${(await error.innerText()).trim()}"`,
     });
 });
+
+test('brand monogram appears on login and in the admin sidebar', async ({ page }) => {
+    await page.goto('/admin/login');
+    await expect(page.locator('header img[alt="Timadey"]')).toBeVisible();
+
+    await loginAsOwner(page);
+    await expect(page.locator('aside img[alt="Timadey"]')).toBeVisible();
+});
