@@ -223,3 +223,13 @@ Podcasts/quotes bespoke views (fallback list only, built if ever needed); websit
 | `collectedTypes.ts` | mirrors PHP const | labels, verbs, pluralization (frontend only) |
 
 Each unit is independently testable; changing a view's internals never touches the shell or controllers; the modal is used by every view through the same prop contract.
+
+---
+
+## Post-review update (2026-10-21)
+
+After the Ask composer shipped with true macOS chrome, the window treatment was unified across both features:
+
+- **Traffic lights** are now the classic mac colors (`#ff5f57` / `#febc2e` / `#28c840`) everywhere — shared via `Components/WindowChrome.tsx` (`TrafficLights`). Tiles themselves stay monochrome (Decision 8 unchanged).
+- **Window titles are centered** in the title bar (Mail.app/Finder style) on the drawer, and category pages now render inside the same window chrome: dots + back chevron on the left, centered `h1` label, item count on the right.
+- Window radius unified to `rounded-xl`, title bar `bg-[#f6f6f6]`; windows remain border-only (no drop shadows — only floating modals like `ItemModal` use shadows).

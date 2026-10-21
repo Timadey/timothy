@@ -5,6 +5,7 @@ import { SearchInput } from '@/Components/SearchInput';
 import { Pagination } from '@/Components/Pagination';
 import { EmptyState } from '@/Components/EmptyState';
 import { ItemModal } from '@/Components/collected/ItemModal';
+import { TrafficLights } from '@/Components/WindowChrome';
 import { EditorialList } from '@/Pages/Collected/views/EditorialList';
 import { TYPE_GLYPHS, type CategoryTile, type CollectedItem, type Paginated } from '@/collectedTypes';
 
@@ -57,12 +58,12 @@ export default function CollectedIndex({ categories, items, filters }: Props) {
                 <h1 className="text-3xl font-semibold tracking-tight">Collected</h1>
                 <p className="mt-2 text-meta">Books, articles, videos, and tools I keep coming back to.</p>
 
-                <div className={`mt-8 overflow-hidden rounded-lg border border-hairline bg-white ${pushing ? 'animate-pushback' : ''}`}>
-                    <div className="flex items-center gap-2 border-b border-hairline bg-surface px-4 py-2.5" aria-hidden="true">
-                        <span className="h-3 w-3 rounded-full border border-hairline bg-white" />
-                        <span className="h-3 w-3 rounded-full border border-hairline bg-white" />
-                        <span className="h-3 w-3 rounded-full border border-hairline bg-white" />
-                        <span className="ml-2 text-xs font-medium text-meta">Collected</span>
+                <div className={`mt-8 overflow-hidden rounded-xl border border-hairline bg-white ${pushing ? 'animate-pushback' : ''}`}>
+                    <div className="relative flex h-10 items-center border-b border-hairline bg-[#f6f6f6] px-4">
+                        <TrafficLights />
+                        <span className="pointer-events-none absolute inset-x-0 text-center text-sm font-medium text-ink">
+                            Collected
+                        </span>
                     </div>
 
                     <div className="px-4 py-5 sm:px-6">
