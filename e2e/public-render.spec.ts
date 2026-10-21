@@ -64,7 +64,8 @@ test('published article detail renders at 1440px', async ({ page }) => {
 });
 
 test('note detail renders at 1440px', async ({ page }) => {
-    const href = await discoverFirstHref(page, '/notes', '/notes/');
+    // The /notes feed intentionally has no permalink links; discover one from the activity feed.
+    const href = await discoverFirstHref(page, '/activity', '/notes/');
     const response = await page.goto(href);
     expect(response?.status(), 'note detail status').toBe(200);
 
