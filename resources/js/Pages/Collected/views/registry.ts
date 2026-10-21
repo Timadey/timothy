@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import type { CollectedItem, ItemType } from '@/collectedTypes';
 import { EditorialList } from './EditorialList';
 import { BooksGrid } from './BooksGrid';
+import { VideoGrid } from './VideoGrid';
 
 export type ViewProps = {
     items: CollectedItem[];
@@ -11,6 +12,7 @@ export type ViewComponent = ComponentType<ViewProps>;
 
 const REGISTRY: Partial<Record<ItemType, ViewComponent>> = {
     book: BooksGrid,
+    video: VideoGrid,
     article: EditorialList,
     podcast: EditorialList,
     quote: EditorialList,
