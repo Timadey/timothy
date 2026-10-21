@@ -71,9 +71,10 @@ it('sends a message and flashes sent', function () {
 
     Mail::assertSent(AskMessage::class, function (AskMessage $mail) {
         return $mail->hasTo('hi@timothyadeleke.com')
-            && $mail->replyTo[0]->email === 'visitor@example.com'
-            && $mail->subject === 'Hello there'
-            && str_contains($mail->text->render(), 'This is my message.');
+            && $mail->envelope()->replyTo[0]->address === 'visitor@example.com'
+            && $mail->envelope()->subject === 'Hello there'
+            && $mail->content()->text === 'mail.ask-message'
+            && $mail->content()->with['body'] === 'This is my message.';
     });
 });
 ```

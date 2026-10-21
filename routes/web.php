@@ -95,7 +95,8 @@ Route::get('/now', \App\Http\Controllers\NowPageController::class)->name('now');
 
 Route::get('/search', \App\Http\Controllers\SearchController::class)->name('search');
 
-Route::get('/ask', fn () => inertia('Ask'))->name('ask');
+Route::get('/ask', [\App\Http\Controllers\AskController::class, 'index'])->name('ask');
+Route::post('/ask', [\App\Http\Controllers\AskController::class, 'send'])->middleware('throttle:5,1')->name('ask.send');
 
 Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap']);
 Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots']);
