@@ -80,7 +80,7 @@ Phase 3 vars are present but commented out: `# LLM_PROVIDER=`, `# LLM_API_KEY=`,
 
 ## Docker
 
-`docker/` + `docker-compose.yml` is a **Phase 5 target scaffold** (app + postgres:16 + nginx) — not required for local development. See [`docker/README.md`](docker/README.md).
+Production deploys with the root `Dockerfile` — a single container (nginx + PHP 8.4.27-FPM, today's security patch) built on Coolify and bootstrapped by `scripts/00-laravel-deploy.sh`. See [`docs/superpowers/specs/2026-10-21-docker-deployment-design.md`](docs/superpowers/specs/2026-10-21-docker-deployment-design.md).
 
 ## License
 
