@@ -17,6 +17,7 @@ test('FAB drawer composes and publishes a note that appears in the public stream
     const dialog = page.getByRole('dialog', { name: 'Quick post' });
     await expect(dialog).toBeVisible();
     await dialog.getByPlaceholder("What's on your mind?").fill(body);
+    await dialog.getByPlaceholder('Add a title (optional)').fill(`Drawer note ${stamp}`);
     await shot(page, 'admin-quick-note-drawer');
 
     await dialog.getByRole('button', { name: 'Publish' }).click();
@@ -29,9 +30,8 @@ test('FAB drawer composes and publishes a note that appears in the public stream
     await expect(row).toBeVisible();
     await shot(page, 'notes-stream-truncated');
 
-    await row.getByRole('link').first().click();
-    await page.waitForURL((url) => url.pathname.startsWith('/notes/drawer-note-'));
-    await expect(page.getByText('More than two hundred eighty characters so the stream truncates it.')).toBeVisible();
+    await row.getByRole('button', { name: 'read more' }).click();
+    await expect(row.getByText('More than two hundred eighty characters so the stream truncates it.')).toBeVisible();
 });
 
 test('full page composer publishes from /admin/notes/new', async ({ page }) => {
