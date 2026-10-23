@@ -28,7 +28,7 @@ final class HtmlSanitizer
         'code' => [],
         'br' => [],
         'hr' => [],
-        'a' => ['href', 'title'],
+        'a' => ['href', 'title', 'target', 'rel'],
         'img' => ['src', 'alt', 'width', 'height'],
         'figure' => [],
         'figcaption' => [],
@@ -101,6 +101,18 @@ final class HtmlSanitizer
                 self::reject();
             }
 
+            return;
+        }
+
+        if ($name === 'target') {
+            if (! in_array($value, ['_blank', '_self'], true)) {
+                self::reject();
+            }
+
+            return;
+        }
+
+        if ($name === 'rel') {
             return;
         }
 

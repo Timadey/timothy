@@ -45,3 +45,14 @@ it('accepts local and mailto links', function () {
 
     expect(HtmlSanitizer::sanitize($html))->toBe($html);
 });
+
+it('allows pasted external link attributes (target and rel)', function () {
+    $html = '<p>I found <a target="_blank" rel="noopener noreferrer nofollow" href="https://alxafrica.com">ALX</a>.</p>';
+
+    expect(HtmlSanitizer::sanitize($html))->toBe($html);
+});
+
+it('rejects unexpected target values on links', function () {
+    expect(fn () => HtmlSanitizer::sanitize('<p><a target="evil" href="https://example.com">x</a></p>'))
+        ->toThrow(ValidationException::class);
+});
