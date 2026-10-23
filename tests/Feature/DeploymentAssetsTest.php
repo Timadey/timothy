@@ -35,6 +35,13 @@ it('guards APP_KEY, optimizes and migrates at boot', function () {
         ->and($deploy)->not->toContain('composer update');
 });
 
+it('ensures the storage directory structure exists before artisan runs', function () {
+    $deploy = file_get_contents(base_path('scripts/00-laravel-deploy.sh'));
+
+    expect($deploy)->toContain('mkdir -p')
+        ->and($deploy)->toContain('storage/framework/views');
+});
+
 it('starts php-fpm and nginx under supervisord', function () {
     $startPath = base_path('scripts/start.sh');
     $confPath = base_path('conf/supervisor/supervisord.conf');

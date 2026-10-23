@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "Ensuring storage directory structure..."
+mkdir -p \
+    storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/testing \
+    storage/framework/views \
+    storage/logs \
+    storage/app/public \
+    storage/app/private
+
 echo "Checking APP_KEY..."
 if [ -z "${APP_KEY:-}" ]; then
     echo "ERROR: APP_KEY is not set. Generate one with: php artisan key:generate --show" >&2
