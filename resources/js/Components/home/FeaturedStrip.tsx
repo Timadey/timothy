@@ -16,7 +16,7 @@ export function FeaturedStrip({ items }: { items: FeaturedItem[] }) {
     }
 
     return (
-        <section className="border-t border-hairline bg-surface" aria-labelledby="featured-heading">
+        <section className="bg-surface md:border-t md:border-hairline" aria-labelledby="featured-heading">
             <div className="mx-auto max-w-5xl px-6 py-12">
                 <h2 id="featured-heading" className="text-sm font-semibold uppercase tracking-wider text-meta">
                     A few favourites

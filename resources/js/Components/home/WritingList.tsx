@@ -12,7 +12,7 @@ export type WritingItem = {
 
 export function WritingList({ writings }: { writings: WritingItem[] }) {
     return (
-        <section className="mx-auto max-w-5xl border-t border-hairline px-6 py-12" aria-labelledby="writing-heading">
+        <section className="mx-auto max-w-5xl px-6 py-12 md:border-t md:border-hairline" aria-labelledby="writing-heading">
             <div className="flex items-baseline justify-between gap-4">
                 <h2 id="writing-heading" className="text-sm font-semibold uppercase tracking-wider text-meta">
                     What I’ve been writing

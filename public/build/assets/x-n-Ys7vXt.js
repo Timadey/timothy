@@ -1,1 +1,0 @@
-import{c as e}from"./createLucideIcon-BitjaZDY.js";const a={name:"menu",size:24,node:[["path",{d:"M4 5h16",key:"1tepv9"}],["path",{d:"M4 12h16",key:"1lakjw"}],["path",{d:"M4 19h16",key:"1djgab"}]]};a.node;const o=e(a);const n={name:"x",size:24,node:[["path",{d:"M18 6 6 18",key:"1bl5f8"}],["path",{d:"m6 6 12 12",key:"d8bk6v"}]]};n.node;const d=e(n);export{o as M,d as X};

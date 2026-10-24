@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
-import { MobileNav } from '@/Components/MobileNav';
+import { MobileDrawer } from '@/Components/MobileDrawer';
 import { navItems } from '@/nav';
 
 type SocialLink = { platform: string; url: string; label: string | null };
@@ -18,9 +18,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             >
                 Skip to content
             </a>
-            <header className="sticky top-0 z-30 border-b border-hairline bg-white/90 backdrop-blur">
-                <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-                    <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight text-primary">
+            <header className="sticky top-0 z-30 bg-white/90 backdrop-blur md:border-b md:border-hairline">
+                <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:py-3">
+                    <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary md:text-lg">
                         <img src="/images/logo-mark.png" alt="Timadey" width={28} height={28} className="rounded-lg" />
                         Timadey
                     </Link>
@@ -37,13 +37,12 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                             </Link>
                         ))}
                     </nav>
-                    <MobileNav current={current} />
                 </div>
             </header>
             <main id="main" className="flex-1">
                 {children}
             </main>
-            <footer className="border-t border-hairline">
+            <footer className="md:border-t md:border-hairline">
                 <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-8 text-xs text-meta sm:flex-row sm:justify-between">
                     <span>© {new Date().getFullYear()} Timadey</span>
                     <div className="flex flex-wrap gap-4">
@@ -73,6 +72,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                     </div>
                 </div>
             </footer>
+            <MobileDrawer current={current} />
         </div>
     );
 }

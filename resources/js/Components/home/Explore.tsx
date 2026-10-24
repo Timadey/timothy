@@ -15,7 +15,7 @@ export function Explore({ projects, collected }: { projects: number; collected: 
     ];
 
     return (
-        <section className="mx-auto max-w-5xl border-t border-hairline px-6 py-12" aria-labelledby="explore-heading">
+        <section className="mx-auto max-w-5xl px-6 py-12 md:border-t md:border-hairline" aria-labelledby="explore-heading">
             <h2 id="explore-heading" className="text-sm font-semibold uppercase tracking-wider text-meta">
                 More to explore
             </h2>

@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
     @php($seo = \App\Support\Seo::forPage($page ?? null))
     <title>{{ $seo['title'] }}</title>
     @if ($seo['description'])
