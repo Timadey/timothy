@@ -41,22 +41,22 @@ export default function ProjectShow({
             </Head>
 
             <article className="mx-auto max-w-3xl px-6 pt-12 pb-16">
-                <div className="flex items-center gap-3">
-                    <Badge>{project.status}</Badge>
-                    {project.started_at && <span className="text-xs text-meta">Started {project.started_at}</span>}
-                    {project.completed_at && <span className="text-xs text-meta">Completed {project.completed_at}</span>}
-                </div>
-                <h1 className="mt-3 text-4xl font-semibold tracking-tight">{project.name}</h1>
-                {project.summary && <p className="mt-3 text-lg text-meta">{project.summary}</p>}
+                {project.cover_image && (
+                    <div className="h-64 relative overflow-hidden rounded-xl">
+                        <img src={project.cover_image} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                    </div>
+                )}
+                <h1 className="mt-6 text-4xl font-semibold tracking-tight">{project.name}</h1>
+                {project.summary && <p className="mt-4 text-lg text-meta">{project.summary}</p>}
 
                 {(project.live_url || project.repository_url) && (
-                    <div className="mt-5 flex flex-wrap gap-3">
+                    <div className="mt-8 flex flex-wrap gap-3">
                         {project.live_url && (
                             <a
                                 href={project.live_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-80"
+                                className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-white hover:opacity-80"
                             >
                                 Visit site
                             </a>
@@ -66,7 +66,7 @@ export default function ProjectShow({
                                 href={project.repository_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="rounded-md border border-hairline px-4 py-2 text-sm font-medium hover:bg-surface"
+                                className="rounded-full border border-hairline px-5 py-2 text-sm font-medium hover:bg-surface"
                             >
                                 Source code
                             </a>
@@ -74,13 +74,17 @@ export default function ProjectShow({
                     </div>
                 )}
 
-                {project.cover_image && <img src={project.cover_image} alt="" className="mt-8 w-full rounded-md" loading="lazy" />}
+                <div className="mt-8 flex flex-wrap items-center gap-4 text-xs text-meta">
+                    <span className="rounded-full border border-hairline px-2 py-1">{project.status}</span>
+                    {project.started_at && <span>Started {project.started_at}</span>}
+                    {project.completed_at && <span>Completed {project.completed_at}</span>}
+                </div>
 
-                <hr className="my-8 border-hairline" />
+                <hr className="my-12 border-hairline" />
                 <Prose html={project.description_html} />
 
                 {project.tags.length > 0 && (
-                    <div className="mt-10 flex flex-wrap gap-2 border-t border-hairline pt-6">
+                    <div className="mt-12 flex flex-wrap gap-2 border-t border-hairline pt-8">
                         {project.tags.map((t) => (
                             <Badge key={t}>{t}</Badge>
                         ))}
