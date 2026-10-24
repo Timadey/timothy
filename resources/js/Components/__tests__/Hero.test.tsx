@@ -20,7 +20,7 @@ const base = {
     initials: 'TS',
 };
 
-test('renders headline, role@company chip, and status', () => {
+test('renders headline, role/company byline, and status', () => {
     render(<Hero hero={base} />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent("Hey, I'm Timadey.");
     expect(screen.getByText('Design Engineer')).toBeInTheDocument();
@@ -55,8 +55,9 @@ test('company without url renders as plain text', () => {
     expect(screen.queryByRole('link', { name: 'Striped' })).not.toBeInTheDocument();
 });
 
-test('omits chip and status when empty', () => {
+test('omits byline and status when empty', () => {
     render(<Hero hero={{ ...base, role: null, company: null, status: null }} />);
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+    expect(screen.queryByText('Design Engineer')).not.toBeInTheDocument();
     expect(screen.queryByText('@')).not.toBeInTheDocument();
 });
