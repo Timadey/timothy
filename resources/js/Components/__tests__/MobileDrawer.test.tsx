@@ -75,7 +75,7 @@ test('locks body scroll while open and releases on close', () => {
     expect(document.body.style.overflow).toBe('');
 });
 
-test('hides the trigger on scroll up, shows it on scroll down and at the top', () => {
+test('hides the trigger on scroll down, shows it on scroll up and at the top', () => {
     render(<MobileDrawer current="/" />);
     const trigger = screen.getByRole('button', { name: 'Open menu' });
 
@@ -83,11 +83,11 @@ test('hides the trigger on scroll up, shows it on scroll down and at the top', (
 
     setScrollY(300);
     fireEvent.scroll(window);
-    expect(trigger.className).not.toContain('opacity-0');
+    expect(trigger.className).toContain('opacity-0');
 
     setScrollY(240);
     fireEvent.scroll(window);
-    expect(trigger.className).toContain('opacity-0');
+    expect(trigger.className).not.toContain('opacity-0');
 
     setScrollY(0);
     fireEvent.scroll(window);
@@ -100,12 +100,10 @@ test('keeps the trigger visible while the drawer is open', () => {
 
     setScrollY(400);
     fireEvent.scroll(window);
-    setScrollY(300);
+    setScrollY(500);
     fireEvent.scroll(window);
     expect(trigger.className).toContain('opacity-0');
 
-    setScrollY(250);
-    fireEvent.scroll(window);
     fireEvent.click(trigger);
     expect(trigger.className).not.toContain('opacity-0');
     expect(trigger.className).not.toContain('pointer-events-none');

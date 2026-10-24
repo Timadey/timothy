@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import { navItems } from '@/nav';
+import { useScrollAwareVisibility } from '@/scrollVisibility';
 
 function NavIcon({ href, className }: { href: string; className?: string }) {
     const shared = {
@@ -84,29 +85,10 @@ function GridOrbIcon({ className }: { className?: string }) {
 
 export function MobileDrawer({ current }: { current: string }) {
     const [open, setOpen] = useState(false);
-    const [hidden, setHidden] = useState(false);
+    const visible = useScrollAwareVisibility();
     const drawerRef = useRef<HTMLElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
     const wasOpen = useRef(false);
-
-    useEffect(() => {
-        let lastY = window.scrollY;
-        const onScroll = () => {
-            const y = window.scrollY;
-            if (open) {
-                lastY = y;
-                return;
-            }
-            if (y <= 12 || y > lastY + 3) {
-                setHidden(false);
-            } else if (y < lastY - 3) {
-                setHidden(true);
-            }
-            lastY = y;
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        return () => window.removeEventListener('scroll', onScroll);
-    }, [open]);
 
     useEffect(() => {
         if (!open) return;
@@ -203,7 +185,7 @@ export function MobileDrawer({ current }: { current: string }) {
                 className={`fixed left-1/2 z-50 grid -translate-x-1/2 place-items-center rounded-full bg-black text-white shadow-[0_12px_28px_rgba(0,0,0,0.4)] transition-[opacity,transform,width,height,bottom] duration-300 ${
                     open
                         ? 'bottom-[calc(52px+env(safe-area-inset-bottom))] h-11 w-11 opacity-100'
-                        : hidden
+                        : !visible
                           ? 'pointer-events-none h-[54px] w-[54px] translate-y-4 bottom-[calc(44px+env(safe-area-inset-bottom))] opacity-0'
                           : 'h-[54px] w-[54px] bottom-[calc(44px+env(safe-area-inset-bottom))] opacity-100'
                 }`}

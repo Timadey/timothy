@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import { MobileDrawer } from '@/Components/MobileDrawer';
 import { navItems } from '@/nav';
+import { useScrollAwareVisibility } from '@/scrollVisibility';
 
 type SocialLink = { platform: string; url: string; label: string | null };
 
@@ -9,6 +10,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     const { url, props } = usePage();
     const current = url.split('?')[0];
     const socialLinks = ((props as { social_links?: SocialLink[] }).social_links ?? []);
+    const headerVisible = useScrollAwareVisibility();
 
     return (
         <div className="flex min-h-screen flex-col">
@@ -18,7 +20,11 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             >
                 Skip to content
             </a>
-            <header className="sticky top-0 z-30 bg-white/90 backdrop-blur md:border-b md:border-hairline">
+            <header
+                className={`sticky top-0 z-30 bg-white/90 backdrop-blur transition-transform duration-300 md:border-b md:border-hairline ${
+                    headerVisible ? 'translate-y-0' : '-translate-y-full'
+                }`}
+            >
                 <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:py-3">
                     <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary md:text-lg">
                         <img src="/images/logo-mark.png" alt="Timadey" width={28} height={28} className="rounded-lg" />
