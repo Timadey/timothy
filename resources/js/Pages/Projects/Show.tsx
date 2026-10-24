@@ -74,12 +74,6 @@ export default function ProjectShow({
                     </div>
                 )}
 
-                <div className="mt-8 flex flex-wrap items-center gap-4 text-xs text-meta">
-                    <span className="rounded-full border border-hairline px-2 py-1">{project.status}</span>
-                    {project.started_at && <span>Started {project.started_at}</span>}
-                    {project.completed_at && <span>Completed {project.completed_at}</span>}
-                </div>
-
                 <hr className="my-12 border-hairline" />
                 <Prose html={project.description_html} />
 
@@ -90,9 +84,8 @@ export default function ProjectShow({
                         ))}
                     </div>
                 )}
-            </article>
 
-            {related.posts.length > 0 && (
+                {related.posts.length > 0 && (
                 <aside className="mx-auto max-w-3xl border-t border-hairline px-6 py-10" aria-labelledby="related-heading">
                     <h2 id="related-heading" className="text-sm font-semibold uppercase tracking-wider text-meta">
                         Related writing
@@ -109,6 +102,7 @@ export default function ProjectShow({
                     </ul>
                 </aside>
             )}
+            </article>
         </PublicLayout>
     );
 }

@@ -61,10 +61,11 @@ export default function ProjectsIndex({ projects, statuses, filters }: { project
                                     )}
                                 </div>
                                 <div className="p-4 pt-3">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <Badge>{statusLabels[p.status] ?? p.status}</Badge>
-                                        {p.tags.length > 0 && <span className="ml-auto text-xs text-meta">{p.tags.join(' · ')}</span>}
-                                    </div>
+                                    {p.tags.length > 0 && (
+                                        <span className="ml-auto text-xs text-meta block mb-2">
+                                            {p.tags.join(' · ')}
+                                        </span>
+                                    )}
                                     <Link href={`/projects/${p.slug}`} className="mt-2 block text-lg font-semibold tracking-tight hover:text-link">
                                         {p.name}
                                     </Link>
@@ -78,9 +79,8 @@ export default function ProjectsIndex({ projects, statuses, filters }: { project
                 <div className="mt-10 grid gap-6 sm:grid-cols-3">
                     {rest.map((p) => (
                         <article key={p.slug} className="border-t border-hairline pt-4">
-                            <div className="flex items-center justify-between gap-2">
-                                <Badge>{statusLabels[p.status] ?? p.status}</Badge>
-                                {p.tags.length > 0 && <span className="ml-auto text-xs text-meta">{p.tags.join(' · ')}</span>}
+                            <div className="flex items-end justify-between gap-2">
+                                {p.tags.length > 0 && <span className="text-xs text-meta">{p.tags.join(' · ')}</span>}
                             </div>
                             {p.cover_image && <img src={p.cover_image} alt="" className="mt-3 w-full rounded-md" loading="lazy" />}
                             <Link href={`/projects/${p.slug}`} className="mt-2 block text-lg font-semibold tracking-tight hover:text-link">
