@@ -1,0 +1,1 @@
+import{j as e}from"./app-BzJZUnwr.js";import{T as r}from"./Tag-B1irikyO.js";import{b as l}from"./collectedTypes-BydlGNRC.js";function o({item:s}){return s.tags.length===0?null:e.jsx("span",{className:"flex flex-wrap gap-1.5",children:s.tags.map(a=>e.jsx(r,{label:a.name,href:`/collected/${l[s.item_type]}?tag=${a.slug}`},a.slug))})}export{o as I};
