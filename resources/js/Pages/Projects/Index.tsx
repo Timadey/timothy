@@ -1,6 +1,5 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Head, Link } from '@inertiajs/react';
-import { Badge } from '@/Components/Badge';
 import { Pagination } from '@/Components/Pagination';
 import { EmptyState } from '@/Components/EmptyState';
 
@@ -17,15 +16,6 @@ type ProjectCard = {
 
 type Paginated = { data: ProjectCard[]; links: { url: string | null; label: string; active: boolean }[] };
 type Filters = { status?: string };
-
-const statusLabels: Record<string, string> = {
-    idea: 'Idea',
-    exploring: 'Exploring',
-    building: 'Building',
-    active: 'Active',
-    paused: 'Paused',
-    completed: 'Completed',
-};
 
 export default function ProjectsIndex({ projects, statuses, filters }: { projects: Paginated; statuses: string[]; filters: Filters }) {
     const featured = projects.data.filter((p) => p.featured);
@@ -55,9 +45,7 @@ export default function ProjectsIndex({ projects, statuses, filters }: { project
                                     {p.cover_image ? (
                                         <img src={p.cover_image} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                                     ) : (
-                                        <div className="absolute inset-0 w-full h-full border border-dashed border-hairline rounded-[inherit] bg-surface/50 flex items-center justify-center">
-                                            <span className="z-10"><Badge>{statusLabels[p.status] ?? p.status}</Badge></span>
-                                        </div>
+                                        <div className="absolute inset-0 w-full h-full border border-dashed border-hairline rounded-[inherit] bg-surface/50" />
                                     )}
                                 </div>
                                 <div className="p-4 pt-3">
