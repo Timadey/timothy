@@ -136,6 +136,10 @@ export function MobileDrawer({ current }: { current: string }) {
                             : 'pointer-events-none translate-y-5 scale-[0.72] opacity-0'
                     }`}
                 >
+                    <div className="mb-3 flex items-center justify-center gap-2 pb-0.5 pt-1.5">
+                        <img src="/images/logo-mark.png" alt="" width={22} height={22} className="rounded-md" />
+                        <span className="text-[13px] font-bold tracking-tight text-ink">Timadey</span>
+                    </div>
                     <ul className="grid grid-cols-4 gap-x-1.5 gap-y-3.5 pt-1.5">
                         {navItems.map((item, index) => {
                             const isCurrent = current === item.href;

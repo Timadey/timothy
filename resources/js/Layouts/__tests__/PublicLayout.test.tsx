@@ -27,6 +27,9 @@ test('header hides while scrolling down, returns on scroll up and at the top', (
     );
     const header = screen.getByRole('banner');
 
+    expect(header.className).toContain('hidden');
+    expect(screen.getByRole('main').className).toContain('safe-area-inset-top');
+
     expect(header.className).not.toContain('-translate-y-full');
 
     setScrollY(500);

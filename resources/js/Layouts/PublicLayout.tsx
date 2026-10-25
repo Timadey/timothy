@@ -21,7 +21,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                 Skip to content
             </a>
             <header
-                className={`sticky top-0 z-30 bg-white/90 backdrop-blur transition-transform duration-300 md:border-b md:border-hairline ${
+                className={`sticky top-0 z-30 hidden bg-white/90 backdrop-blur transition-transform duration-300 md:block md:border-b md:border-hairline ${
                     headerVisible ? 'translate-y-0' : '-translate-y-full'
                 }`}
             >
@@ -45,7 +45,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                     </nav>
                 </div>
             </header>
-            <main id="main" className="flex-1">
+            <main id="main" className="flex-1 pt-[max(env(safe-area-inset-top),16px)] md:pt-0">
                 {children}
             </main>
             <footer className="md:border-t md:border-hairline">

@@ -41,6 +41,13 @@ test('marks the current page with aria-current on its tile', () => {
     expect(screen.getByRole('link', { name: /About/ })).not.toHaveAttribute('aria-current');
 });
 
+test('shows the brand row inside the drawer', () => {
+    render(<MobileDrawer current="/" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
+
+    expect(screen.getByText('Timadey')).toBeInTheDocument();
+});
+
 test('closes on Escape', () => {
     render(<MobileDrawer current="/" />);
     fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
