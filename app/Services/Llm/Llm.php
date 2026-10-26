@@ -27,4 +27,18 @@ class Llm
             && (bool) config('llm.api_key')
             && (bool) config('llm.model');
     }
+
+    public static function client(): OpenAiLlmClient
+    {
+        if (! self::enabled()) {
+            throw new LlmException('LLM not configured');
+        }
+
+        return new OpenAiLlmClient(
+            (string) self::baseUrl(),
+            (string) config('llm.api_key'),
+            (string) config('llm.model'),
+            (int) config('llm.timeout', 10),
+        );
+    }
 }
