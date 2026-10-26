@@ -81,3 +81,17 @@ it('returns 502 when the model answers with prose', function () {
         ->postJson('/admin/posts/suggest-seo', ['title' => 'T', 'body' => '<p>b</p>'])
         ->assertStatus(502);
 });
+
+it('shares whether the llm is enabled', function () {
+    $this->actingAs($this->owner)
+        ->get('/admin')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('llm_enabled', false));
+
+    config(['llm.api_key' => 'k', 'llm.model' => 'm']);
+
+    $this->actingAs($this->owner)
+        ->get('/admin')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('llm_enabled', true));
+});
