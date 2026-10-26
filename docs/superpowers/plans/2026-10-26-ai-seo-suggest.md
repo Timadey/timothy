@@ -17,10 +17,11 @@
 - **Fill-only-empty rule for all sources** (AI and local): only fields whose current value is empty/whitespace get written. Clear a field to let AI rewrite it.
 - **Silent fallback** — every AI failure falls back to local `suggestSeo()` with `console.warn` only (no toasts, no visible errors).
 - **Disabled-safe** — with no `LLM_*` env set, behavior is byte-for-byte today's feature (no network call).
+- **Admin toggle gate** — `Llm::usable() = enabled() && Setting::get('llm_enabled', '1') !== '0'` (key `'llm_enabled'`, default `'1'` = ON). Endpoint gate + shared prop use `usable()`; `enabled()` keeps meaning "env configured" and drives the Settings checkbox lock. Endpoint 422 messages distinguish cause: `LLM not configured` vs `AI suggestions are disabled in settings`.
 - **TDD strictly:** write failing test → verify RED → implement → verify GREEN → commit, per task.
 - **PHP clamp must mirror the TS clamp in `resources/js/seoSuggest.ts` exactly:** `excerpt` 280, `meta_description` 160 (sentence boundary if the last `.!?` within the slice ends at ≥ `floor(max/2)`, else word-cut at `max-1` + `…`); AI path additionally clamps `meta_title` to 60. Local TS path keeps plain `title.trim()`.
 - **Never stage `config/app.php` or `.vite/`.** Commit `public/build/` with every frontend change.
-- Baselines that must stay green: Pest **252**, Vitest **118** (suites only grow). Note: commit `6d834ba` (owner-authored, mid-plan) made `SeoSuggestButton` `values` nullable (`string | null`, `?? ''` guards) and added a 5th button test — Tasks 6/7 below are written on top of that fix; **never revert it**.
+- Baselines that must stay green: Pest **252**, Vitest **118** (suites only grow). Note: commit `6d834ba` (owner-authored, mid-plan) made `SeoSuggestButton` `values` nullable (`string | null`, `?? ''` guards) and added a 5th button test — Tasks 8/9 below are written on top of that fix; **never revert it**.
 - Endpoint lives inside the existing admin group: `Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])` (`routes/web.php:16`).
 - Admin test auth convention (`tests/Feature/AdminPostsTest.php:5-6`): `beforeEach` creates `User::factory()->create(['role' => 'owner'])`, requests use `$this->actingAs($this->owner)`.
 - Frontend JSON+CSRF convention (`resources/js/Components/RichEditor.tsx:19-30`): read `XSRF-TOKEN` cookie, send `X-XSRF-TOKEN` decoded, `Accept`/`Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`, `credentials: 'same-origin'`.
@@ -37,13 +38,17 @@
 | Modify: `.env.example:72-75` | Document the `LLM_*` block |
 | Modify: `app/Http/Controllers/Admin/PostController.php` | New `suggestSeo()` JSON action |
 | Modify: `routes/web.php` (after line 26) | `POST posts/suggest-seo` + `throttle:20,1` |
-| Modify: `app/Http/Middleware/HandleInertiaRequests.php:10-20` | Shared `llm_enabled` prop |
+| Modify: `app/Http/Middleware/HandleInertiaRequests.php:10-20` | Shared `llm_enabled` prop (via `usable()`) |
+| Modify: `app/Services/Llm/Llm.php` | Add `usable()` — env AND settings toggle |
+| Modify: `app/Http/Controllers/Admin/SettingsController.php` | Pass `llm_enabled`/`llm_configured` props; validate + coerce the boolean |
+| Modify: `resources/js/Pages/Admin/Settings.tsx` | "AI suggestions" section: checkbox + env-missing lock note |
 | Modify: `resources/js/Components/SeoSuggestButton.tsx` | `llmEnabled` prop, busy state, fetch + silent fallback |
 | Modify: `resources/js/Pages/Admin/Posts/Edit.tsx` | Read `llm_enabled`, pass to button |
-| Test: `tests/Feature/LlmTest.php` | Resolver behavior |
+| Test: `tests/Feature/LlmTest.php` | Resolver behavior + `usable()` units |
 | Test: `tests/Feature/OpenAiLlmClientTest.php` | Client contract via `Http::fake` |
 | Test: `tests/Feature/SeoSuggestServiceTest.php` | Prompt, parsing, clamping |
-| Test: `tests/Feature/AdminSuggestSeoTest.php` | Endpoint auth/config/HTTP outcomes + shared prop |
+| Test: `tests/Feature/AdminSuggestSeoTest.php` | Endpoint auth/config/HTTP outcomes + shared prop + toggle-off outcomes |
+| Test: `tests/Feature/AdminSettingsToggleTest.php` | Settings round-trip: edit props + update persistence |
 | Test: `resources/js/Components/__tests__/SeoSuggestButton.test.tsx` | AI-mode behavior (extend existing file) |
 
 ---
@@ -630,7 +635,7 @@ git commit -m "feat: add ai seo suggestion service with defensive clamping"
 
 **Interfaces:**
 - Consumes: `Llm::enabled()`, `LlmException`, `SeoSuggestService::suggest(title, body)` from Tasks 1-3.
-- Produces: `POST /admin/posts/suggest-seo` → `200 {excerpt, meta_title, meta_description, source}` | `422 {message:'LLM not configured'}` | `502 {message:'AI suggestion failed'}` | validation-422. Task 6's frontend depends on this contract.
+- Produces: `POST /admin/posts/suggest-seo` → `200 {excerpt, meta_title, meta_description, source}` | `422 {message:'LLM not configured'}` | `502 {message:'AI suggestion failed'}` | validation-422. Task 8's frontend depends on this contract. (Task 6 later switches the gate to `usable()` and adds the second 422 message.)
 
 - [ ] **Step 1: Write the failing test**
 
@@ -798,7 +803,7 @@ git commit -m "feat: add admin suggest-seo endpoint"
 
 **Interfaces:**
 - Consumes: `Llm::enabled()` from Task 1.
-- Produces: shared prop `llm_enabled: boolean` on every Inertia page. Task 7's `Edit.tsx` reads it as `usePage().props as { llm_enabled: boolean }`.
+- Produces: shared prop `llm_enabled: boolean` on every Inertia page (initially computed by `Llm::enabled()`; Task 6 switches it to `usable()`). Task 9's `Edit.tsx` reads it as `usePage().props as { llm_enabled: boolean }`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -856,7 +861,290 @@ git commit -m "feat: share llm_enabled with inertia pages"
 
 ---
 
-### Task 6: AI branch in SeoSuggestButton
+### Task 6: Admin toggle — `usable()` resolver + endpoint/prop gates
+
+**Files:**
+- Modify: `app/Services/Llm/Llm.php` (add `usable()` + `use App\Models\Setting;`)
+- Modify: `app/Http/Controllers/Admin/PostController.php` (gate `enabled()` → `usable()`, two 422 messages)
+- Modify: `app/Http/Middleware/HandleInertiaRequests.php` (prop `enabled()` → `usable()`)
+- Test: `tests/Feature/LlmTest.php` (extend, +3), `tests/Feature/AdminSuggestSeoTest.php` (extend, +2)
+
+**Interfaces:**
+- Consumes: `Llm::enabled()` from Task 1; committed endpoint (Task 4) and shared prop (Task 5); `Setting::get` (`app/Models/Setting.php`).
+- Produces: `Llm::usable(): bool`; endpoint 422 messages `'LLM not configured'` (`!enabled()`) vs `'AI suggestions are disabled in settings'` (enabled but toggle off); shared prop = `usable()`. Task 7's Settings UI consumes `Llm::enabled()` for the lock state.
+
+- [ ] **Step 1: Write the failing tests**
+
+Append `use App\Models\Setting;` to the imports of `tests/Feature/LlmTest.php`, then append:
+
+```php
+it('is usable by default once env is configured', function () {
+    config(['llm.provider' => 'openai', 'llm.api_key' => 'k', 'llm.model' => 'm']);
+
+    expect(Setting::get('llm_enabled', '1'))->toBe('1')
+        ->and(Llm::usable())->toBeTrue();
+});
+
+it('is not usable when the settings toggle is off', function () {
+    config(['llm.provider' => 'openai', 'llm.api_key' => 'k', 'llm.model' => 'm']);
+    Setting::set('llm_enabled', '0');
+
+    expect(Llm::usable())->toBeFalse();
+});
+
+it('is not usable without env regardless of the settings toggle', function () {
+    Setting::set('llm_enabled', '1');
+
+    expect(Llm::usable())->toBeFalse();
+});
+```
+
+Append `use App\Models\Setting;` to the imports of `tests/Feature/AdminSuggestSeoTest.php`, then append:
+
+```php
+it('returns 422 disabled message when toggled off in settings', function () {
+    config(['llm.api_key' => 'k', 'llm.model' => 'm']);
+    Setting::set('llm_enabled', '0');
+    Http::fake(['*' => Http::response('{}', 200)]);
+
+    $this->actingAs($this->owner)
+        ->postJson('/admin/posts/suggest-seo', ['title' => 'T', 'body' => '<p>b</p>'])
+        ->assertStatus(422)
+        ->assertJson(['message' => 'AI suggestions are disabled in settings']);
+});
+
+it('shares llm_enabled as false when the settings toggle is off', function () {
+    config(['llm.api_key' => 'k', 'llm.model' => 'm']);
+    Setting::set('llm_enabled', '0');
+
+    $this->actingAs($this->owner)
+        ->get('/admin')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('llm_enabled', false));
+});
+```
+
+(The `Http::fake` in the endpoint test guards RED from making a real network call — without the toggle gate, the old code would proceed to the LLM call.)
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+Run: `vendor/bin/pest tests/Feature/LlmTest.php tests/Feature/AdminSuggestSeoTest.php`
+Expected: 5 new tests FAIL (`Call to undefined method ...usable()` ×3; endpoint test gets 502/200 instead of 422-disabled; prop test gets `true` instead of `false`). Pre-existing tests stay green.
+
+- [ ] **Step 3: Write the implementation**
+
+Modify `app/Services/Llm/Llm.php` — add import `use App\Models\Setting;` and method:
+
+```php
+    public static function usable(): bool
+    {
+        return self::enabled()
+            && Setting::get('llm_enabled', '1') !== '0';
+    }
+```
+
+Modify `app/Http/Controllers/Admin/PostController.php` — replace the gate inside `suggestSeo()`:
+
+```php
+        if (! Llm::usable()) {
+            return response()->json([
+                'message' => Llm::enabled()
+                    ? 'AI suggestions are disabled in settings'
+                    : 'LLM not configured',
+            ], 422);
+        }
+```
+
+Modify `app/Http/Middleware/HandleInertiaRequests.php` — change the shared prop:
+
+```php
+            'llm_enabled' => fn () => Llm::usable(),
+```
+
+- [ ] **Step 4: Run tests to verify they pass**
+
+Run: `vendor/bin/pest tests/Feature/LlmTest.php tests/Feature/AdminSuggestSeoTest.php`
+Expected: PASS — LlmTest 10 tests, AdminSuggestSeoTest 10 tests.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add app/Services/Llm/Llm.php app/Http/Controllers/Admin/PostController.php app/Http/Middleware/HandleInertiaRequests.php tests/Feature/LlmTest.php tests/Feature/AdminSuggestSeoTest.php
+git commit -m "feat: gate ai suggestions behind admin settings toggle"
+```
+
+---
+
+### Task 7: Settings toggle UI + persistence
+
+**Files:**
+- Modify: `app/Http/Controllers/Admin/SettingsController.php` (edit props, update validation + coercion, `use App\Services\Llm\Llm;`)
+- Modify: `resources/js/Pages/Admin/Settings.tsx` (Settings type, component props, AI section)
+- Test: `tests/Feature/AdminSettingsToggleTest.php` (new)
+
+**Interfaces:**
+- Consumes: `Llm::enabled()` (lock state); `Setting::get/set`; existing routes `GET /admin/settings` → edit, `PUT /admin/settings` → update (`routes/web.php:73-74`).
+- Produces: page props `settings.llm_enabled: boolean` (default `true`) and `llm_configured: boolean`; persisted key `'llm_enabled'` as `'1'`/`'0'` (read by `Llm::usable()`, Task 6). `Settings.tsx` prop signature gains `llm_configured: boolean`.
+
+- [ ] **Step 1: Write the failing test**
+
+Create `tests/Feature/AdminSettingsToggleTest.php`:
+
+```php
+<?php
+
+use App\Models\Setting;
+use App\Models\User;
+
+beforeEach(function () {
+    config([
+        'llm.provider' => null,
+        'llm.base_url' => null,
+        'llm.api_key' => null,
+        'llm.model' => null,
+    ]);
+    $this->owner = User::factory()->create(['role' => 'owner']);
+});
+
+it('shows the toggle on by default and reports env configuration', function () {
+    $this->actingAs($this->owner)->get('/admin/settings')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('settings.llm_enabled', true)
+            ->where('llm_configured', false));
+
+    config(['llm.provider' => 'openai', 'llm.api_key' => 'k', 'llm.model' => 'm']);
+
+    $this->actingAs($this->owner)->get('/admin/settings')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('llm_configured', true));
+});
+
+it('persists the toggle off as 0', function () {
+    $this->actingAs($this->owner)->put('/admin/settings', [
+        'settings' => ['site_title' => 'Timadey', 'llm_enabled' => false],
+    ])->assertRedirect();
+
+    expect(Setting::get('llm_enabled'))->toBe('0');
+
+    $this->actingAs($this->owner)->get('/admin/settings')
+        ->assertInertia(fn ($page) => $page->where('settings.llm_enabled', false));
+});
+
+it('persists the toggle back on as 1', function () {
+    Setting::set('llm_enabled', '0');
+
+    $this->actingAs($this->owner)->put('/admin/settings', [
+        'settings' => ['site_title' => 'Timadey', 'llm_enabled' => true],
+    ])->assertRedirect();
+
+    expect(Setting::get('llm_enabled'))->toBe('1');
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `vendor/bin/pest tests/Feature/AdminSettingsToggleTest.php`
+Expected: 3 FAIL — missing `settings.llm_enabled`/`llm_configured` props; `Setting::get('llm_enabled')` returns `null` instead of `'0'`/`'1'`.
+
+- [ ] **Step 3: Implement the controller**
+
+Modify `app/Http/Controllers/Admin/SettingsController.php`:
+
+Add import (alongside the existing `App\Models\...` line):
+
+```php
+use App\Services\Llm\Llm;
+```
+
+In `edit()`, after the `collect(self::KEYS)` map and before `return Inertia::render(...)`:
+
+```php
+        $settings['llm_enabled'] = Setting::get('llm_enabled', '1') !== '0';
+```
+
+and add to the render array:
+
+```php
+            'llm_configured' => Llm::enabled(),
+```
+
+In `update()` validation array, add:
+
+```php
+            'settings.llm_enabled' => ['sometimes', 'boolean'],
+```
+
+Replace the save loop with:
+
+```php
+        foreach (($data['settings'] ?? []) as $key => $value) {
+            Setting::set($key, is_bool($value) ? ($value ? '1' : '0') : $value);
+        }
+```
+
+- [ ] **Step 4: Run the PHP test to verify it passes**
+
+Run: `vendor/bin/pest tests/Feature/AdminSettingsToggleTest.php`
+Expected: PASS — 3 tests.
+
+- [ ] **Step 5: Implement the Settings page UI**
+
+Modify `resources/js/Pages/Admin/Settings.tsx`:
+
+Type (line 9):
+
+```tsx
+type Settings = { site_title: string; tagline: string; footer_text: string; llm_enabled: boolean };
+```
+
+Component signature (line 25):
+
+```tsx
+export default function SettingsPage({ settings, hero, llm_configured }: { settings: Settings; hero: Hero; llm_configured: boolean }) {
+```
+
+In the first `<form onSubmit={save}>`, insert **after** the footer-text `<div>` (line ~111) and **before** the Save `<Button>`:
+
+```tsx
+                <div>
+                    <h2 className="text-sm font-semibold uppercase tracking-wider text-meta">AI suggestions</h2>
+                    <p className="text-sm text-meta">
+                        Let &quot;Suggest from content&quot; write SEO fields with AI instead of plain truncation.
+                    </p>
+                </div>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                    <input
+                        type="checkbox"
+                        checked={data.settings.llm_enabled}
+                        onChange={(e) => setData('settings.llm_enabled', e.target.checked)}
+                        disabled={!llm_configured}
+                    />
+                    Enable AI-generated SEO suggestions
+                </label>
+                {!llm_configured && (
+                    <p className="text-sm text-meta">Set LLM_API_KEY and LLM_MODEL in your environment to use this.</p>
+                )}
+```
+
+- [ ] **Step 6: Run the frontend suite and build**
+
+Run: `npm test 2>&1 | grep -E "Test Files|Tests|FAIL"`
+Expected: `Tests 122 passed (122)` (Settings.tsx has no unit test; suite unchanged), no FAIL lines.
+
+Run: `npm run build`
+Expected: `✓ built in …s`.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add app/Http/Controllers/Admin/SettingsController.php resources/js/Pages/Admin/Settings.tsx tests/Feature/AdminSettingsToggleTest.php public/build
+git commit -m "feat: add admin toggle for ai seo suggestions in settings"
+```
+
+---
+
+### Task 8: AI branch in SeoSuggestButton
 
 **Files:**
 - Modify: `resources/js/Components/SeoSuggestButton.tsx` (current state includes the owner's `string | null` values fix from `6d834ba` — preserve it)
@@ -864,7 +1152,7 @@ git commit -m "feat: share llm_enabled with inertia pages"
 
 **Interfaces:**
 - Consumes: `suggestSeo`/`SeoSuggestion` from `resources/js/seoSuggest.ts` (existing); endpoint contract from Task 4.
-- Produces: `SeoSuggestButton` props gain `llmEnabled?: boolean` (default `false`). Existing props unchanged. Task 7 passes `llmEnabled={llm_enabled}`.
+- Produces: `SeoSuggestButton` props gain `llmEnabled?: boolean` (default `false`). Existing props unchanged. Task 9 passes `llmEnabled={llm_enabled}`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1072,13 +1360,13 @@ git commit -m "feat: suggest seo fields via ai when configured"
 
 ---
 
-### Task 7: Wire AI suggest into the post editor
+### Task 9: Wire AI suggest into the post editor
 
 **Files:**
 - Modify: `resources/js/Pages/Admin/Posts/Edit.tsx` (import line 2; `PostEdit` function line 68; `<SeoSuggestButton>` JSX line 291 — line numbers as of `6d834ba`)
 
 **Interfaces:**
-- Consumes: shared prop `llm_enabled` (Task 5); `llmEnabled` prop (Task 6).
+- Consumes: shared prop `llm_enabled` (Task 5, gated by Task 6); `llmEnabled` prop (Task 8).
 - Produces: none (leaf wiring).
 
 - [ ] **Step 1: Write the failing test**
@@ -1134,7 +1422,7 @@ Expected: `2` (read + pass).
 - [ ] **Step 4: Run the frontend suite and build**
 
 Run: `npm test 2>&1 | grep -E "Test Files|Tests|FAIL"`
-Expected: `Test Files 32 passed (32)`, `Tests 122 passed (122)` (118 baseline incl. owner's null test + 4 new from Task 6), no FAIL lines.
+Expected: `Test Files 32 passed (32)`, `Tests 122 passed (122)` (118 baseline incl. owner's null test + 4 new from Task 8), no FAIL lines.
 
 Run: `npm run build`
 Expected: `✓ built in …s`.
@@ -1146,11 +1434,11 @@ git add resources/js/Pages/Admin/Posts/Edit.tsx public/build
 git commit -m "feat: wire ai suggest into admin post editor"
 ```
 
-(If `public/build` is already current from Task 6's suite run, the commit simply includes the rebuilt hashed assets — never stage `.vite/`.)
+(If `public/build` is already current from Task 8's suite run, the commit simply includes the rebuilt hashed assets — never stage `.vite/`.)
 
 ---
 
-### Task 8: Full regression
+### Task 10: Full regression
 
 **Files:**
 - None new (verification gate; commit only if something is outstanding)
@@ -1162,7 +1450,7 @@ git commit -m "feat: wire ai suggest into admin post editor"
 - [ ] **Step 1: Run the full Pest suite**
 
 Run: `vendor/bin/pest`
-Expected: all green — **277 tests** (252 baseline + 7 Task 1 + 5 Task 2 + 5 Task 3 + 7 Task 4 + 1 Task 5). If the count differs but everything passes, report the actual count.
+Expected: all green — **285 tests** (252 baseline + 7 Task 1 + 5 Task 2 + 5 Task 3 + 7 Task 4 + 1 Task 5 + 5 Task 6 + 3 Task 7). If the count differs but everything passes, report the actual count.
 
 - [ ] **Step 2: Run the full Vitest suite**
 
