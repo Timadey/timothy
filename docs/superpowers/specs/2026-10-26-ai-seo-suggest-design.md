@@ -1,7 +1,7 @@
 # AI-Assisted SEO Field Suggestion
 
 - **Date:** 2026-10-26
-- **Status:** Approved design; awaiting spec review
+- **Status:** Approved design (amended: admin settings toggle); spec reviewed
 
 ## Background
 
@@ -20,6 +20,7 @@ The original Phase-3 plan already reserved `LLM_PROVIDER` / `LLM_API_KEY` / `LLM
 5. **Fill-only-empty rule unchanged** — AI and rule-based obey the same merge: only fields currently empty are written. To let AI rewrite an existing field, clear it first. Prevents clobbering hand-written values.
 6. **Defensive clamping** — model output is never trusted for length; a PHP mirror of the TS `clamp()` (sentence-boundary, word-cut + ellipsis) runs on every returned field server-side.
 7. **Disabled-safe** — with no env vars set, behavior is byte-for-byte today's feature. Ships before any key exists.
+8. **Admin toggle (settings, option A + approach 1)** — a `llm_enabled` key in the existing `Setting` store gates the feature: **ON by default** once env is configured (the toggle is a kill switch), always visible in Settings, shown disabled with a note while env is missing. New resolver `Llm::usable() = enabled() && Setting::get('llm_enabled', '1') !== '0'`; endpoint and shared prop both use `usable()`, `enabled()` keeps meaning "env configured". The toggle gates an already-configured LLM — it cannot replace the API key.
 
 ## Section 1 — Config
 
@@ -72,14 +73,16 @@ public function complete(string $system, string $user): string
 **Endpoint** — `POST /admin/posts/suggest-seo`, inside the existing `/admin` auth group, `throttle:20,1`:
 
 - Request: `{ title: string ≤300, body: string ≤100000 }` (editor HTML), validated.
-- Not configured → **422** `{message}` (frontend should not normally hit this).
+- Not configured (env missing) → **422** `{message: 'LLM not configured'}`.
+- Configured but toggled off in Settings → **422** `{message: 'AI suggestions are disabled in settings'}`.
 - LLM or parse failure → **502** `{message}`.
 - Success → **200** `{excerpt, meta_title, meta_description, source: 'ai'}`.
+- Gate check uses `Llm::usable()` (env AND setting); message distinguishes which half failed.
 - Endpoint location (explicit): new `suggestSeo()` action on the existing `App\Http\Controllers\Admin\PostController` + one `Route::post('posts/suggest-seo', ...)` line in `routes/web.php` next to the existing posts routes (`routes/web.php:19-25`). No new controller file.
 
 ## Section 3 — Frontend
 
-**`llm_enabled` shared prop** — one line in `HandleInertiaRequests`, computed by a single resolver `Llm::enabled()` (static helper in the `app/Services/Llm` namespace: `api_key` && `model` && resolvable base URL — the backend config/endpoint reuses this same resolver). Shared so future admin AI features inherit it.
+**`llm_enabled` shared prop** — one line in `HandleInertiaRequests`, computed by `Llm::usable()` (env configured AND the Settings toggle on). `Llm::enabled()` remains "env configured" and is what the Settings page uses to lock/annotate the checkbox. Shared so future admin AI features inherit it.
 
 **`SeoSuggestButton`** (`resources/js/Components/SeoSuggestButton.tsx`):
 
@@ -97,7 +100,9 @@ public function complete(string $system, string $user): string
 | Condition | Server | Client |
 |---|---|---|
 | No env configured, button clicked | (not called — prop false) | local rule-based, instant |
-| No env but endpoint hit directly | 422 | silent local fallback |
+| No env but endpoint hit directly | 422 `LLM not configured` | silent local fallback |
+| Toggle off in Settings, button clicked | (not called — prop false) | local rule-based, instant |
+| Toggle off, endpoint hit directly | 422 `AI suggestions are disabled in settings` | silent local fallback |
 | LLM timeout / 5xx / network | 502 | silent local fallback |
 | Unparseable / missing-key JSON | 502 | silent local fallback |
 | Over-length model output | clamped before 200 | fill as returned |
@@ -111,12 +116,20 @@ Silent fallback = `console.warn` only, per decision (option A).
 **Pest** (`tests/Feature/AdminSuggestSeoTest.php`):
 
 1. Guest → redirected (auth guard).
-2. Admin + not configured → 422.
+2. Admin + not configured → 422 `LLM not configured`.
 3. Admin + configured + `Http::fake` valid JSON → 200, fields present, **over-length fake output asserted clamped** (feed a 500-char description, expect ≤160 + ellipsis/sentence rule).
 4. `Http::fake` HTTP 500 → 502.
 5. `Http::fake` garbage body ("sorry, here are thoughts") → 502.
 6. Request validation (missing/oversized fields).
 7. Throttle smoke (optional — only if cheap).
+
+**Toggle (settings amendment):**
+
+8. `Llm::usable()` units: default key missing → true (with env); setting `'0'` → false; env missing → false regardless of setting.
+9. Endpoint + env configured + setting `'0'` → 422 `AI suggestions are disabled in settings`.
+10. Shared prop: setting `'0'` → `llm_enabled` false despite env configured (extend the existing prop test).
+11. Settings round-trip: the settings update endpoint persists `settings.llm_enabled` boolean as `'1'`/`'0'`; GET edit page reflects the stored value; `llm_configured` prop matches `Llm::enabled()`.
+12. `Setting::get('llm_enabled', '1')` default `'1'` asserted explicitly (ON-by-default choice A).
 
 **Vitest** (`SeoSuggestButton.test.tsx` extensions):
 
@@ -125,13 +138,43 @@ Silent fallback = `console.warn` only, per decision (option A).
 3. `llmEnabled=false` → no fetch (existing local tests remain green untouched).
 4. Fill-only-empty respected on the AI path (pre-filled excerpt untouched).
 
-**Regression:** full `vendor/bin/pest` (252 baseline) + `npm test` (117 baseline) + `npm run build`.
+**Regression:** full `vendor/bin/pest` + `npm test` + `npm run build` — authoritative expected counts live in the implementation plan's final task.
 
 ## Section 6 — Deploy
 
 - Ships disabled-safe; no Coolify changes required to deploy.
 - Owner adds env vars in Coolify when ready: `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_MODEL` (+ optional `LLM_BASE_URL`, `LLM_TIMEOUT`). Values never committed.
 - No new composer/npm dependencies.
+
+## Section 7 — Settings toggle (admin on/off)
+
+**Persistence** — existing `Setting` key-value store (`app/Models/Setting.php`, `Setting::get/set`), key **`llm_enabled`**, values `'1'`/`'0'`, **default `'1'`** (ON). No migration needed.
+
+**Resolver** — one new method on `App\Services\Llm\Llm`:
+
+```php
+public static function usable(): bool
+{
+    return self::enabled()
+        && Setting::get('llm_enabled', '1') !== '0';
+}
+```
+
+`enabled()` semantics unchanged ("env configured"); `usable()` = "may actually call the LLM". Call sites: endpoint gate + shared prop (Sections 2-3). The Settings page uses `enabled()` for the locked state.
+
+**Settings controller** (`app/Http/Controllers/Admin/SettingsController.php`):
+
+- `edit()` — additionally passes `llm_enabled: bool` (`Setting::get('llm_enabled', '1') !== '0'`) and `llm_configured: bool` (`Llm::enabled()`) props to `Admin/Settings`.
+- `update()` — validation gains `'settings.llm_enabled' => ['sometimes', 'boolean']`; the save loop coerces boolean values to `'1'`/`'0'` before `Setting::set` (string fields pass through untouched).
+
+**Settings page** (`resources/js/Pages/Admin/Settings.tsx`) — new section card **"AI suggestions"** matching the existing `h2 uppercase tracking-wider text-meta` section style, placed after "Site":
+
+- Checkbox: **"Enable AI-generated SEO suggestions"**, bound into the existing form (`data.settings.llm_enabled`), saved by the existing Save button — no new submit path.
+- When `llm_configured === false`: checkbox **disabled** + meta note *"Set LLM_API_KEY and LLM_MODEL in your environment to use this."*
+- When configured: plain checkbox (kill switch per choice A).
+- Footer/help text (configured): one line stating the model being used is out of scope — YAGNI.
+
+**Interaction with the feature** — toggling off takes effect immediately on next request: editor button falls back to local rules (prop false), endpoint returns its distinct 422. No cache layer (`Setting::get` is a simple query per call — two calls per request max: prop + endpoint).
 
 ## Out of Scope (YAGNI)
 
