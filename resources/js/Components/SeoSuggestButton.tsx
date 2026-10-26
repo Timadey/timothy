@@ -8,12 +8,12 @@ export type SeoField = (typeof FIELDS)[number];
 type Props = {
     body: string;
     title: string;
-    values: Record<SeoField, string>;
+    values: Record<SeoField, string | null>;
     onFill: (field: SeoField, value: string) => void;
 };
 
 export function SeoSuggestButton({ body, title, values, onFill }: Props) {
-    const empty = FIELDS.filter((field) => !values[field].trim());
+    const empty = FIELDS.filter((field) => !(values[field] ?? '').trim());
 
     const suggest = () => {
         const suggestion = suggestSeo(body, title);

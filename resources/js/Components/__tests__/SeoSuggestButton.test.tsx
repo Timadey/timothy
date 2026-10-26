@@ -49,6 +49,24 @@ describe('SeoSuggestButton', () => {
         expect(screen.getByRole('button', { name: 'Suggest from content' })).toBeDisabled();
     });
 
+    test('treats null values as empty instead of crashing', () => {
+        const onFill = vi.fn();
+        render(
+            <SeoSuggestButton
+                body={BODY}
+                title="Sample Title"
+                values={{ excerpt: null, meta_title: null, meta_description: null }}
+                onFill={onFill}
+            />,
+        );
+
+        const button = screen.getByRole('button', { name: 'Suggest from content' });
+        expect(button).toBeEnabled();
+        fireEvent.click(button);
+
+        expect(onFill).toHaveBeenCalledTimes(3);
+    });
+
     test('does nothing when there is no content to suggest from', () => {
         const onFill = vi.fn();
         render(<SeoSuggestButton body="" title="" values={empty} onFill={onFill} />);

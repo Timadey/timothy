@@ -10,24 +10,35 @@ import { SeoSuggestButton } from '@/Components/SeoSuggestButton';
 
 type PostData = {
     id?: number;
-    title: string;
+    title: string | null;
     slug: string;
-    excerpt: string;
+    excerpt: string | null;
     body: string;
     post_type: string;
     status: string;
     visibility: string;
     featured: boolean;
-    cover_image: string;
-    meta_title: string;
-    meta_description: string;
+    cover_image: string | null;
+    meta_title: string | null;
+    meta_description: string | null;
     tags: string[];
     topics: string[];
     reading_time?: number;
     published_at?: string | null;
 };
 
-type PostForm = Omit<PostData, 'tags' | 'topics'> & { tags: string; topics: string };
+type PostForm = Omit<
+    PostData,
+    'title' | 'excerpt' | 'cover_image' | 'meta_title' | 'meta_description' | 'tags' | 'topics'
+> & {
+    title: string;
+    excerpt: string;
+    cover_image: string;
+    meta_title: string;
+    meta_description: string;
+    tags: string;
+    topics: string;
+};
 
 const empty: PostForm = {
     title: '',
@@ -57,6 +68,11 @@ function commaList(value: string): string[] {
 export default function PostEdit({ post }: { post: PostData | null }) {
     const { data, setData, put, post: submitCreate, processing, errors, transform } = useForm<PostForm>({
         ...(post ?? empty),
+        title: post?.title ?? '',
+        excerpt: post?.excerpt ?? '',
+        cover_image: post?.cover_image ?? '',
+        meta_title: post?.meta_title ?? '',
+        meta_description: post?.meta_description ?? '',
         tags: (post?.tags ?? []).join(', '),
         topics: (post?.topics ?? []).join(', '),
     });
