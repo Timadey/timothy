@@ -25,6 +25,7 @@ function devtoShowFixture(array $overrides = []): array
 {
     $body = <<<'HTML'
 <p class="dev-card">Intro with <a href="https://example.com" target="_blank" rel="noopener" class="x">link</a>.</p>
+<p>José says “你好” and 🍕 — I’m ok.</p>
 <h4>Nested heading</h4>
 <div class="hljs"><span>code-ish</span></div>
 <pre><code class="language-php">echo 1;</code></pre>
@@ -92,6 +93,17 @@ it('imports dev.to articles as published posts with cleaned bodies', function ()
         ->toContain('/storage/uploads/devto/')
         ->not->toContain('media2.dev.to');
 
+    $decoded = html_entity_decode($body, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    expect($decoded)
+        ->toContain('José')
+        ->toContain('你好')
+        ->toContain('🍕')
+        ->toContain('—')
+        ->toContain('I’m');
+    expect($body)
+        ->not->toContain('Ã©')
+        ->not->toContain("\u{00F0}\u{009F}");
+
     expect(count(Storage::disk('public')->allFiles('uploads/devto')))->toBe(2);
 
     expect(fn () => \App\Support\HtmlSanitizer::sanitize($body))
@@ -126,6 +138,22 @@ it('imports only the requested slugs', function () {
 
     expect(Post::count())->toBe(1);
     expect(Post::sole()->title)->toBe('My First Post');
+});
+
+it('skips articles whose slug is taken by a soft-deleted post', function () {
+    Storage::fake('public');
+    $author = User::factory()->create();
+    Post::factory()->create([
+        'author_id' => $author->id,
+        'title' => 'My First Post',
+        'slug' => 'my-first-post',
+    ])->delete();
+
+    fakeDevToApi([devtoIndexFixture()], [991 => devtoShowFixture()]);
+
+    $this->artisan('devto:import')->assertExitCode(0);
+
+    expect(Post::count())->toBe(0);
 });
 
 it('still imports an article when its images fail to download', function () {

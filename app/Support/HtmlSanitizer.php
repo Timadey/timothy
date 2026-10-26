@@ -41,6 +41,12 @@ final class HtmlSanitizer
             return '';
         }
 
+        $html = preg_replace_callback(
+            '/[^\x00-\x7F]/u',
+            fn (array $m) => '&#'.mb_ord($m[0], 'UTF-8').';',
+            $html,
+        ) ?? $html;
+
         $doc = new DOMDocument();
         libxml_use_internal_errors(true);
         $doc->loadHTML(

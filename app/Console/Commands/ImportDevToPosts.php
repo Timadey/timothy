@@ -57,7 +57,8 @@ class ImportDevToPosts extends Command
 
             $siteSlug = Post::makeSlug($item['title']);
 
-            if (Post::where('source_url', $item['url'])->exists() || Post::where('slug', $siteSlug)->exists()) {
+            if (Post::withTrashed()->where('source_url', $item['url'])->exists()
+                || Post::withTrashed()->where('slug', $siteSlug)->exists()) {
                 $skipped++;
                 $this->line("  skipped: {$item['title']} (already imported)");
 
@@ -133,9 +134,15 @@ class ImportDevToPosts extends Command
             return '';
         }
 
+        $html = preg_replace_callback(
+            '/[^\x00-\x7F]/u',
+            fn (array $m) => '&#'.mb_ord($m[0], 'UTF-8').';',
+            $html,
+        ) ?? $html;
+
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
-        $doc->loadHTML('<?xml encoding="utf-8"?><div id="__import_root">'.$html.'</div>', LIBXML_NOERROR | LIBXML_NOWARNING);
+        $doc->loadHTML('<div id="__import_root">'.$html.'</div>', LIBXML_NOERROR | LIBXML_NOWARNING);
         libxml_clear_errors();
 
         $root = (new \DOMXPath($doc))->query('//div[@id="__import_root"]')->item(0);
