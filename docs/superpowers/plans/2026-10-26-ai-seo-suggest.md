@@ -272,7 +272,7 @@ it('throws when the provider returns an http error', function () {
 })->throws(LlmException::class);
 
 it('throws when the network fails', function () {
-    Http::fake(['*' => Http::connectionException('timeout')]);
+    Http::fake(['*' => Http::failedConnection('timeout')]);
 
     Llm::client()->complete('s', 'u');
 })->throws(LlmException::class);
