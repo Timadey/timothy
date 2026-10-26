@@ -32,6 +32,7 @@ vi.mock('@inertiajs/react', async () => {
                 post: (url: string, opts?: unknown) => mocks.post(url, mocks.transformFn.fn(data), opts),
             };
         },
+        usePage: () => ({ props: { llm_enabled: false } }),
     };
 });
 vi.mock('@/Layouts/AdminLayout', () => ({

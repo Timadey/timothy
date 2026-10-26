@@ -1,5 +1,5 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { useForm, Link } from '@inertiajs/react';
+import { useForm, Link, usePage } from '@inertiajs/react';
 import type { FormDataValues } from '@inertiajs/core';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/Components/Button';
@@ -76,6 +76,7 @@ export default function PostEdit({ post }: { post: PostData | null }) {
         tags: (post?.tags ?? []).join(', '),
         topics: (post?.topics ?? []).join(', '),
     });
+    const { llm_enabled } = usePage().props as { llm_enabled: boolean };
     const [preview, setPreview] = useState(false);
     const [savedAt, setSavedAt] = useState<string | null>(null);
     const [dirty, setDirty] = useState(false);
@@ -291,6 +292,7 @@ export default function PostEdit({ post }: { post: PostData | null }) {
                         <SeoSuggestButton
                             body={data.body}
                             title={data.title}
+                            llmEnabled={llm_enabled}
                             values={{
                                 excerpt: data.excerpt,
                                 meta_title: data.meta_title,
