@@ -1,0 +1,1 @@
+import{j as s}from"./app-CamXAL6Y.js";function o({html:e,className:r=""}){return s.jsx("div",{className:`prose-custom max-w-[65ch] text-[1.0625rem] leading-[1.7] ${r}`,dangerouslySetInnerHTML:{__html:e}})}export{o as P};

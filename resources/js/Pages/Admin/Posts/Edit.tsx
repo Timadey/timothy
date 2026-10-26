@@ -6,6 +6,7 @@ import { Button } from '@/Components/Button';
 import { PreviewPane } from '@/Components/PreviewPane';
 import { RichEditor } from '@/Components/RichEditor';
 import { Flash } from '@/Components/Flash';
+import { SeoSuggestButton } from '@/Components/SeoSuggestButton';
 
 type PostData = {
     id?: number;
@@ -271,6 +272,16 @@ export default function PostEdit({ post }: { post: PostData | null }) {
                                 className={fieldClass}
                             />
                         </div>
+                        <SeoSuggestButton
+                            body={data.body}
+                            title={data.title}
+                            values={{
+                                excerpt: data.excerpt,
+                                meta_title: data.meta_title,
+                                meta_description: data.meta_description,
+                            }}
+                            onFill={(field, value) => update(field, value)}
+                        />
                         <div>
                             <label className="text-sm font-medium" htmlFor="post-meta-title">
                                 Meta title
