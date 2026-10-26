@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Setting;
 use App\Services\Llm\Llm;
 
 beforeEach(function () {
@@ -49,4 +50,24 @@ it('ignores unknown providers', function () {
 
     expect(Llm::baseUrl())->toBeNull()
         ->and(Llm::enabled())->toBeFalse();
+});
+
+it('is usable by default once env is configured', function () {
+    config(['llm.provider' => 'openai', 'llm.api_key' => 'k', 'llm.model' => 'm']);
+
+    expect(Setting::get('llm_enabled', '1'))->toBe('1')
+        ->and(Llm::usable())->toBeTrue();
+});
+
+it('is not usable when the settings toggle is off', function () {
+    config(['llm.provider' => 'openai', 'llm.api_key' => 'k', 'llm.model' => 'm']);
+    Setting::set('llm_enabled', '0');
+
+    expect(Llm::usable())->toBeFalse();
+});
+
+it('is not usable without env regardless of the settings toggle', function () {
+    Setting::set('llm_enabled', '1');
+
+    expect(Llm::usable())->toBeFalse();
 });

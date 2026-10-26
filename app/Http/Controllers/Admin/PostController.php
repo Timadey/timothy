@@ -128,8 +128,12 @@ class PostController extends Controller
             'body' => ['required', 'string', 'max:100000'],
         ]);
 
-        if (! Llm::enabled()) {
-            return response()->json(['message' => 'LLM not configured'], 422);
+        if (! Llm::usable()) {
+            return response()->json([
+                'message' => Llm::enabled()
+                    ? 'AI suggestions are disabled in settings'
+                    : 'LLM not configured',
+            ], 422);
         }
 
         try {

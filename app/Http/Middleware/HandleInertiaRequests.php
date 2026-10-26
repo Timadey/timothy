@@ -19,7 +19,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => fn () => $request->session()->get('flash'),
             'social_links' => fn () => SocialLink::where('visible', true)->orderBy('sort_order')
                 ->get(['platform', 'url', 'label']),
-            'llm_enabled' => fn () => Llm::enabled(),
+            'llm_enabled' => fn () => Llm::usable(),
         ];
     }
 }

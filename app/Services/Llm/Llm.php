@@ -2,6 +2,8 @@
 
 namespace App\Services\Llm;
 
+use App\Models\Setting;
+
 class Llm
 {
     private const PRESETS = [
@@ -26,6 +28,12 @@ class Llm
         return self::baseUrl() !== null
             && (bool) config('llm.api_key')
             && (bool) config('llm.model');
+    }
+
+    public static function usable(): bool
+    {
+        return self::enabled()
+            && Setting::get('llm_enabled', '1') !== '0';
     }
 
     public static function client(): OpenAiLlmClient

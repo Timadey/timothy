@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
@@ -94,4 +95,25 @@ it('shares whether the llm is enabled', function () {
         ->get('/admin')
         ->assertOk()
         ->assertInertia(fn ($page) => $page->where('llm_enabled', true));
+});
+
+it('returns 422 disabled message when toggled off in settings', function () {
+    config(['llm.api_key' => 'k', 'llm.model' => 'm']);
+    Setting::set('llm_enabled', '0');
+    Http::fake(['*' => Http::response('{}', 200)]);
+
+    $this->actingAs($this->owner)
+        ->postJson('/admin/posts/suggest-seo', ['title' => 'T', 'body' => '<p>b</p>'])
+        ->assertStatus(422)
+        ->assertJson(['message' => 'AI suggestions are disabled in settings']);
+});
+
+it('shares llm_enabled as false when the settings toggle is off', function () {
+    config(['llm.api_key' => 'k', 'llm.model' => 'm']);
+    Setting::set('llm_enabled', '0');
+
+    $this->actingAs($this->owner)
+        ->get('/admin')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page->where('llm_enabled', false));
 });
