@@ -82,29 +82,29 @@ Laravel's `redis` cache/session stores use the `default` connection in `config/d
 
 **2a. Notes index payload** (`NoteController::index`, currently renders CommonMark ×15 + strips plain text up to ~3× per note):
 - Remove `body_html` from the index payload; ship only `slug`, `headline`, `teaser`, `date`, `tags`.
-- Inline expansion (`NoteFeedItem` "read more") fetches rendered HTML on demand from a small endpoint `GET /notes/{slug}/body` → `{ body_html }` (publicly-visible notes only; 404 otherwise), wrapped in `Cache::tags('content')->remember("note.body:{$slug}", ...)` so it flushes with all other content keys. UX: expand shows the row immediately with a brief loading state; typically tens of ms since it's a single cached query + render.
+- Inline expansion (`NoteFeedItem` "read more") fetches rendered HTML on demand from a small endpoint `GET /notes/{slug}/body` → `{ body_html }` (publicly-visible notes only; 404 otherwise), wrapped in `Cache::remember(CacheKeys::noteBody($slug), …)` so `CacheKeys` flushes it with all other content keys. UX: expand shows the row immediately with a brief loading state; typically tens of ms since it's a single cached query + render.
 - Memoize `plainBody()` / `plainExcerpt()` on the `Post` model — compute once per instance, store on a property, so `streamHeadline()` + `streamTeaser()` share one regex pass over the body.
 
 **2b. Shared props & settings** (`HandleInertiaRequests::share`, `Setting::get`, `HomeHero::load`):
 - `social_links` → `Cache::remember('social_links', now()->addHour(), ...)`; also memoize `Setting::get()` per-key with 1-hour TTL and have `HomeHero` reuse it instead of re-reading `site_title`.
 
 **2c. Hybrid invalidation (approved):**
-- **Event-based (content):** observers on `Post`, `Project`, `CollectedItem` on saved/deleted → `Cache::tags('content')->flush()`. Keys tagged `content`: home bundle, activity feed, RSS, sitemap, tag/topic lists, list-page data caches.
+- **Event-based (content):** model events (`saved`/`deleted`) on `Post`, `Project`, `CollectedItem`, `Tag`, `Topic` → `CacheKeys` flushes the content-derived keys (home, activity feed, RSS, sitemap, tag/topic lists) plus `note.body.{slug}` for the affected post (including its original slug if the slug changed).
 - **Event-based (chrome):** observers on `Tag`, `Topic`, `SocialLink`, `NowSection`, `NowUpdate`, About/settings writes → forget their specific keys.
 - **TTL-only (low churn):** settings and social links refresh within ≤1 h even without an event (safety net).
-- **Safety TTL:** content-tagged keys also carry a short TTL (5 min) so a missed invalidation self-heals quickly.
-- Cache tags are used because the cache store is Redis (tag support required — file/database stores don't have it).
+- **Safety TTL:** content keys also carry a short TTL (5 min) so a missed invalidation self-heals quickly.
+- **Store-agnostic keys, no cache tags:** all keys are constructed in one `App\Support\CacheKeys` class and invalidated by explicit `Cache::forget()` calls from model events. Cache tags were rejected because local dev runs `CACHE_STORE=database` (not taggable) — explicit keys work identically on database, array (tests), and Redis (production) stores.
 
 **2d. Hot-query caching:** `HomeController`, `FeedService` (activity/RSS), `SeoController` (sitemap) responses wrapped in `Cache::remember` per the tagging scheme above. First uncached hit still queries; subsequent hits skip DB.
 
-**2e. LIKE → FTS:** Writing/Notes/Collected `?q=` filters switch from `LOWER(col) LIKE '%q%'` to `search_vector @@ websearch_to_tsquery('simple', ...)` against the existing GIN indexes (same mechanism `SearchService` already uses for posts). `SearchService`'s `OR LOWER ... LIKE` fallbacks for projects/collected are removed so plans use the index cleanly. Trade-off: stemming/substring behavior changes slightly (prefix matches need `:*` handling — use `websearch_to_tsquery` and accept word-boundary matching; matches how on-site search already behaves for posts).
+**2e. LIKE → FTS:** Writing/Notes/Collected `?q=` filters switch from `LOWER(col) LIKE '%q%'` to `search_vector @@ to_tsquery('english', …)` where each extracted word becomes `word:*` (prefix match) with `&` (AND) between words — built by a sanitizing helper so user input can never reach tsquery syntax. This uses the existing GIN indexes while preserving the type-ahead prefix behavior users get from `LIKE` (e.g. "neuro" still matches "Neurotechnology"). `SearchService`'s `OR LOWER ... LIKE` fallbacks for projects/collected are removed so plans use the index cleanly; `/search` keeps `websearch_to_tsquery` (full-word semantics are correct there). Queries containing no word characters return no results.
 
 **2f. Indexes (one migration):**
 - `posts`: composite `(post_type, visibility, status, published_at)` to match `publiclyVisible()->ofType()->latest('published_at')`.
 - `posts(featured)`, `projects(featured)` for Home featured queries.
 - `projects(updated_at)`, `collected_items(created_at)` for `latest()` sorts.
-- Partial indexes with `WHERE deleted_at IS NULL` on posts/projects/collected_items where the planner benefits (soft-delete scope matches Laravel's global scope exactly).
-- Drop superseded redundant indexes in the same migration where safe (keep the existing unique slug indexes and FTS GIN indexes untouched).
+- Composite indexes cover the equality-plus-ordered-range patterns above; partial (`WHERE deleted_at IS NULL`) variants are deferred unless `EXPLAIN` shows the composites insufficient at real data volumes (YAGNI at personal-site scale).
+- Keep the existing unique slug indexes, `status/post_type/published_at` composite, and FTS GIN indexes untouched.
 
 ### Layer 3 — Frontend prefetching
 
@@ -113,7 +113,7 @@ In `PublicLayout.tsx` nav links: `prefetch="hover"`. List rows / pagination / re
 ### Layer 4 — SSR (server-side rendering)
 
 - **Build:** `resources/js/ssr.tsx` + `vite.config.ts ssr:` already exist; the `ssr` build output (laravel-vite-plugin convention: `bootstrap/ssr/ssr.mjs`) is produced during the Docker build.
-- **Enable:** inertia-laravel's SSR config (`ssr.enabled`, driven by an env flag such as `INERTIA_SSR_ENABLED=true`, `ssr.url` pointing at the local Node server) — exact config keys/artisan commands to be verified against the installed inertia-laravel version during implementation. When enabled, initial Inertia responses are rendered by the Node process; on failure the middleware falls back to the CSR shell (no user-facing error).
+- **Enable:** inertia-laravel v3 `config/inertia.php` (vendor config, not published) — `ssr.enabled` reads `INERTIA_SSR_ENABLED` (default `true`), `ssr.url` defaults to `http://127.0.0.1:13714`. Production: `ENV INERTIA_SSR_ENABLED=true` in the Dockerfile (`.env` is excluded from the image). Local dev: `INERTIA_SSR_ENABLED=false` in `.env` so requests never attempt a connection to a non-running SSR server. When enabled, `php artisan inertia:start-ssr` serves the bundle; on any failure Inertia falls back to the CSR shell (no user-facing error, `throw_on_error=false`).
 - **Runtime:** new `program:ssr` in `conf/supervisor/supervisord.conf` running the built bundle with `autorestart=true`; health = supervisor + Inertia fallback.
 - **Docker:** multi-stage Dockerfile — stage 1 installs Node 22, runs `npm ci` + the SSR build; stage 2 (current PHP image) copies only the built SSR artifact. Runtime image grows modestly (~80–120 MB for the Node runtime); no `node_modules` at runtime since Vite bundles React/Inertia into the SSR file.
 - **Scope:** all Inertia pages SSR (public + admin); admin auth/session behavior unchanged because SSR is stateless per request (session cookie still drives auth server-side).
@@ -142,7 +142,7 @@ In `PublicLayout.tsx` nav links: `prefetch="hover"`. List rows / pagination / re
 
 ## 6. Risks & trade-offs
 
-- **FTS behavior change:** word-boundary matching replaces substring `LIKE` — for a personal site this matches existing search UX; substring search returns are an accepted loss unless `pg_trgm` is added later.
+- **FTS behavior change:** mid-word substring matches (LIKE '%urotech%') no longer match — prefix-of-word matches do. Type-ahead UX and existing tests are preserved; true substring search would need `pg_trgm` later.
 - **Notes expansion adds one network hop** on read-more — offset by Redis cache; payload wins on every list page load outweigh it.
 - **OPcache `validate_timestamps=0`** makes local dev images unsuitable for hot-reload edits — this ini ships only in the production Dockerfile, not local php.ini.
 - **php-fpm `max_children=16`** is a starting point — revisit if RSS or Postgres connection counts climb.
