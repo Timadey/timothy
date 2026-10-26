@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
 use App\Models\{Post, Tag, Topic};
-use Illuminate\Http\{RedirectResponse, Request};
+use App\Services\Llm\Llm;
+use App\Services\Llm\LlmException;
+use App\Services\Llm\SeoSuggestService;
+use Illuminate\Http\{JsonResponse, RedirectResponse, Request};
 use Inertia\{Inertia, Response};
 
 class PostController extends Controller
@@ -116,6 +119,26 @@ class PostController extends Controller
         $path = $post->post_type === 'article' ? 'writing' : 'notes';
 
         return redirect("/{$path}/{$post->slug}?preview=1");
+    }
+
+    public function suggestSeo(Request $request, SeoSuggestService $service): JsonResponse
+    {
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:300'],
+            'body' => ['required', 'string', 'max:100000'],
+        ]);
+
+        if (! Llm::enabled()) {
+            return response()->json(['message' => 'LLM not configured'], 422);
+        }
+
+        try {
+            return response()->json($service->suggest($data['title'], $data['body']));
+        } catch (LlmException $e) {
+            report($e);
+
+            return response()->json(['message' => 'AI suggestion failed'], 502);
+        }
     }
 
     private function syncRelations(Post $post, array $tags, array $topics): void

@@ -23,6 +23,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])->group(fun
     Route::put('posts/{post}', [\App\Http\Controllers\Admin\PostController::class, 'update'])->name('posts.update');
     Route::delete('posts/{post}', [\App\Http\Controllers\Admin\PostController::class, 'destroy'])->name('posts.destroy');
     Route::get('posts/{post}/preview', [\App\Http\Controllers\Admin\PostController::class, 'preview'])->name('posts.preview');
+    Route::post('posts/suggest-seo', [\App\Http\Controllers\Admin\PostController::class, 'suggestSeo'])
+        ->middleware('throttle:20,1')
+        ->name('posts.suggest-seo');
 
     Route::get('notes', [\App\Http\Controllers\Admin\NoteController::class, 'index'])->name('notes.index');
     Route::get('notes/new', [\App\Http\Controllers\Admin\NoteController::class, 'create'])->name('notes.create');
