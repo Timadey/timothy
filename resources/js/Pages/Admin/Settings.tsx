@@ -5,7 +5,7 @@ import { Button } from '@/Components/Button';
 import { ConfirmDialog } from '@/Components/ConfirmDialog';
 import { Flash } from '@/Components/Flash';
 
-type Settings = { site_title: string; tagline: string; footer_text: string };
+type Settings = { site_title: string; tagline: string; footer_text: string; llm_enabled: boolean };
 
 type Hero = {
     headline: string;
@@ -22,7 +22,7 @@ type Hero = {
 
 const fieldClass = 'mt-1 w-full rounded-md border border-hairline px-3 py-2 text-sm focus:border-primary';
 
-export default function SettingsPage({ settings, hero }: { settings: Settings; hero: Hero }) {
+export default function SettingsPage({ settings, hero, llm_configured }: { settings: Settings; hero: Hero; llm_configured: boolean }) {
     const { data, setData, put, processing, errors } = useForm<{ settings: Settings }>({ settings });
     const heroForm = useForm({
         headline: hero.headline,
@@ -109,6 +109,24 @@ export default function SettingsPage({ settings, hero }: { settings: Settings; h
                     <input id="footer-text" value={data.settings.footer_text} onChange={(e) => setData('settings.footer_text', e.target.value)} className={fieldClass} />
                     {fieldError('footer_text') && <p className="mt-1 text-sm text-red-700">{fieldError('footer_text')}</p>}
                 </div>
+                <div>
+                    <h2 className="text-sm font-semibold uppercase tracking-wider text-meta">AI suggestions</h2>
+                    <p className="text-sm text-meta">
+                        Let &quot;Suggest from content&quot; write SEO fields with AI instead of plain truncation.
+                    </p>
+                </div>
+                <label className="flex items-center gap-2 text-sm font-medium">
+                    <input
+                        type="checkbox"
+                        checked={data.settings.llm_enabled}
+                        onChange={(e) => setData('settings.llm_enabled', e.target.checked)}
+                        disabled={!llm_configured}
+                    />
+                    Enable AI-generated SEO suggestions
+                </label>
+                {!llm_configured && (
+                    <p className="text-sm text-meta">Set LLM_API_KEY and LLM_MODEL in your environment to use this.</p>
+                )}
                 <Button type="submit" disabled={processing}>
                     {processing ? 'Saving…' : 'Save settings'}
                 </Button>

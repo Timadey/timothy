@@ -1,0 +1,1 @@
+import{j as s,L as a}from"./app-DujdIgtc.js";function o({label:r,active:i=!1,href:e}){const t=`inline-block rounded-sm border px-2 py-0.5 text-xs ${i?"border-primary bg-primary text-white":"border-hairline text-meta hover:border-primary hover:text-ink"}`;return e?s.jsx(a,{href:e,className:t,children:r}):s.jsx("span",{className:t,children:r})}export{o as T};

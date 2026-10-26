@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\{CollectedItem, Post, Project, Setting};
+use App\Services\Llm\Llm;
 use App\Support\HomeHero;
 use Illuminate\Http\{RedirectResponse, Request, UploadedFile};
 use Illuminate\Support\Facades\Storage;
@@ -21,9 +22,12 @@ class SettingsController extends Controller
             ->mapWithKeys(fn ($k) => [$k => Setting::get($k, '')])
             ->all();
 
+        $settings['llm_enabled'] = Setting::get('llm_enabled', '1') !== '0';
+
         return Inertia::render('Admin/Settings', [
             'settings' => $settings,
             'hero' => HomeHero::load()->toArray(),
+            'llm_configured' => Llm::enabled(),
         ]);
     }
 
@@ -34,6 +38,7 @@ class SettingsController extends Controller
             'settings.site_title' => ['required_with:settings', 'string', 'max:100'],
             'settings.tagline' => ['nullable', 'string', 'max:200'],
             'settings.footer_text' => ['nullable', 'string', 'max:300'],
+            'settings.llm_enabled' => ['sometimes', 'boolean'],
             'hero' => ['sometimes', 'array'],
             'hero.headline' => ['nullable', 'string', 'max:120'],
             'hero.role' => ['nullable', 'string', 'max:80'],
@@ -47,7 +52,7 @@ class SettingsController extends Controller
         ]);
 
         foreach (($data['settings'] ?? []) as $key => $value) {
-            Setting::set($key, $value);
+            Setting::set($key, is_bool($value) ? ($value ? '1' : '0') : $value);
         }
 
         if (array_key_exists('hero', $data)) {

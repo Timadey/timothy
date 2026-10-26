@@ -1130,7 +1130,7 @@ In the first `<form onSubmit={save}>`, insert **after** the footer-text `<div>` 
 - [ ] **Step 6: Run the frontend suite and build**
 
 Run: `npm test 2>&1 | grep -E "Test Files|Tests|FAIL"`
-Expected: `Tests 122 passed (122)` (Settings.tsx has no unit test; suite unchanged), no FAIL lines.
+Expected: `Tests 118 passed (118)` (Settings.tsx has no unit test; suite unchanged from baseline — Task 8's button tests still to come), no FAIL lines.
 
 Run: `npm run build`
 Expected: `✓ built in …s`.

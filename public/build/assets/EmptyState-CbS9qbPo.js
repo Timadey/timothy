@@ -1,1 +1,0 @@
-import{j as e}from"./app-DIpqIPjw.js";function m({title:r,hint:t}){return e.jsxs("div",{className:"border border-hairline rounded-md px-6 py-12 text-center",children:[e.jsx("p",{className:"text-ink font-medium",children:r}),t&&e.jsx("p",{className:"mt-1 text-sm text-meta",children:t})]})}export{m as E};
