@@ -20,7 +20,7 @@
 - **TDD strictly:** write failing test → verify RED → implement → verify GREEN → commit, per task.
 - **PHP clamp must mirror the TS clamp in `resources/js/seoSuggest.ts` exactly:** `excerpt` 280, `meta_description` 160 (sentence boundary if the last `.!?` within the slice ends at ≥ `floor(max/2)`, else word-cut at `max-1` + `…`); AI path additionally clamps `meta_title` to 60. Local TS path keeps plain `title.trim()`.
 - **Never stage `config/app.php` or `.vite/`.** Commit `public/build/` with every frontend change.
-- Baselines that must stay green: Pest **252**, Vitest **117** (suites only grow).
+- Baselines that must stay green: Pest **252**, Vitest **118** (suites only grow). Note: commit `6d834ba` (owner-authored, mid-plan) made `SeoSuggestButton` `values` nullable (`string | null`, `?? ''` guards) and added a 5th button test — Tasks 6/7 below are written on top of that fix; **never revert it**.
 - Endpoint lives inside the existing admin group: `Route::prefix('admin')->name('admin.')->middleware(['auth', 'owner'])` (`routes/web.php:16`).
 - Admin test auth convention (`tests/Feature/AdminPostsTest.php:5-6`): `beforeEach` creates `User::factory()->create(['role' => 'owner'])`, requests use `$this->actingAs($this->owner)`.
 - Frontend JSON+CSRF convention (`resources/js/Components/RichEditor.tsx:19-30`): read `XSRF-TOKEN` cookie, send `X-XSRF-TOKEN` decoded, `Accept`/`Content-Type: application/json`, `X-Requested-With: XMLHttpRequest`, `credentials: 'same-origin'`.
@@ -859,8 +859,8 @@ git commit -m "feat: share llm_enabled with inertia pages"
 ### Task 6: AI branch in SeoSuggestButton
 
 **Files:**
-- Modify: `resources/js/Components/SeoSuggestButton.tsx`
-- Test: `resources/js/Components/__tests__/SeoSuggestButton.test.tsx` (extend existing file)
+- Modify: `resources/js/Components/SeoSuggestButton.tsx` (current state includes the owner's `string | null` values fix from `6d834ba` — preserve it)
+- Test: `resources/js/Components/__tests__/SeoSuggestButton.test.tsx` (extend existing file — currently 5 tests)
 
 **Interfaces:**
 - Consumes: `suggestSeo`/`SeoSuggestion` from `resources/js/seoSuggest.ts` (existing); endpoint contract from Task 4.
@@ -976,7 +976,7 @@ describe('SeoSuggestButton with llmEnabled', () => {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run resources/js/Components/__tests__/SeoSuggestButton.test.tsx`
-Expected: 4 new tests FAIL — `llmEnabled` is not a known prop (TS/build error) or behavior unchanged (no fetch call, local fill of all 3 even mid-flight).
+Expected: the 5 existing tests still PASS; the 4 new tests FAIL (no fetch call happens / local fill happens instead / `llmEnabled` unknown).
 
 - [ ] **Step 3: Write the implementation**
 
@@ -994,7 +994,7 @@ export type SeoField = (typeof FIELDS)[number];
 type Props = {
     body: string;
     title: string;
-    values: Record<SeoField, string>;
+    values: Record<SeoField, string | null>;
     onFill: (field: SeoField, value: string) => void;
     llmEnabled?: boolean;
 };
@@ -1004,10 +1004,10 @@ export function SeoSuggestButton({ body, title, values, onFill, llmEnabled = fal
     const valuesRef = useRef(values);
     valuesRef.current = values;
 
-    const empty = FIELDS.filter((field) => !values[field].trim());
+    const empty = FIELDS.filter((field) => !(values[field] ?? '').trim());
 
     const apply = (suggestion: SeoSuggestion) => {
-        FIELDS.filter((field) => !valuesRef.current[field].trim()).forEach((field) => {
+        FIELDS.filter((field) => !(valuesRef.current[field] ?? '').trim()).forEach((field) => {
             if (suggestion[field]) onFill(field, suggestion[field]);
         });
     };
@@ -1061,7 +1061,7 @@ export function SeoSuggestButton({ body, title, values, onFill, llmEnabled = fal
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run resources/js/Components/__tests__/SeoSuggestButton.test.tsx`
-Expected: PASS — 8 tests (4 existing + 4 new).
+Expected: PASS — 9 tests (5 existing incl. the owner's null-values test + 4 new).
 
 - [ ] **Step 5: Commit**
 
@@ -1075,7 +1075,7 @@ git commit -m "feat: suggest seo fields via ai when configured"
 ### Task 7: Wire AI suggest into the post editor
 
 **Files:**
-- Modify: `resources/js/Pages/Admin/Posts/Edit.tsx` (import line 2; component function line ~57; button usage line ~274)
+- Modify: `resources/js/Pages/Admin/Posts/Edit.tsx` (import line 2; `PostEdit` function line 68; `<SeoSuggestButton>` JSX line 291 — line numbers as of `6d834ba`)
 
 **Interfaces:**
 - Consumes: shared prop `llm_enabled` (Task 5); `llmEnabled` prop (Task 6).
@@ -1104,7 +1104,7 @@ to:
 import { useForm, Link, usePage } from '@inertiajs/react';
 ```
 
-Inside `PostEdit` (after line ~57, before `const [preview, ...]`):
+Inside `PostEdit` (line 68; right after the `useForm<PostForm>({...})` call ends):
 
 ```tsx
     const { llm_enabled } = usePage().props as { llm_enabled: boolean };
@@ -1134,7 +1134,7 @@ Expected: `2` (read + pass).
 - [ ] **Step 4: Run the frontend suite and build**
 
 Run: `npm test 2>&1 | grep -E "Test Files|Tests|FAIL"`
-Expected: `Test Files 32 passed (32)`, `Tests 121 passed (121)` (117 baseline + 4 new from Task 6), no FAIL lines.
+Expected: `Test Files 32 passed (32)`, `Tests 122 passed (122)` (118 baseline incl. owner's null test + 4 new from Task 6), no FAIL lines.
 
 Run: `npm run build`
 Expected: `✓ built in …s`.
@@ -1167,7 +1167,7 @@ Expected: all green — **277 tests** (252 baseline + 7 Task 1 + 5 Task 2 + 5 Ta
 - [ ] **Step 2: Run the full Vitest suite**
 
 Run: `npm test 2>&1 | grep -E "Test Files|Tests|FAIL"`
-Expected: `Tests 121 passed (121)`, no FAIL lines (3 pre-existing jsdom `scrollIntoView` console errors are harmless).
+Expected: `Tests 122 passed (122)`, no FAIL lines (3 pre-existing jsdom `scrollIntoView` console errors are harmless).
 
 - [ ] **Step 3: Build and check the working tree**
 
