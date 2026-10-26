@@ -73,13 +73,14 @@ class WritingController extends Controller
                 'published_iso' => $post->published_at?->toIso8601String(),
                 'updated_iso' => $post->updated_at->toIso8601String(),
                 'cover_image' => $post->cover_image,
+                'source_url' => $post->source_url,
                 'meta_title' => $post->meta_title ?: $post->title,
                 'meta_description' => $post->meta_description ?: $post->excerpt,
                 'tags' => $post->tags->pluck('name'),
                 'topics' => $post->topics->pluck('name'),
             ],
             'related' => $related,
-            'canonical' => url('/writing/'.$post->slug),
+            'canonical' => $post->source_url ?: url('/writing/'.$post->slug),
         ]);
     }
 }

@@ -1,1 +1,0 @@
-import{j as a}from"./app-BnzaUz4h.js";function i({type:e,date:n,readingTime:t,items:r}){const s=[e,n,t?`${t} min read`:null,...r??[]].filter(Boolean);return a.jsx("p",{className:"text-xs text-meta tracking-wide uppercase",children:s.join(" · ")})}export{i as M};

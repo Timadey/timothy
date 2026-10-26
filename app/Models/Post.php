@@ -16,7 +16,7 @@ class Post extends Model
 
     protected $fillable = [
         'author_id', 'title', 'slug', 'excerpt', 'body', 'post_type', 'status',
-        'visibility', 'featured', 'cover_image', 'meta_title', 'meta_description',
+        'visibility', 'featured', 'cover_image', 'source_url', 'meta_title', 'meta_description',
         'og_image', 'reading_time', 'is_demo', 'published_at',
     ];
 

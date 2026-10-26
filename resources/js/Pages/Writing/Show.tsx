@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 import { Prose } from '@/Components/Prose';
 import { MetaLine } from '@/Components/MetaLine';
 import { Badge } from '@/Components/Badge';
+import SourceBacklink from '@/Components/SourceBacklink';
 
 type Post = {
     slug: string;
@@ -14,6 +15,7 @@ type Post = {
     published_iso: string | null;
     updated_iso: string;
     cover_image: string | null;
+    source_url: string | null;
     meta_title: string;
     meta_description: string | null;
     tags: string[];
@@ -46,6 +48,7 @@ export default function ArticleShow({ post, related, canonical, preview }: { pos
                 <MetaLine type="Article" date={post.date ?? undefined} readingTime={post.reading_time} />
                 <h1 className="mt-2 text-4xl font-semibold tracking-tight">{post.title}</h1>
                 {post.excerpt && <p className="mt-3 text-lg text-meta">{post.excerpt}</p>}
+                <SourceBacklink url={post.source_url} />
                 {post.cover_image && <img src={post.cover_image} alt="" className="mt-8 w-full rounded-md" loading="lazy" />}
                 <hr className="my-8 border-hairline" />
                 <Prose html={post.body_html} />

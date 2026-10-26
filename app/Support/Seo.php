@@ -100,6 +100,7 @@ class Seo
         $canonical = self::canonical(
             self::nullable($props['canonical'] ?? null) ?? '/writing/'.($post['slug'] ?? '')
         );
+        $selfUrl = self::canonical('/writing/'.($post['slug'] ?? ''));
         $image = self::absoluteUrl($post['cover_image'] ?? null);
         $published = self::nullable($post['published_iso'] ?? null);
         $modified = self::nullable($post['updated_iso'] ?? null);
@@ -110,7 +111,7 @@ class Seo
         $result['description'] = $description;
         $result['canonical'] = $canonical;
         $result['robots'] = ! empty($props['preview']) ? 'noindex,follow' : $base['robots'];
-        $result['og'] = self::ogTags('article', $title, $description, $canonical, $image, $siteTitle);
+        $result['og'] = self::ogTags('article', $title, $description, $selfUrl, $image, $siteTitle);
         if ($published !== null) {
             $result['og']['article:published_time'] = $published;
         }
