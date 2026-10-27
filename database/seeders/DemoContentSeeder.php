@@ -35,8 +35,16 @@ class DemoContentSeeder extends Seeder
             ['title' => 'Demo: Learning in Public', 'excerpt' => 'Demonstration article on sharing unfinished work.'],
             ['title' => 'Demo: Why Personal Websites Still Matter', 'excerpt' => 'Demonstration article on owning your corner of the internet.'],
         ];
+        $articleTopics = [
+            ['technology', 'ideas-in-progress'],
+            ['technology'],
+            ['ideas-in-progress'],
+            ['product-thinking'],
+            ['product-thinking', 'ideas-in-progress'],
+            ['technology'],
+        ];
         foreach ($articles as $i => $a) {
-            Post::updateOrCreate(
+            $post = Post::updateOrCreate(
                 ['slug' => Str::slug($a['title'])],
                 [
                     'author_id' => $owner->id,
@@ -52,6 +60,9 @@ class DemoContentSeeder extends Seeder
                     'reading_time' => 4,
                 ]
             );
+            $post->topics()->sync(
+                Topic::whereIn('slug', $articleTopics[$i])->pluck('id')->all()
+            );
         }
 
         $notes = [
@@ -64,8 +75,18 @@ class DemoContentSeeder extends Seeder
             'Demo note: depth beats breadth when learning.',
             'Demo note: ship the boring version first.',
         ];
+        $noteTags = [
+            ['writing'],
+            ['writing', 'notes'],
+            ['learning'],
+            ['notes'],
+            [],
+            ['writing'],
+            ['learning', 'notes'],
+            [],
+        ];
         foreach ($notes as $i => $body) {
-            Post::updateOrCreate(
+            $post = Post::updateOrCreate(
                 ['slug' => Str::slug($body)],
                 [
                     'author_id' => $owner->id,
@@ -79,6 +100,9 @@ class DemoContentSeeder extends Seeder
                     'published_at' => now()->subHours($i * 7 + 2),
                     'reading_time' => 1,
                 ]
+            );
+            $post->tags()->sync(
+                Tag::whereIn('slug', $noteTags[$i])->pluck('id')->all()
             );
         }
 

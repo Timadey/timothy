@@ -76,7 +76,7 @@ export default function PostEdit({ post }: { post: PostData | null }) {
         tags: (post?.tags ?? []).join(', '),
         topics: (post?.topics ?? []).join(', '),
     });
-    const { llm_enabled } = usePage().props as { llm_enabled: boolean };
+    const { llm_enabled } = usePage().props as unknown as { llm_enabled: boolean };
     const [preview, setPreview] = useState(false);
     const [savedAt, setSavedAt] = useState<string | null>(null);
     const [dirty, setDirty] = useState(false);

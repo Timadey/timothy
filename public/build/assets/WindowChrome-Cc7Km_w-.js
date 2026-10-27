@@ -1,1 +1,0 @@
-import{j as s}from"./app-D7iTA69U.js";const e=["bg-[#ff5f57]","bg-[#febc2e]","bg-[#28c840]"];function i(){return s.jsx("div",{className:"flex gap-2","aria-hidden":"true",children:e.map(a=>s.jsx("span",{className:`h-3 w-3 rounded-full ${a} ring-1 ring-black/5`},a))})}export{i as T};
