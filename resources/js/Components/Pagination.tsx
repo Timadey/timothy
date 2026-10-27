@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { prefetchOnVisibleRef } from '@/prefetchOnVisible';
 
 export type PageLink = { url: string | null; label: string; active: boolean };
 
@@ -12,6 +13,7 @@ export function Pagination({ links }: { links: PageLink[] }) {
                         key={i}
                         href={l.url}
                         preserveScroll
+                        ref={prefetchOnVisibleRef(l.url)}
                         className={`rounded-sm px-3 py-1 text-sm ${
                             l.active ? 'bg-primary text-white' : 'border border-hairline bg-white text-ink hover:bg-surface'
                         }`}

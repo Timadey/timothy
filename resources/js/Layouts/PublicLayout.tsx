@@ -26,7 +26,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                 }`}
             >
                 <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4 md:py-3">
-                    <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary md:text-lg">
+                    <Link href="/" prefetch="hover" className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary md:text-lg">
                         <img src="/images/logo-mark.png" alt="Timadey" width={28} height={28} className="rounded-lg" />
                         Timadey
                     </Link>
@@ -35,6 +35,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                prefetch="hover"
                                 className={`text-sm font-medium ${
                                     current === item.href ? 'text-primary' : 'text-meta hover:text-ink'
                                 }`}
@@ -52,13 +53,13 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                 <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-8 text-xs text-meta sm:flex-row sm:justify-between">
                     <span>© {new Date().getFullYear()} Timadey</span>
                     <div className="flex flex-wrap gap-4">
-                        <Link href="/activity" className="hover:text-ink">
+                        <Link href="/activity" prefetch="hover" className="hover:text-ink">
                             Activity
                         </Link>
-                        <Link href="/writing" className="hover:text-ink">
+                        <Link href="/writing" prefetch="hover" className="hover:text-ink">
                             Writing
                         </Link>
-                        <Link href="/ask" className="hover:text-ink">
+                        <Link href="/ask" prefetch="hover" className="hover:text-ink">
                             Ask me anything
                         </Link>
                         <a href="/rss.xml" className="hover:text-ink">

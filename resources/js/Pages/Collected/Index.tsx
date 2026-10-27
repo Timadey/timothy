@@ -8,6 +8,7 @@ import { ItemModal } from '@/Components/collected/ItemModal';
 import { TrafficLights } from '@/Components/WindowChrome';
 import { EditorialList } from '@/Pages/Collected/views/EditorialList';
 import { TYPE_GLYPHS, type CategoryTile, type CollectedItem, type Paginated } from '@/collectedTypes';
+import { prefetchOnVisibleRef } from '@/prefetchOnVisible';
 
 type Props = {
     categories: CategoryTile[];
@@ -85,6 +86,7 @@ export default function CollectedIndex({ categories, items, filters }: Props) {
                                         <Link
                                             href={category.href}
                                             onClick={launchFrom}
+                                            ref={prefetchOnVisibleRef(category.href)}
                                             aria-label={`${category.label}, ${category.count} items`}
                                             className="group flex flex-col items-center gap-2 rounded-md p-2 transition hover:bg-surface/80"
                                         >

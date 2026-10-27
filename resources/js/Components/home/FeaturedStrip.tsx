@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { MetaLine } from '@/Components/MetaLine';
 import { formatDate } from './format';
+import { prefetchOnVisibleRef } from '@/prefetchOnVisible';
 
 export type FeaturedItem = {
     type: 'writing' | 'project';
@@ -29,6 +30,7 @@ export function FeaturedStrip({ items }: { items: FeaturedItem[] }) {
                             </span>
                             <Link
                                 href={item.url}
+                                ref={prefetchOnVisibleRef(item.url)}
                                 className="mt-1 block text-lg font-semibold tracking-tight text-ink hover:text-link"
                             >
                                 {item.title}

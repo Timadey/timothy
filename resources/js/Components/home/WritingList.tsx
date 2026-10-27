@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { MetaLine } from '@/Components/MetaLine';
 import { PostRow } from '@/Components/PostRow';
+import { prefetchOnVisibleRef } from '@/prefetchOnVisible';
 
 export type WritingItem = {
     slug: string;
@@ -17,7 +18,7 @@ export function WritingList({ writings }: { writings: WritingItem[] }) {
                 <h2 id="writing-heading" className="text-sm font-semibold uppercase tracking-wider text-meta">
                     What I’ve been writing
                 </h2>
-                <Link href="/writing" className="shrink-0 text-sm text-link hover:underline">
+                <Link href="/writing" ref={prefetchOnVisibleRef('/writing')} className="shrink-0 text-sm text-link hover:underline">
                     All writing
                 </Link>
             </div>

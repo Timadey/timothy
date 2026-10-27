@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Button } from '@/Components/Button';
+import { prefetchOnVisibleRef } from '@/prefetchOnVisible';
 
 export type HeroData = {
     headline: string;
@@ -59,7 +60,7 @@ export function Hero({ hero }: { hero: HeroData }) {
                 <Button href="/ask" size="lg" variant="brand">
                     Ask me anything
                 </Button>
-                <Link href="/writing" className="text-sm font-medium text-link hover:underline">
+                <Link href="/writing" ref={prefetchOnVisibleRef('/writing')} className="text-sm font-medium text-link hover:underline">
                     Read what I’ve written
                 </Link>
             </div>

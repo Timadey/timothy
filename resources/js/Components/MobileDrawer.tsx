@@ -148,6 +148,7 @@ export function MobileDrawer({ current }: { current: string }) {
                                     <Link
                                         href={item.href}
                                         onClick={close}
+                                        prefetch="hover"
                                         aria-current={isCurrent ? 'page' : undefined}
                                         className={`flex flex-col items-center gap-1.5 outline-none transition-[opacity,transform] duration-300 ${
                                             open

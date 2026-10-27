@@ -9,6 +9,7 @@ import { ItemModal } from '@/Components/collected/ItemModal';
 import { TrafficLights } from '@/Components/WindowChrome';
 import { prefersReducedMotion } from '@/motion';
 import type { CollectedItem, ItemType, Paginated } from '@/collectedTypes';
+import { prefetchOnVisibleRef } from '@/prefetchOnVisible';
 import { resolveView } from './views/registry';
 
 type Props = {
@@ -66,6 +67,7 @@ export default function CollectedShow({ type, label, segment, items, tags, filte
                             <Link
                                 href="/collected"
                                 onClick={goBack}
+                                ref={prefetchOnVisibleRef('/collected')}
                                 aria-label="Back to Collected"
                                 className="inline-flex h-6 w-6 items-center justify-center rounded text-ink hover:bg-black/5"
                             >

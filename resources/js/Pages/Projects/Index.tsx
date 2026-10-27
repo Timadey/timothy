@@ -2,6 +2,7 @@ import PublicLayout from '@/Layouts/PublicLayout';
 import { Head, Link } from '@inertiajs/react';
 import { Pagination } from '@/Components/Pagination';
 import { EmptyState } from '@/Components/EmptyState';
+import { prefetchOnVisibleRef } from '@/prefetchOnVisible';
 
 type ProjectCard = {
     slug: string;
@@ -54,7 +55,7 @@ export default function ProjectsIndex({ projects, statuses, filters }: { project
                                             {p.tags.join(' · ')}
                                         </span>
                                     )}
-                                    <Link href={`/projects/${p.slug}`} className="mt-2 block text-lg font-semibold tracking-tight hover:text-link">
+                                    <Link href={`/projects/${p.slug}`} ref={prefetchOnVisibleRef(`/projects/${p.slug}`)} className="mt-2 block text-lg font-semibold tracking-tight hover:text-link">
                                         {p.name}
                                     </Link>
                                     {p.summary && <p className="mt-2 text-sm text-meta line-clamp-2">{p.summary}</p>}
@@ -71,7 +72,7 @@ export default function ProjectsIndex({ projects, statuses, filters }: { project
                                 {p.tags.length > 0 && <span className="text-xs text-meta">{p.tags.join(' · ')}</span>}
                             </div>
                             {p.cover_image && <img src={p.cover_image} alt="" className="mt-3 w-full rounded-md" loading="lazy" />}
-                            <Link href={`/projects/${p.slug}`} className="mt-2 block text-lg font-semibold tracking-tight hover:text-link">
+                            <Link href={`/projects/${p.slug}`} ref={prefetchOnVisibleRef(`/projects/${p.slug}`)} className="mt-2 block text-lg font-semibold tracking-tight hover:text-link">
                                 {p.name}
                             </Link>
                             {p.summary && <p className="mt-1 text-sm text-meta line-clamp-2">{p.summary}</p>}

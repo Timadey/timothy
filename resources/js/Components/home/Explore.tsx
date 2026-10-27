@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { prefetchOnVisibleRef } from '@/prefetchOnVisible';
 
 type Row = {
     label: string;
@@ -22,7 +23,7 @@ export function Explore({ projects, collected }: { projects: number; collected: 
             <ul className="mt-4 divide-y divide-hairline border-t border-hairline">
                 {rows.map((row) => (
                     <li key={row.href}>
-                        <Link href={row.href} className="group flex items-baseline justify-between gap-6 py-4">
+                        <Link href={row.href} ref={prefetchOnVisibleRef(row.href)} className="group flex items-baseline justify-between gap-6 py-4">
                             <span className="flex flex-wrap items-baseline gap-x-3">
                                 <span className="text-base font-medium text-ink transition-colors group-hover:text-link">
                                     {row.label}
