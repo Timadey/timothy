@@ -25,6 +25,18 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::useHotFile((string) config('vite.hot_file'));
 
+        foreach ([
+            \App\Models\Post::class,
+            \App\Models\Project::class,
+            \App\Models\CollectedItem::class,
+            \App\Models\Tag::class,
+            \App\Models\Topic::class,
+            \App\Models\SocialLink::class,
+            \App\Models\Setting::class,
+        ] as $model) {
+            $model::observe(\App\Observers\CacheFlushObserver::class);
+        }
+
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\CacheKeys;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Setting extends Model
 {
@@ -10,9 +12,13 @@ class Setting extends Model
 
     public static function get(string $key, ?string $default = null): ?string
     {
-        $setting = static::where('key', $key)->first();
+        $value = Cache::remember(
+            CacheKeys::setting($key),
+            now()->addHour(),
+            fn () => static::where('key', $key)->value('value')
+        );
 
-        return $setting?->value ?? $default;
+        return $value ?? $default;
     }
 
     public static function set(string $key, ?string $value): void
