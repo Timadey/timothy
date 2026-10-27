@@ -77,3 +77,32 @@ it('filters notes by tag', function () {
 
     $this->get('/notes?tag=systems')->assertInertia(fn ($p) => $p->where('notes.data.0.headline', 'Tagged Note'));
 });
+
+it('serves a note body for inline expansion when the note is publicly visible', function () {
+    $author = User::factory()->create();
+    Post::factory()->create([
+        'post_type' => 'note', 'status' => 'published', 'visibility' => 'public',
+        'published_at' => now(), 'author_id' => $author->id,
+        'slug' => 'bold-note', 'title' => 'Bold Note', 'body' => '**strong** point',
+    ]);
+
+    $body = $this->get('/notes/bold-note/body')->assertOk()->json();
+
+    expect($body['body_html'])->toContain('<strong>strong</strong>');
+});
+
+it('404s the note body endpoint for drafts, private notes and articles', function () {
+    $author = User::factory()->create();
+    Post::factory()->create([
+        'post_type' => 'note', 'status' => 'draft', 'author_id' => $author->id,
+        'slug' => 'draft-note', 'title' => 'Draft', 'body' => 'secret',
+    ]);
+    Post::factory()->create([
+        'post_type' => 'article', 'status' => 'published', 'visibility' => 'public',
+        'published_at' => now(), 'author_id' => $author->id,
+        'slug' => 'an-article', 'title' => 'Article', 'body' => '<p>hi</p>',
+    ]);
+
+    $this->get('/notes/draft-note/body')->assertNotFound();
+    $this->get('/notes/an-article/body')->assertNotFound();
+});

@@ -6,13 +6,14 @@ use App\Models\{Post, Tag};
 use App\Services\MarkdownService;
 use App\Support\CacheKeys;
 use App\Support\Fts;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\{Inertia, Response};
 
 class NoteController extends Controller
 {
-    public function index(Request $request, MarkdownService $markdown): Response
+    public function index(Request $request): Response
     {
         $query = Post::publiclyVisible()->ofType('note')->with('tags')->latest('published_at');
 
@@ -28,7 +29,6 @@ class NoteController extends Controller
                 'slug' => $p->slug,
                 'headline' => $p->streamHeadline(),
                 'teaser' => $p->streamTeaser(),
-                'body_html' => $markdown->render((string) $p->body),
                 'date' => $p->published_at?->format('M j, Y'),
                 'tags' => $p->tags->pluck('name'),
             ]),
@@ -39,6 +39,19 @@ class NoteController extends Controller
                     ->orderBy('name')->get(['name', 'slug'])
             ),
             'filters' => $request->only(['q', 'tag']),
+        ]);
+    }
+
+    public function body(string $slug, MarkdownService $markdown): JsonResponse
+    {
+        $note = Post::publiclyVisible()->ofType('note')->where('slug', $slug)->firstOrFail();
+
+        return response()->json([
+            'body_html' => Cache::remember(
+                CacheKeys::noteBody($slug),
+                now()->addHour(),
+                fn () => $markdown->render((string) $note->body)
+            ),
         ]);
     }
 

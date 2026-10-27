@@ -81,6 +81,9 @@ Route::get('/writing', [\App\Http\Controllers\WritingController::class, 'index']
 Route::get('/writing/{slug}', [\App\Http\Controllers\WritingController::class, 'show'])->name('writing.show');
 
 Route::get('/notes', [\App\Http\Controllers\NoteController::class, 'index'])->name('notes.index');
+Route::get('/notes/{slug}/body', [\App\Http\Controllers\NoteController::class, 'body'])
+    ->where('slug', '[A-Za-z0-9\-]+')
+    ->name('notes.body');
 Route::get('/notes/{slug}', [\App\Http\Controllers\NoteController::class, 'show'])->name('notes.show');
 
 Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index'])->name('projects.index');
