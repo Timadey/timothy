@@ -56,13 +56,12 @@ it('starts php-fpm and nginx under supervisord', function () {
         ->and($supervisord)->toContain('[program:nginx]');
 });
 
-it('commits built frontend assets', function () {
-    $manifest = public_path('build/manifest.json');
-    expect(file_exists($manifest))->toBeTrue()
-        ->and(filesize($manifest))->toBeGreaterThan(0);
-
+it('keeps build artifacts out of git', function () {
     $gitignore = file_get_contents(base_path('.gitignore'));
-    expect($gitignore)->toContain('!/public/build');
+
+    expect($gitignore)->toContain('/public/build')
+        ->and($gitignore)->not->toContain('!/public/build')
+        ->and($gitignore)->toContain('/bootstrap/ssr');
 });
 
 it('keeps dev cruft out of the image build context', function () {

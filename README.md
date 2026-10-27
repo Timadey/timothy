@@ -36,6 +36,8 @@ php artisan serve
 
 Then open http://localhost:8000.
 
+Built assets (`public/build`, `bootstrap/ssr`) are generated, never committed — Docker builds them inside the image, and locally they come from `npm run build` (or `npm run dev` for hot reload).
+
 ## Admin
 
 - Visit `/admin/login`.
@@ -59,6 +61,7 @@ Read-only JSON endpoints for published content: `GET /api/posts`, `/api/notes`, 
 npm test               # frontend unit tests
 npm run build          # production asset build
 npx tsc --noEmit       # type check
+npm run test:e2e       # builds assets, then runs Playwright
 ```
 
 ## Environment variables
