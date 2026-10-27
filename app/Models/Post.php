@@ -141,7 +141,14 @@ class Post extends Model
             });
     }
 
+    private ?string $plainBodyMemo = null;
+
     public function plainBody(): string
+    {
+        return $this->plainBodyMemo ??= $this->computePlainBody();
+    }
+
+    private function computePlainBody(): string
     {
         $text = (string) $this->body;
 

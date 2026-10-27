@@ -91,3 +91,18 @@ it('provides a headline on the note permalink for seo and the h1 fallback', func
     $html = $this->get('/notes/quiet-note')->getContent();
     expect($html)->toMatch('/<title>[^<]*Shipping the quick notes feature today/');
 });
+
+it('memoizes plainBody so one note strips its body once per instance', function () {
+    $note = makeTitlelessNote(['body' => "## Heading\n\nSome **bold** text here."]);
+
+    $first = $note->plainBody();
+    expect($first)->toBe('Heading Some bold text here.')
+        ->and($note->plainBody())->toBe($first);
+
+    // Memoization: the same instance does not recompute after mutation.
+    $note->body = 'Totally different body now.';
+    expect($note->plainBody())->toBe($first);
+
+    // A fresh instance does recompute.
+    expect($note->fresh()->plainBody())->toBe('Heading Some bold text here.');
+});
