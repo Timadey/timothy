@@ -3,31 +3,41 @@
 namespace App\Http\Controllers;
 
 use App\Models\{CollectedItem, Post, Project};
+use App\Support\CacheKeys;
 use App\Support\HomeHero;
+use Illuminate\Support\Facades\Cache;
 use Inertia\{Inertia, Response};
 
 class HomeController extends Controller
 {
     public function __invoke(): Response
     {
-        $hero = HomeHero::load();
+        $data = Cache::remember(
+            CacheKeys::HOME,
+            now()->addMinutes(5),
+            function (): array {
+                $hero = HomeHero::load();
 
-        return Inertia::render('Home', [
-            'hero' => $hero->toArray() + [
-                'avatar_url' => $hero->avatarUrl(),
-                'logo_url' => $hero->logoUrl(),
-                'initials' => $hero->initials(),
-            ],
-            'og_image' => $hero->avatarUrl() !== null
-                ? url($hero->avatarUrl())
-                : null,
-            'featured' => $this->featured(),
-            'writings' => $this->writings(),
-            'explore' => [
-                'projects' => Project::publiclyVisible()->count(),
-                'collected' => CollectedItem::publiclyVisible()->count(),
-            ],
-        ]);
+                return [
+                    'hero' => $hero->toArray() + [
+                        'avatar_url' => $hero->avatarUrl(),
+                        'logo_url' => $hero->logoUrl(),
+                        'initials' => $hero->initials(),
+                    ],
+                    'og_image' => $hero->avatarUrl() !== null
+                        ? url($hero->avatarUrl())
+                        : null,
+                    'featured' => $this->featured(),
+                    'writings' => $this->writings(),
+                    'explore' => [
+                        'projects' => Project::publiclyVisible()->count(),
+                        'collected' => CollectedItem::publiclyVisible()->count(),
+                    ],
+                ];
+            }
+        );
+
+        return Inertia::render('Home', $data);
     }
 
     /** @return array<int, array<string, mixed>> */

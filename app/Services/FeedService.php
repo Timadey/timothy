@@ -3,10 +3,29 @@
 namespace App\Services;
 
 use App\Models\{CollectedItem, Post, Project};
+use App\Support\CacheKeys;
+use Illuminate\Support\Facades\Cache;
 
 class FeedService
 {
+    /**
+     * Latest activity items. The cache always holds the newest 30 entries;
+     * callers slice down to $limit. Flushed via CacheKeys::FEED on any
+     * content save/delete.
+     */
     public function recent(int $limit = 12): array
+    {
+        $items = Cache::remember(
+            CacheKeys::FEED,
+            now()->addMinutes(5),
+            fn (): array => $this->build(30)
+        );
+
+        return array_slice($items, 0, $limit);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    private function build(int $limit): array
     {
         $items = [];
 
@@ -56,6 +75,6 @@ class FeedService
 
         usort($items, fn ($a, $b) => strtotime($b['date']) <=> strtotime($a['date']));
 
-        return array_slice($items, 0, $limit);
+        return $items;
     }
 }

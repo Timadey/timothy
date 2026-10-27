@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\{Post, Tag};
 use App\Services\MarkdownService;
+use App\Support\CacheKeys;
 use App\Support\Fts;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\{Inertia, Response};
 
 class NoteController extends Controller
@@ -30,8 +32,12 @@ class NoteController extends Controller
                 'date' => $p->published_at?->format('M j, Y'),
                 'tags' => $p->tags->pluck('name'),
             ]),
-            'tags' => Tag::whereHas('posts', fn ($q2) => $q2->where('post_type', 'note'))
-                ->orderBy('name')->get(['name', 'slug']),
+            'tags' => Cache::remember(
+                CacheKeys::NOTE_TAGS,
+                now()->addMinutes(5),
+                fn () => Tag::whereHas('posts', fn ($q2) => $q2->where('post_type', 'note'))
+                    ->orderBy('name')->get(['name', 'slug'])
+            ),
             'filters' => $request->only(['q', 'tag']),
         ]);
     }

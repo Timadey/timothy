@@ -52,3 +52,40 @@ it('forgets the original slug key when a post slug changes', function () {
 
     expect(Cache::has(CacheKeys::noteBody('old-slug')))->toBeFalse();
 });
+
+it('caches home, feed, rss and sitemap, and flushes them on content save', function () {
+    $this->get('/')->assertOk();
+    $this->get('/activity')->assertOk();
+    $this->get('/rss.xml')->assertOk();
+    $this->get('/sitemap.xml')->assertOk();
+
+    expect(Cache::has(CacheKeys::HOME))->toBeTrue()
+        ->and(Cache::has(CacheKeys::FEED))->toBeTrue()
+        ->and(Cache::has(CacheKeys::RSS))->toBeTrue()
+        ->and(Cache::has(CacheKeys::SITEMAP))->toBeTrue();
+
+    $author = User::factory()->create();
+    Post::factory()->create([
+        'post_type' => 'article', 'status' => 'published', 'visibility' => 'public',
+        'published_at' => now(), 'author_id' => $author->id, 'title' => 'Fresh Post', 'slug' => 'fresh-post',
+    ]);
+
+    expect(Cache::has(CacheKeys::HOME))->toBeFalse()
+        ->and(Cache::has(CacheKeys::FEED))->toBeFalse()
+        ->and(Cache::has(CacheKeys::RSS))->toBeFalse()
+        ->and(Cache::has(CacheKeys::SITEMAP))->toBeFalse();
+
+    // Second pass repopulates and serves from cache.
+    $this->get('/')->assertOk();
+    $this->get('/activity')->assertOk();
+    expect(Cache::has(CacheKeys::HOME))->toBeTrue()
+        ->and(Cache::has(CacheKeys::FEED))->toBeTrue();
+});
+
+it('caches the writing topics and notes tag lists', function () {
+    $this->get('/writing')->assertOk();
+    $this->get('/notes')->assertOk();
+
+    expect(Cache::has(CacheKeys::TOPICS))->toBeTrue()
+        ->and(Cache::has(CacheKeys::NOTE_TAGS))->toBeTrue();
+});

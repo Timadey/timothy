@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Post, Topic};
+use App\Support\CacheKeys;
 use App\Support\Fts;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\{Inertia, Response};
 
 class WritingController extends Controller
@@ -34,7 +36,11 @@ class WritingController extends Controller
                 'topics' => $p->topics->pluck('name'),
                 'tags' => $p->tags->pluck('name'),
             ]),
-            'topics' => Topic::orderBy('name')->get(['name', 'slug']),
+            'topics' => Cache::remember(
+                CacheKeys::TOPICS,
+                now()->addMinutes(5),
+                fn () => Topic::orderBy('name')->get(['name', 'slug'])
+            ),
             'filters' => $request->only(['q', 'topic', 'tag']),
         ]);
     }

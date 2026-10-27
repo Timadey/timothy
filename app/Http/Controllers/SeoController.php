@@ -3,11 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Post, Project, Setting};
+use App\Support\CacheKeys;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 
 class SeoController extends Controller
 {
     public function sitemap(): Response
+    {
+        $content = Cache::remember(
+            CacheKeys::SITEMAP,
+            now()->addMinutes(5),
+            fn () => $this->buildSitemap()
+        );
+
+        return response($content, 200, ['Content-Type' => 'application/xml']);
+    }
+
+    private function buildSitemap(): string
     {
         $static = ['/', '/writing', '/notes', '/projects', '/collected', '/activity', '/now', '/about', '/ask', '/search'];
 
@@ -30,11 +43,7 @@ class SeoController extends Controller
         $body = $urls->map(fn ($u) =>
             "  <url>\n    <loc>{$u['loc']}</loc>\n    <lastmod>{$u['lastmod']}</lastmod>\n  </url>")->implode("\n");
 
-        return response(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n{$body}\n</urlset>",
-            200,
-            ['Content-Type' => 'application/xml']
-        );
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n{$body}\n</urlset>";
     }
 
     public function robots(): Response
@@ -45,6 +54,17 @@ class SeoController extends Controller
     }
 
     public function rss(): Response
+    {
+        $content = Cache::remember(
+            CacheKeys::RSS,
+            now()->addMinutes(5),
+            fn () => $this->buildRss()
+        );
+
+        return response($content, 200, ['Content-Type' => 'application/xml']);
+    }
+
+    private function buildRss(): string
     {
         $posts = Post::publiclyVisible()->whereIn('post_type', ['article', 'note'])
             ->latest('published_at')->limit(20)->get();
@@ -58,8 +78,6 @@ class SeoController extends Controller
             return "    <item>\n      <title>{$title}</title>\n      <link>{$link}</link>\n      <guid isPermaLink=\"true\">{$link}</guid>\n      <description>{$description}</description>\n      <pubDate>{$pubDate}</pubDate>\n    </item>";
         })->implode("\n");
 
-        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\">\n  <channel>\n    <title>".e(Setting::get('site_title') ?: config('app.name', 'Timadey'))."</title>\n    <link>".url('/')."</link>\n    <description>Latest writing and notes from Timadey.</description>\n{$items}\n  </channel>\n</rss>";
-
-        return response($xml, 200, ['Content-Type' => 'application/xml']);
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\">\n  <channel>\n    <title>".e(Setting::get('site_title') ?: config('app.name', 'Timadey'))."</title>\n    <link>".url('/')."</link>\n    <description>Latest writing and notes from Timadey.</description>\n{$items}\n  </channel>\n</rss>";
     }
 }
