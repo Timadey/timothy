@@ -1,0 +1,1 @@
+import{a as i}from"./app-D7iTA69U.js";function c(n){let e=null;return r=>{e?.disconnect(),e=null,!(!r||typeof IntersectionObserver>"u")&&(e=new IntersectionObserver(t=>{t.some(o=>o.isIntersecting)&&(e?.disconnect(),e=null,i.prefetch(n,{method:"get"}))},{rootMargin:"240px 0px"}),e.observe(r))}}export{c as p};
