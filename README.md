@@ -75,6 +75,11 @@ npx tsc --noEmit       # type check
 | `ADMIN_EMAIL` | Owner login email | `owner@timadey.test` |
 | `ADMIN_PASSWORD` | Owner login password | `change-me-in-production` |
 | `SESSION_SECURE_COOKIE` | Secure cookies | `false` (set `true` in production) |
+| `CACHE_STORE` | Cache driver | `database` locally, `redis` in Docker |
+| `SESSION_DRIVER` | Session driver | `database` locally, `redis` in Docker |
+| `REDIS_HOST` | Redis host (required in production) | `127.0.0.1` (set to Coolify Redis service name) |
+| `REDIS_PASSWORD` | Redis password | `null` |
+| `INERTIA_SSR_ENABLED` | Server-side rendering | `false` locally, `true` in Docker |
 
 Phase 3 vars are present but commented out: `# LLM_PROVIDER=`, `# LLM_API_KEY=`, `# LLM_MODEL=`.
 
