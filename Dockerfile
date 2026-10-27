@@ -12,7 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libpq-dev \
         libonig-dev \
         libzip-dev \
+        libstdc++6 \
     && docker-php-ext-install -j"$(nproc)" pdo_pgsql mbstring opcache zip \
+    && pecl install redis && docker-php-ext-enable redis \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -26,6 +28,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
     && rm -rf /root/.composer/cache
 
 COPY conf/php-fpm/zz-timadey.conf /usr/local/etc/php-fpm.d/zz-timadey.conf
+COPY conf/php/opcache.ini $PHP_INI_DIR/conf.d/opcache.ini
 
 RUN rm -f /etc/nginx/sites-enabled/default \
     && cp conf/nginx/nginx-site.conf /etc/nginx/sites-available/timadey.conf \
@@ -35,6 +38,9 @@ RUN rm -f /etc/nginx/sites-enabled/default \
 ENV APP_ENV=production
 ENV APP_DEBUG=false
 ENV LOG_CHANNEL=stderr
+ENV CACHE_STORE=redis
+ENV SESSION_DRIVER=redis
+ENV INERTIA_SSR_ENABLED=true
 
 EXPOSE 80
 

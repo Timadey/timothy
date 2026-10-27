@@ -80,3 +80,46 @@ it('has replaced the stale Phase-5 docker scaffold', function () {
     expect(file_exists(base_path('docker-compose.yml')))->toBeFalse()
         ->and(file_exists(base_path('docker')))->toBeFalse();
 });
+
+it('ships a production-tuned opcache ini', function () {
+    $path = base_path('conf/php/opcache.ini');
+    expect(file_exists($path))->toBeTrue();
+
+    $ini = file_get_contents($path);
+
+    expect($ini)->toContain('opcache.enable=1')
+        ->and($ini)->toContain('opcache.enable_cli=1')
+        ->and($ini)->toContain('opcache.memory_consumption=256')
+        ->and($ini)->toContain('opcache.interned_strings_buffer=32')
+        ->and($ini)->toContain('opcache.max_accelerated_files=32531')
+        ->and($ini)->toContain('opcache.validate_timestamps=0')
+        ->and($ini)->toContain('opcache.save_comments=1');
+});
+
+it('installs the opcache ini and the redis extension in the image', function () {
+    $dockerfile = file_get_contents(base_path('Dockerfile'));
+
+    expect($dockerfile)->toContain('COPY conf/php/opcache.ini $PHP_INI_DIR/conf.d/opcache.ini')
+        ->and($dockerfile)->toContain('pecl install redis')
+        ->and($dockerfile)->toContain('docker-php-ext-enable redis')
+        ->and($dockerfile)->toContain('libstdc++6');
+});
+
+it('defaults production to redis cache/sessions and enables SSR', function () {
+    $dockerfile = file_get_contents(base_path('Dockerfile'));
+
+    expect($dockerfile)->toContain('ENV CACHE_STORE=redis')
+        ->and($dockerfile)->toContain('ENV SESSION_DRIVER=redis')
+        ->and($dockerfile)->toContain('ENV INERTIA_SSR_ENABLED=true');
+});
+
+it('tunes the php-fpm pool', function () {
+    $conf = file_get_contents(base_path('conf/php-fpm/zz-timadey.conf'));
+
+    expect($conf)->toContain('pm = dynamic')
+        ->and($conf)->toContain('pm.max_children = 16')
+        ->and($conf)->toContain('pm.start_servers = 4')
+        ->and($conf)->toContain('pm.min_spare_servers = 2')
+        ->and($conf)->toContain('pm.max_spare_servers = 6')
+        ->and($conf)->toContain('pm.max_requests = 500');
+});
