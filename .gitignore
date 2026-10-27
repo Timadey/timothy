@@ -27,3 +27,6 @@ Thumbs.db
 /test-results
 /playwright-report
 .superpowers/
+
+/bootstrap/ssr
+/.vite/

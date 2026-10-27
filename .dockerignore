@@ -25,7 +25,6 @@ storage/pail
 .DS_Store
 Thumbs.db
 playwright.config.ts
-vite.config.ts
 vitest.config.ts
 phpunit.xml
 phpunit.xml.dist

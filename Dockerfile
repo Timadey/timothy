@@ -1,3 +1,10 @@
+FROM node:22-bookworm-slim AS ssr-build
+WORKDIR /var/www/html
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
 FROM php:8.4.27-fpm-bookworm
 
 # Today's security patch (2026-10-21: CVE-2026-109618 / CVE-2026-109619).
@@ -26,6 +33,12 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress \
     && rm -rf /root/.composer/cache
+
+# Fresh frontend + SSR bundles built by the node stage (source of truth at
+# image build time; committed public/build remains for local dev convenience).
+COPY --from=ssr-build /var/www/html/public/build public/build
+COPY --from=ssr-build /var/www/html/bootstrap/ssr bootstrap/ssr
+COPY --from=node:22-bookworm-slim /usr/local/bin/node /usr/local/bin/node
 
 COPY conf/php-fpm/zz-timadey.conf /usr/local/etc/php-fpm.d/zz-timadey.conf
 COPY conf/php/opcache.ini $PHP_INI_DIR/conf.d/opcache.ini

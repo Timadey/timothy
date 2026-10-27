@@ -123,3 +123,25 @@ it('tunes the php-fpm pool', function () {
         ->and($conf)->toContain('pm.max_spare_servers = 6')
         ->and($conf)->toContain('pm.max_requests = 500');
 });
+
+it('runs the inertia ssr server under supervisord', function () {
+    $conf = file_get_contents(base_path('conf/supervisor/supervisord.conf'));
+
+    expect($conf)->toContain('[program:ssr]')
+        ->and($conf)->toContain('php artisan inertia:start-ssr');
+});
+
+it('builds the ssr bundle and ships node in the image', function () {
+    $dockerfile = file_get_contents(base_path('Dockerfile'));
+
+    expect($dockerfile)->toContain('FROM node:22-bookworm-slim AS ssr-build')
+        ->and($dockerfile)->toContain('RUN npm run build')
+        ->and($dockerfile)->toContain('--from=ssr-build /var/www/html/bootstrap/ssr')
+        ->and($dockerfile)->toContain('--from=node:22-bookworm-slim /usr/local/bin/node');
+});
+
+it('keeps vite.config.ts in the docker build context', function () {
+    $ignore = file_get_contents(base_path('.dockerignore'));
+
+    expect($ignore)->not->toContain('vite.config.ts');
+});
