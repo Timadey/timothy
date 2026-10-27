@@ -34,12 +34,8 @@ class SearchService
         }
 
         if (! $type || $type === 'project') {
-            $needle = '%'.mb_strtolower($query).'%';
             $rows = Project::publiclyVisible()
-                ->where(fn ($w) => $w
-                    ->whereRaw('search_vector @@ websearch_to_tsquery(?, ?)', ['english', $query])
-                    ->orWhereRaw('LOWER(name) LIKE ?', [$needle])
-                    ->orWhereRaw('LOWER(COALESCE(summary, \'\')) LIKE ?', [$needle]))
+                ->whereRaw('search_vector @@ websearch_to_tsquery(?, ?)', ['english', $query])
                 ->orderByRaw('ts_rank(search_vector, websearch_to_tsquery(?, ?)) DESC', ['english', $query])
                 ->limit($limit)->get(['name', 'slug', 'summary', 'updated_at']);
 
@@ -55,12 +51,8 @@ class SearchService
         }
 
         if (! $type || $type === 'collected') {
-            $needle = '%'.mb_strtolower($query).'%';
             $rows = CollectedItem::publiclyVisible()
-                ->where(fn ($w) => $w
-                    ->whereRaw('search_vector @@ websearch_to_tsquery(?, ?)', ['english', $query])
-                    ->orWhereRaw('LOWER(title) LIKE ?', [$needle])
-                    ->orWhereRaw('LOWER(COALESCE(annotation, \'\')) LIKE ?', [$needle]))
+                ->whereRaw('search_vector @@ websearch_to_tsquery(?, ?)', ['english', $query])
                 ->orderByRaw('ts_rank(search_vector, websearch_to_tsquery(?, ?)) DESC', ['english', $query])
                 ->limit($limit)->get(['title', 'url', 'annotation', 'created_at', 'id']);
 

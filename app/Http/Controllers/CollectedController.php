@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CollectedItem;
 use App\Models\Tag;
 use App\Support\CollectedTypes;
+use App\Support\Fts;
 use Illuminate\Http\Request;
 use Inertia\{Inertia, Response};
 
@@ -16,15 +17,11 @@ class CollectedController extends Controller
         $items = null;
 
         if ($q !== '') {
-            $needle = '%'.mb_strtolower($q).'%';
-            $items = CollectedItem::publiclyVisible()
+            $query = CollectedItem::publiclyVisible()
                 ->with('tags')
-                ->latest('created_at')
-                ->where(fn ($w) => $w
-                    ->whereRaw('LOWER(title) LIKE ?', [$needle])
-                    ->orWhereRaw('LOWER(COALESCE(annotation, \'\')) LIKE ?', [$needle])
-                    ->orWhereRaw('LOWER(COALESCE(creator, \'\')) LIKE ?', [$needle]))
-                ->paginate(20)
+                ->latest('created_at');
+            Fts::apply($query, $q);
+            $items = $query->paginate(20)
                 ->withQueryString()
                 ->through(fn ($i) => $this->mapItem($i));
         }

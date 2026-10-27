@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\{Post, Tag};
 use App\Services\MarkdownService;
+use App\Support\Fts;
 use Illuminate\Http\Request;
 use Inertia\{Inertia, Response};
 
@@ -14,10 +15,7 @@ class NoteController extends Controller
         $query = Post::publiclyVisible()->ofType('note')->with('tags')->latest('published_at');
 
         if ($q = $request->query('q')) {
-            $needle = '%'.mb_strtolower($q).'%';
-            $query->where(fn ($w) => $w
-                ->whereRaw('LOWER(title) LIKE ?', [$needle])
-                ->orWhereRaw('LOWER(body) LIKE ?', [$needle]));
+            Fts::apply($query, (string) $q);
         }
         if ($tag = $request->query('tag')) {
             $query->whereHas('tags', fn ($t) => $t->where('slug', $tag));

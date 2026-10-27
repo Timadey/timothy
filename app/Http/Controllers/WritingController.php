@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Post, Topic};
+use App\Support\Fts;
 use Illuminate\Http\Request;
 use Inertia\{Inertia, Response};
 
@@ -13,10 +14,7 @@ class WritingController extends Controller
         $query = Post::publiclyVisible()->ofType('article')->with(['tags', 'topics'])->latest('published_at');
 
         if ($q = $request->query('q')) {
-            $needle = '%'.mb_strtolower($q).'%';
-            $query->where(fn ($w) => $w
-                ->whereRaw('LOWER(title) LIKE ?', [$needle])
-                ->orWhereRaw('LOWER(COALESCE(excerpt, \'\')) LIKE ?', [$needle]));
+            Fts::apply($query, (string) $q);
         }
         if ($topic = $request->query('topic')) {
             $query->whereHas('topics', fn ($t) => $t->where('slug', $topic));

@@ -18,7 +18,7 @@ it('excludes drafts from search', function () {
 });
 
 it('finds projects and collected items', function () {
-    Project::factory()->create(['name' => 'MindReader', 'summary' => 'Reading thoughts', 'visibility' => 'public']);
+    Project::factory()->create(['name' => 'Mind Reader', 'summary' => 'Reading thoughts', 'visibility' => 'public']);
     CollectedItem::factory()->create(['title' => 'Mind Reading 101', 'visibility' => 'public']);
 
     $this->get('/search?q=mind')->assertInertia(fn ($p) => $p->has('results', 2));
@@ -27,7 +27,7 @@ it('finds projects and collected items', function () {
 it('filters by type', function () {
     $author = User::factory()->create();
     Post::factory()->create(['post_type' => 'article', 'status' => 'published', 'visibility' => 'public', 'published_at' => now(), 'author_id' => $author->id, 'title' => 'Mindful Article']);
-    Project::factory()->create(['name' => 'MindProject', 'visibility' => 'public']);
+    Project::factory()->create(['name' => 'Mind Project', 'visibility' => 'public']);
 
     $this->get('/search?q=mind&type=project')->assertInertia(fn ($p) => $p->where('results.0.type', 'project')->has('results', 1));
 });

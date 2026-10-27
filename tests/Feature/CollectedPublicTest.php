@@ -74,3 +74,17 @@ it('excludes private items from search results', function () {
 
     $this->get('/collected?q=Private')->assertInertia(fn ($p) => $p->where('items.total', 0));
 });
+
+it('filters collected items by prefix full text on annotation', function () {
+    CollectedItem::factory()->create([
+        'title' => 'Blade Runner', 'annotation' => 'A film about androids and memory.', 'visibility' => 'public',
+    ]);
+    CollectedItem::factory()->create([
+        'title' => 'Bread Book', 'annotation' => 'Sourdough techniques.', 'visibility' => 'public',
+    ]);
+
+    $this->get('/collected?q=android')->assertInertia(fn ($p) => $p
+        ->component('Collected/Index')
+        ->has('items.data', 1)
+        ->where('items.data.0.title', 'Blade Runner'));
+});
