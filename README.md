@@ -82,6 +82,7 @@ npm run test:e2e       # builds assets, then runs Playwright
 | `SESSION_DRIVER` | Session driver | `database` locally, `redis` in Docker |
 | `REDIS_HOST` | Redis host (required in production) | `127.0.0.1` (set to Coolify Redis service name) |
 | `REDIS_PASSWORD` | Redis password | `null` |
+| `REDIS_URL` | Optional single-var Redis config (`redis://:pass@host:6379`) — overrides `REDIS_HOST`/`REDIS_PORT`/`REDIS_PASSWORD`/`REDIS_DB`; omit the URL path so `REDIS_CACHE_DB` still applies | `null` |
 | `INERTIA_SSR_ENABLED` | Server-side rendering | `false` locally, `true` in Docker |
 
 Phase 3 vars are present but commented out: `# LLM_PROVIDER=`, `# LLM_API_KEY=`, `# LLM_MODEL=`.
