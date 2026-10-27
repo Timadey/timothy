@@ -65,6 +65,13 @@ class Seo
             $result['twitter']['twitter:card'] = 'summary_large_image';
         }
 
+        $result['jsonLd'][] = [
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => 'Timothy Adeleke',
+            'url' => url('/'),
+        ];
+
         return $result;
     }
 

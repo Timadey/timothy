@@ -178,3 +178,14 @@ it('emits favicon, touch icon, and theme-color in the head', function () {
         ->toContain('<link rel="apple-touch-icon" href="/apple-touch-icon.png">')
         ->toContain('<meta name="theme-color" content="#ffffff">');
 });
+
+it('emits a website json-ld site name block on public pages', function () {
+    foreach (['/', '/writing'] as $path) {
+        $blocks = seoLdJsonBlocks($this->get($path)->assertOk()->getContent());
+        $website = collect($blocks)->firstWhere('@type', 'WebSite');
+
+        expect($website)->not->toBeNull()
+            ->and($website['name'])->toBe('Timothy Adeleke')
+            ->and($website['url'])->toBe(url('/'));
+    }
+});
